@@ -36,7 +36,7 @@ namespace CPRIMA.WorkflowAnalyzerRules.Tests
         {
             // Arrange
             var mockActivity = new Mock<IActivityModel>();
-            var configuredRule = new Rule<IActivityModel>("Test Rule", "ST-CPM-003", (a, r) => new InspectionResult { HasErrors = false })
+            var configuredRule = new Rule<IActivityModel>("Test Rule", "CPM_NOOP_003", (a, r) => new InspectionResult { HasErrors = false })
             {
                 DefaultErrorLevel = TraceLevel.Info
             };
