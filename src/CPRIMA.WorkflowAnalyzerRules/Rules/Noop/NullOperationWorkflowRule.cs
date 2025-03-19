@@ -1,22 +1,32 @@
+using System.Diagnostics;
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using CPRIMA.WorkflowAnalyzerRules.LocalizationResources;
 
 namespace CPRIMA.WorkflowAnalyzerRules.Rules.Noop
 {
     public class NullOperationWorkflowRule : IRegisterAnalyzerConfiguration
     {
-        private const string RuleId = "ST-CPM-002";
+        private const string RuleId = "CPM_NOOP_002";
 
-        public void Initialize(IAnalyzerConfigurationService configService)
+        public Rule<IWorkflowModel> Get()
         {
-            var nullOpRule = new Rule<IWorkflowModel>("Null Workflow Rule", RuleId, InspectWorkflow);
-            nullOpRule.DefaultErrorLevel = System.Diagnostics.TraceLevel.Info;
-            configService.AddRule<IWorkflowModel>(nullOpRule);
+            return new Rule<IWorkflowModel>(Strings.CPM_NOOP_002_Name, RuleId, InspectWorkflow)
+            {
+                RecommendationMessage = Strings.CPM_NOOP_002_Recommendation,
+                DefaultErrorLevel = TraceLevel.Info,
+                DocumentationLink = "https://github.com/rpapub/WatchfulAnvil"
+            };
         }
 
-        private InspectionResult InspectWorkflow(IWorkflowModel workflow, Rule rule)
+        public void Initialize(IAnalyzerConfigurationService workflowAnalyzerConfigService)
+        {
+            workflowAnalyzerConfigService.AddRule<IWorkflowModel>(Get());
+        }
+
+        private InspectionResult InspectWorkflow(IWorkflowModel workflow, Rule configuredRule)
         {
             return new InspectionResult { HasErrors = false };
         }
