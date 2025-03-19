@@ -1,0 +1,52 @@
+name: Build and Upload DLL
+
+on:
+  push:
+    branches:
+      - main
+      - develop*
+      - feature/*
+      - fix/*
+      - release/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure full history for GitVersion
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install GitVersion
+        run: dotnet tool install --global GitVersion.Tool
+
+      - name: Determine Version
+        run: |
+          rm -rf .git/gitversion_cache  # Ensure no cached versioning issues
+          VERSION=$(dotnet-gitversion /showvariable FullSemVer)
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "🔹 Version resolved: ${VERSION}"
+
+      - name: Build the Project
+        run: dotnet build --configuration Release /p:Version=${{ env.VERSION }}
+
+      - name: Upload DLL (Mandatory)
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-dll
+          path: src/**/bin/Release/*.dll  # Ensures DLLs are uploaded
+
+      - name: Pack NuGet Package (Optional)
+        run: dotnet pack --configuration Release /p:Version=${{ env.VERSION }}
+
+      - name: Upload NuGet Package (Optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package
+          path: src/**/bin/Release/*.nupkg
