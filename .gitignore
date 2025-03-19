@@ -1,0 +1,64 @@
+# --- General Visual Studio ---
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.opendb
+ipch/
+*.tlog
+*.log
+
+# --- Build outputs ---
+bin/
+obj/
+*.pdb
+*.ilk
+*.idb
+*.cache
+
+# --- .NET Build Artifacts ---
+*.exe
+*.dll
+*.nupkg
+*.snupkg
+*.deps.json
+*.runtimeconfig.json
+*.csproj.nuget.g.props
+*.csproj.nuget.g.targets
+project.lock.json
+project.assets.json
+
+# --- Test Artifacts ---
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+*.testlog
+*.testsettings
+*.vsix
+
+# --- UiPath Specific ---
+/.nuget/
+/Rules/
+/Rules/*/bin/
+/Rules/*/obj/
+/Packages/
+/UiPath/
+UiPath.Studio.RulesLibrary/
+
+# --- Logs & Debugging ---
+*.log
+*.dmp
+*.bak
+*.svclog
+*.tmp
+
+# --- Miscellaneous ---
+*.swp
+*~
+*.DS_Store
+Thumbs.db
+desktop.ini
