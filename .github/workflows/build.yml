@@ -1,0 +1,82 @@
+name: Build and Version
+
+on:
+  push:
+    branches:
+      - main
+      - develop*
+      - feature/*
+      - fix/*
+      - release/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure full history for GitVersion
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install GitVersion
+        run: dotnet tool install --global GitVersion.Tool
+
+      - name: Determine Version
+        run: |
+          rm -rf .git/gitversion_cache  # Ensure no cached versioning issues
+          VERSION=$(dotnet-gitversion /showvariable FullSemVer)
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "🔹 Version resolved: ${VERSION}"
+
+      - name: Add UiPath NuGet Source
+        run: |
+          dotnet nuget add source "https://uipath.pkgs.visualstudio.com/Public.Feeds/_packaging/UiPath-Official/nuget/v3/index.json" --name UiPath-Official
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Solution
+        run: dotnet build --configuration Release /p:Version=${{ env.VERSION }}
+
+      - name: Pack NuGet Package (Optional)
+        run: dotnet pack --configuration Release --output ./nupkg /p:Version=${{ env.VERSION }}
+
+      - name: Debug Build Output
+        run: ls -R src/CPRIMA.WorkflowAnalyzerRules/bin/Release/
+
+      - name: Get Built File Names
+        run: |
+          # Set default values
+          DEFAULT_DLL_NAME="built-dll"
+          DEFAULT_NUPKG_NAME="nuget-package"
+
+          # Try to find the actual file names
+          DLL_NAME=$(ls src/**/bin/Release/net6.0/*.dll 2>/dev/null | head -n 1 | xargs -n 1 basename || echo "${DEFAULT_DLL_NAME}.dll")
+          NUPKG_NAME=$(ls nupkg/*.nupkg 2>/dev/null | head -n 1 | xargs -n 1 basename || echo "${DEFAULT_NUPKG_NAME}.nupkg")
+
+          # Export values to GitHub environment variables
+          echo "DLL_NAME=${DLL_NAME}" >> $GITHUB_ENV
+          echo "NUPKG_NAME=${NUPKG_NAME}" >> $GITHUB_ENV
+          echo "🔹 DLL Name: ${DLL_NAME}"
+          echo "🔹 NuGet Package Name: ${NUPKG_NAME}"
+
+      - name: Upload DLL Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.DLL_NAME }}-${{ env.VERSION }}
+          path: |
+            src/**/bin/Release/net6.0/*.dll
+            src/**/bin/Release/net8.0/*.dll
+            src/**/bin/Release/**/*.dll
+
+      - name: Upload NuGet Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NUPKG_NAME }}-${{ env.VERSION }}
+          path: nupkg/**/*.nupkg
+
