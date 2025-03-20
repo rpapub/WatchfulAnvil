@@ -1,5 +1,1 @@
-branches:
-  develop:
-    increment: None  # Prevents automatic version increments
-    label: alpha
-    prevent-increment: true
+workflow: GitFlow/v1
