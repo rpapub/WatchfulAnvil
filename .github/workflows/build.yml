@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - develop*
+      - develop
       - feature/*
       - fix/*
       - release/*
@@ -29,10 +29,26 @@ jobs:
 
       - name: Determine Version
         run: |
-          rm -rf .git/gitversion_cache  # Ensure no cached versioning issues
-          VERSION=$(dotnet-gitversion /showvariable FullSemVer)
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "🔹 Version resolved: ${VERSION}"
+          VERSION_JSON=$(dotnet-gitversion /output json)
+          FULL_VERSION=$(echo $VERSION_JSON | jq -r '.FullSemVer')
+          FILE_VERSION=$(echo $VERSION_JSON | jq -r '.AssemblySemFileVer')
+          ASSEMBLY_VERSION=$(echo $VERSION_JSON | jq -r '.AssemblySemVer')
+      
+          # Ensure NuGet Package Version is valid
+          NUGET_VERSION=$(echo $VERSION_JSON | jq -r '.NuGetVersionV2')
+          if [[ -z "$NUGET_VERSION" || "$NUGET_VERSION" == "null" ]]; then
+            NUGET_VERSION=$FULL_VERSION
+          fi
+      
+          # Export versions to GitHub environment variables
+          echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_ENV
+          echo "FILE_VERSION=$FILE_VERSION" >> $GITHUB_ENV
+          echo "ASSEMBLY_VERSION=$ASSEMBLY_VERSION" >> $GITHUB_ENV
+          echo "NUGET_VERSION=$NUGET_VERSION" >> $GITHUB_ENV
+      
+          # Debug output
+          echo "🔹 Resolved Full Version: $FULL_VERSION"
+          echo "🔹 Resolved NuGet Version: $NUGET_VERSION"
 
       - name: Add UiPath NuGet Source
         run: |
@@ -42,25 +58,28 @@ jobs:
         run: dotnet restore
 
       - name: Build Solution
-        run: dotnet build --configuration Release /p:Version=${{ env.VERSION }}
+        run: |
+          dotnet build --configuration Release \
+            /p:Version=${{ env.FULL_VERSION }} \
+            /p:FileVersion=${{ env.FILE_VERSION }} \
+            /p:AssemblyVersion=${{ env.ASSEMBLY_VERSION }}
 
-      - name: Pack NuGet Package (Optional)
-        run: dotnet pack --configuration Release --output ./nupkg /p:Version=${{ env.VERSION }}
+      - name: Pack NuGet Package
+        run: |
+          dotnet pack --configuration Release --no-build --output ./nupkg \
+            /p:PackageVersion=${{ env.NUGET_VERSION }} \
+            /p:Version=${{ env.FULL_VERSION }} \
+            /p:FileVersion=${{ env.FILE_VERSION }} \
+            /p:AssemblyVersion=${{ env.ASSEMBLY_VERSION }}
 
       - name: Debug Build Output
-        run: ls -R src/CPRIMA.WorkflowAnalyzerRules/bin/Release/
+        run: ls -R src/**/bin/Release/
 
       - name: Get Built File Names
         run: |
-          # Set default values
-          DEFAULT_DLL_NAME="built-dll"
-          DEFAULT_NUPKG_NAME="nuget-package"
+          DLL_NAME=$(find src -type f -name "*.dll" -path "*/bin/Release/*" | head -n 1 | xargs -n 1 basename)
+          NUPKG_NAME=$(find nupkg -type f -name "*.nupkg" | head -n 1 | xargs -n 1 basename)
 
-          # Try to find the actual file names
-          DLL_NAME=$(ls src/**/bin/Release/net6.0/*.dll 2>/dev/null | head -n 1 | xargs -n 1 basename || echo "${DEFAULT_DLL_NAME}.dll")
-          NUPKG_NAME=$(ls nupkg/*.nupkg 2>/dev/null | head -n 1 | xargs -n 1 basename || echo "${DEFAULT_NUPKG_NAME}.nupkg")
-
-          # Export values to GitHub environment variables
           echo "DLL_NAME=${DLL_NAME}" >> $GITHUB_ENV
           echo "NUPKG_NAME=${NUPKG_NAME}" >> $GITHUB_ENV
           echo "🔹 DLL Name: ${DLL_NAME}"
@@ -69,15 +88,19 @@ jobs:
       - name: Upload DLL Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.DLL_NAME }}-${{ env.VERSION }}
-          path: |
-            src/**/bin/Release/net6.0/*.dll
-            src/**/bin/Release/net8.0/*.dll
-            src/**/bin/Release/**/*.dll
+          name: ${{ env.DLL_NAME }}-${{ env.FULL_VERSION }}
+          path: src/**/bin/Release/**/*.dll
 
       - name: Upload NuGet Package
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.NUPKG_NAME }}-${{ env.VERSION }}
+          name: ${{ env.NUPKG_NAME }}-${{ env.FULL_VERSION }}
           path: nupkg/**/*.nupkg
 
+#      - name: Publish NuGet Package (Pre-release)
+#        if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/feature/')
+#        run: dotnet nuget push "nupkg/**/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+#
+#      - name: Publish NuGet Package (Stable)
+#        if: startsWith(github.ref, 'refs/tags/v')
+#        run: dotnet nuget push "nupkg/**/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
