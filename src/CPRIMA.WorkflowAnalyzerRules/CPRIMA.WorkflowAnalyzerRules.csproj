@@ -49,8 +49,6 @@
 		</PackageReference>
 	</ItemGroup>
 
-
-
 	<ItemGroup>
 		<Compile Update="LocalizationResources\Strings.Designer.cs">
 			<DesignTime>True</DesignTime>

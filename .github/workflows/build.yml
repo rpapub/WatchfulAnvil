@@ -53,8 +53,15 @@ jobs:
           echo "🔹 Resolved NuGet Version: $NUGET_VERSION"
 
       - name: Add UiPath NuGet Source
+        # Adds the public UiPath-Official feed (hosted on Azure DevOps) to NuGet sources
+        # Required for prepare-api-dlls.ps1 to fetch UiPath.Activities.Api
         run: |
           dotnet nuget add source "https://uipath.pkgs.visualstudio.com/Public.Feeds/_packaging/UiPath-Official/nuget/v3/index.json" --name UiPath-Official
+
+      - name: Prepare UiPath API DLLs
+        # Downloads and extracts API reference DLLs for each target framework
+        # Depends on 'UiPath-Official' NuGet source being available
+        run: pwsh ./tools/prepare-api-dlls.ps1
 
       - name: Restore Dependencies
         run: dotnet restore
