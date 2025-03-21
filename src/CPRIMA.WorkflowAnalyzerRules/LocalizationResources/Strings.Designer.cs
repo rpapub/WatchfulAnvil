@@ -149,5 +149,23 @@ namespace CPRIMA.WorkflowAnalyzerRules.LocalizationResources {
                 return ResourceManager.GetString("CPM_USG_000_Recommendation", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wait 10 Seconds.
+        /// </summary>
+        public static string CPM_WAIT_001_Name {
+            get {
+                return ResourceManager.GetString("CPM_WAIT_001_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This rule does nothing but waiting for 10 seconds.
+        /// </summary>
+        public static string CPM_WAIT_001_Recommendation {
+            get {
+                return ResourceManager.GetString("CPM_WAIT_001_Recommendation", resourceCulture);
+            }
+        }
     }
 }

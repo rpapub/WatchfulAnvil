@@ -147,4 +147,10 @@
   <data name="CPM_USG_000_Recommendation" xml:space="preserve">
     <value>Project must include at least one 'ShouldStop' activity.</value>
   </data>
+  <data name="CPM_WAIT_001_Name" xml:space="preserve">
+    <value>Wait 10 Seconds</value>
+  </data>
+  <data name="CPM_WAIT_001_Recommendation" xml:space="preserve">
+    <value>This rule does nothing but waiting for 10 seconds</value>
+  </data>
 </root>
