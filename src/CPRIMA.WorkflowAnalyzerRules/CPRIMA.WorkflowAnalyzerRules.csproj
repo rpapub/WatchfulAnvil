@@ -29,16 +29,27 @@
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-		<PackageReference Include="UiPath.Activities.Api" Version="23.10.3" />
+		<PackageReference Include="UiPath.Activities.Api" Version="23.10.3">
+			<ExcludeAssets>runtime</ExcludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-		<PackageReference Include="UiPath.Activities.Api" Version="24.10.1" />
+		<PackageReference Include="UiPath.Activities.Api" Version="24.10.1">
+			<ExcludeAssets>runtime</ExcludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-		<PackageReference Include="UiPath.Activities.Api" Version="24.10.1" />
+		<PackageReference Include="UiPath.Activities.Api" Version="24.10.1">
+			<ExcludeAssets>runtime</ExcludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 	</ItemGroup>
+
+
 
 	<ItemGroup>
 		<Compile Update="LocalizationResources\Strings.Designer.cs">
