@@ -62,3 +62,7 @@ UiPath.Studio.RulesLibrary/
 *.DS_Store
 Thumbs.db
 desktop.ini
+
+# --- Added for UiPath API DLL prep ---
+/src/**/temp-nugets/
+/src/**/lib-deps/
