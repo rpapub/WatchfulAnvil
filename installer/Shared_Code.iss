@@ -22,16 +22,33 @@ begin
     DirExists(ExpandConstant('{pf64}' + '\UiPath\Studio\' + userPathPf64));
 end;
 
+function IsAdminUser: Boolean;
+begin
+  Result := IsAdmin;
+end;
+
 function PathExistsUserFirst(userPathPf32, userPathPf64: String): String;
 begin
-  if DirExists(ExpandConstant('{localappdata}\Programs\UiPath\Studio\' + userPathPf32)) then
-    Result := ExpandConstant('{localappdata}\Programs\UiPath\Studio\' + userPathPf32)
-  else if DirExists(ExpandConstant('{pf}' + '\UiPath\Studio\' + userPathPf32)) then
-    Result := ExpandConstant('{pf}' + '\UiPath\Studio\' + userPathPf32)
-  else if DirExists(ExpandConstant('{pf64}' + '\UiPath\Studio\' + userPathPf64)) then
-    Result := ExpandConstant('{pf64}' + '\UiPath\Studio\' + userPathPf64)
+  if IsAdminUser then
+  begin
+    // Admin users can access Program Files
+    if DirExists(ExpandConstant('{pf64}\UiPath\Studio\' + userPathPf64)) then
+      Result := ExpandConstant('{pf64}\UiPath\Studio\' + userPathPf64)
+    else if DirExists(ExpandConstant('{pf}\UiPath\Studio\' + userPathPf32)) then
+      Result := ExpandConstant('{pf}\UiPath\Studio\' + userPathPf32)
+    else
+      Result := ''; // Admin users should not default to user paths for installation
+  end
   else
-    Result := '';
+  begin
+    // Non-admin users should be restricted to user paths
+    if DirExists(ExpandConstant('{localappdata}\Programs\UiPath\Studio\' + userPathPf32)) then
+      Result := ExpandConstant('{localappdata}\Programs\UiPath\Studio\' + userPathPf32)
+    else if DirExists(ExpandConstant('{localappdata}\UiPath\Studio\' + userPathPf32)) then
+      Result := ExpandConstant('{localappdata}\UiPath\Studio\' + userPathPf32)
+    else
+      Result := ''; // No match found, let ProbeUiPath handle fallback
+  end;
 end;
 
 function ProbeUiPath(): TUiPathDetection;
