@@ -94,16 +94,23 @@ jobs:
           echo "🔹 DLL Name: ${DLL_NAME}"
           echo "🔹 NuGet Package Name: ${NUPKG_NAME}"
 
+      - name: Set Artifact Base Name
+        run: |
+          REPO_CODENAME="WatchfulAnvil"
+          echo "REPO_CODENAME=$REPO_CODENAME" >> $GITHUB_ENV
+
       - name: Upload DLL Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.DLL_NAME }}-${{ env.FULL_VERSION }}
+          #name: ${{ env.DLL_NAME }}-${{ env.FULL_VERSION }}
+          name: ${{ env.REPO_CODENAME }}.dll-${{ env.FULL_VERSION }}
           path: src/**/bin/Release/**/*.dll
 
       - name: Upload NuGet Package
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.NUPKG_NAME }}-${{ env.FULL_VERSION }}
+          #name: ${{ env.NUPKG_NAME }}-${{ env.FULL_VERSION }}
+          name: ${{ env.REPO_CODENAME }}.nupkg-${{ env.FULL_VERSION }}
           path: nupkg/**/*.nupkg
 
 #      - name: Publish NuGet Package (Pre-release)
