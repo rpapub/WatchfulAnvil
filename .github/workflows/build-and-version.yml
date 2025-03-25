@@ -21,6 +21,15 @@ jobs:
         with:
           fetch-depth: 0  # Ensure full history for GitVersion
 
+      - name: Read build-settings.json
+        shell: pwsh
+        run: |
+          $settings = Get-Content "build-settings.json" | ConvertFrom-Json
+          echo "ARTIFACT_NAME_MODE=$($settings.artifactNameMode)" >> $env:GITHUB_ENV
+          echo "ARTIFACT_NAME_PREFIX=$($settings.artifactNamePrefix)" >> $env:GITHUB_ENV
+          echo "UIPATH_API_FEED_URL=$($settings.uipathApiFeedUrl)" >> $env:GITHUB_ENV
+          echo "UIPATH_API_FEED_NAME=$($settings.uipathApiFeedName)" >> $env:GITHUB_ENV
+
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v3
         with:
@@ -32,6 +41,8 @@ jobs:
       - name: Determine Version
         run: |
           VERSION_JSON=$(dotnet-gitversion /output json)
+          echo "$VERSION_JSON" > version.json  # Save to file for publish workflow
+      
           FULL_VERSION=$(echo $VERSION_JSON | jq -r '.FullSemVer')
           FILE_VERSION=$(echo $VERSION_JSON | jq -r '.AssemblySemFileVer')
           ASSEMBLY_VERSION=$(echo $VERSION_JSON | jq -r '.AssemblySemVer')
@@ -52,11 +63,9 @@ jobs:
           echo "🔹 Resolved Full Version: $FULL_VERSION"
           echo "🔹 Resolved NuGet Version: $NUGET_VERSION"
 
-      - name: Add UiPath NuGet Source
-        # Adds the public UiPath-Official feed (hosted on Azure DevOps) to NuGet sources
-        # Required for prepare-api-dlls.ps1 to fetch UiPath.Activities.Api
+      - name: Add UiPath API Feed
         run: |
-          dotnet nuget add source "https://uipath.pkgs.visualstudio.com/Public.Feeds/_packaging/UiPath-Official/nuget/v3/index.json" --name UiPath-Official
+          dotnet nuget add source "$UIPATH_API_FEED_URL" --name "$UIPATH_API_FEED_NAME"
 
       - name: Prepare UiPath API DLLs
         # Downloads and extracts API reference DLLs for each target framework
@@ -84,20 +93,20 @@ jobs:
       - name: Debug Build Output
         run: ls -R src/**/bin/Release/
 
-      - name: Get Built File Names
-        run: |
-          DLL_NAME=$(find src -type f -name "*.dll" -path "*/bin/Release/*" | head -n 1 | xargs -n 1 basename)
-          NUPKG_NAME=$(find nupkg -type f -name "*.nupkg" | head -n 1 | xargs -n 1 basename)
-
-          echo "DLL_NAME=${DLL_NAME}" >> $GITHUB_ENV
-          echo "NUPKG_NAME=${NUPKG_NAME}" >> $GITHUB_ENV
-          echo "🔹 DLL Name: ${DLL_NAME}"
-          echo "🔹 NuGet Package Name: ${NUPKG_NAME}"
-
       - name: Set Artifact Base Name
         run: |
-          REPO_CODENAME="WatchfulAnvil"
-          echo "REPO_CODENAME=$REPO_CODENAME" >> $GITHUB_ENV
+          if [[ "$ARTIFACT_NAME_MODE" == "static" ]]; then
+            CODENAME="$ARTIFACT_NAME_PREFIX"
+          else
+            CODENAME="${GITHUB_REPOSITORY##*/}"
+          fi
+          echo "REPO_CODENAME=$CODENAME" >> $GITHUB_ENV
+
+      - name: Upload version info
+        uses: actions/upload-artifact@v4
+        with:
+          name: version
+          path: version.json
 
       - name: Upload DLL Artifact
         uses: actions/upload-artifact@v4
@@ -105,6 +114,7 @@ jobs:
           #name: ${{ env.DLL_NAME }}-${{ env.FULL_VERSION }}
           name: ${{ env.REPO_CODENAME }}.dll-${{ env.FULL_VERSION }}
           path: src/**/bin/Release/**/*.dll
+          retention-days: 30
 
       - name: Upload NuGet Package
         uses: actions/upload-artifact@v4
@@ -112,11 +122,4 @@ jobs:
           #name: ${{ env.NUPKG_NAME }}-${{ env.FULL_VERSION }}
           name: ${{ env.REPO_CODENAME }}.nupkg-${{ env.FULL_VERSION }}
           path: nupkg/**/*.nupkg
-
-#      - name: Publish NuGet Package (Pre-release)
-#        if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/feature/')
-#        run: dotnet nuget push "nupkg/**/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
-#
-#      - name: Publish NuGet Package (Stable)
-#        if: startsWith(github.ref, 'refs/tags/v')
-#        run: dotnet nuget push "nupkg/**/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+          retention-days: 30

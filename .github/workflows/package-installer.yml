@@ -1,0 +1,17 @@
+name: Create Installer
+
+on:
+  workflow_run:
+    workflows: ["Build and Version"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  installer:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: windows-latest
+
+    steps:
+      - name: No-op
+        run: echo "🛠 Installer packaging is not implemented yet."

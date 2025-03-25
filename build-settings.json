@@ -1,0 +1,18 @@
+{
+  "_comment": "Build and publishing metadata. Do NOT duplicate MSBuild config here.",
+
+  "artifactNameMode": "dynamic",
+  "artifactNamePrefix": "WatchfulAnvil",
+  "artifactNameMode_comment": "Set to 'dynamic' to use repo name; 'static' to use artifactNamePrefix",
+
+  "uipathApiFeedUrl": "https://uipath.pkgs.visualstudio.com/Public.Feeds/_packaging/UiPath-Official/nuget/v3/index.json",
+  "uipathApiFeedName": "UiPath-Official",
+
+  "publishFeeds": {
+    "_comment": "GitVersion (GitFlow) branch → feed mapping: feature/*, fix/*, develop → alpha; release/* → beta; main or v* tag → prod",
+
+    "alpha": "https://www.myget.org/F/watchful-anvil-alpha/api/v3/index.json",
+    "beta": "https://www.myget.org/F/watchful-anvil-beta/api/v3/index.json",
+    "prod": "https://www.myget.org/F/watchful-anvil/api/v3/index.json"
+  }
+}

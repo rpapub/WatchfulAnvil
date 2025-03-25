@@ -1,0 +1,111 @@
+name: Publish NuGet Packages
+
+on:
+  workflow_run:
+    workflows: ["Build and Version"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  publish:
+    if: |
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+      }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Debug trigger info
+        run: |
+          echo "Workflow triggered by: ${{ github.event_name }}"
+          echo "Run ID: ${{ github.event.workflow_run.id || github.run_id }}"
+          echo "Commit: ${{ github.event.workflow_run.head_sha || github.sha }}"
+
+      - name: List Artifacts
+        run: |
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id || github.run_id }}/artifacts" > artifacts.json
+          cat artifacts.json
+
+      - name: Download version.json from prior workflow
+        run: |
+          VERSION_URL=$(jq -r '.artifacts[] | select(.name == "version") | .archive_download_url' artifacts.json)
+          if [[ "$VERSION_URL" == "null" || -z "$VERSION_URL" ]]; then
+            echo "❌ version artifact not found"
+            exit 1
+          fi
+          curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$VERSION_URL" --output version.zip
+          unzip version.zip -d version
+
+      - name: Parse version.json
+        shell: pwsh
+        run: |
+          $version = Get-Content "version/version.json" | ConvertFrom-Json
+          $nugetVersion = $version.NuGetVersionV2
+          if (-not $nugetVersion) {
+            $nugetVersion = $version.FullSemVer
+          }
+          echo "NUGET_VERSION=$nugetVersion" >> $env:GITHUB_ENV
+          Write-Host "📦 NuGet Version: $nugetVersion"
+
+      - name: Read build-settings.json
+        shell: pwsh
+        run: |
+          $settings = Get-Content "build-settings.json" | ConvertFrom-Json
+          $feeds = $settings.publishFeeds
+
+          $branch = "${{ github.event.workflow_run.head_branch }}"
+          if (-not $branch) {
+            $branch = $env:GITHUB_REF.Split('/')[-1]
+          }
+
+          if ($branch -like "release/*") {
+            $target = $feeds.beta
+          }
+          elseif ($branch -eq "main" -or $branch -match "^v\d") {
+            $target = $feeds.prod
+          }
+          else {
+            $target = $feeds.alpha
+          }
+
+          "MYGET_FEED=$target" >> $env:GITHUB_ENV
+          Write-Host "📦 Target Feed: $target"
+
+      - name: Set Artifact Name
+        shell: pwsh
+        run: |
+          $settings = Get-Content "build-settings.json" | ConvertFrom-Json
+          if ($settings.artifactNameMode -eq 'static') {
+            $prefix = $settings.artifactNamePrefix
+          } else {
+            $repoParts = "${{ github.repository }}" -split '/'
+            $prefix = $repoParts[1]
+          }
+          $artifactName = "$prefix.nupkg-${{ env.NUGET_VERSION }}"
+          echo "ARTIFACT_NAME=$artifactName" >> $env:GITHUB_ENV
+          Write-Host "📦 Artifact Name: $artifactName"
+
+      - name: Download NuGet Artifact
+        run: |
+          NUPKG_URL=$(jq -r --arg NAME "$ARTIFACT_NAME" '.artifacts[] | select(.name == $NAME) | .archive_download_url' artifacts.json)
+          if [[ "$NUPKG_URL" == "null" || -z "$NUPKG_URL" ]]; then
+            echo "❌ NuGet artifact not found: $ARTIFACT_NAME"
+            exit 1
+          fi
+          curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$NUPKG_URL" --output nupkg.zip
+          unzip nupkg.zip -d nupkg
+
+      - name: Publish to MyGet
+        run: |
+          dotnet nuget push "nupkg/**/*.nupkg" \
+            --source "$MYGET_FEED" \
+            --api-key ${{ secrets.RPAPUB_MYGET_API_KEY }} \
+            --skip-duplicate
