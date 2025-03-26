@@ -2,6 +2,10 @@
 
 A minimal, working example of custom **UiPath Workflow Analyzer rules**, built in **.NET**, intended for integration with **UiPath Studio's Workflow Analyzer**.
 
+<p align="center">
+  <img src="https://rpapub.github.io/WatchfulAnvil/assets/img/logo/TheWatchfulAnvil.png" alt="Watchful Anvil Logo" height="200">
+</p>
+
 This repository provides the technical foundation for custom rule development, multi-targeted builds, and packaging. While internal tooling and installers are under development, this release focuses on structural readiness and early reference value.
 
 ---
