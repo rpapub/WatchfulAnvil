@@ -1,119 +1,122 @@
-# CPRIMA-UiPath-Studio-WorkflowAnalyzerRules
+# WatchfulAnvil – UiPath Studio Workflow Analyzer Rules
 
-A custom **UiPath Workflow Analyzer Rules Library**, built in **.NET**, designed to integrate with **UiPath Studio's Workflow Analyzer**. 
+A minimal, working example of custom **UiPath Workflow Analyzer rules**, built in **.NET**, intended for integration with **UiPath Studio's Workflow Analyzer**.
 
-## 📌 Project Goals
-
-This project aims to:
-
-- Provide a **minimal working example** for custom Workflow Analyzer rules  
-- Support **multi-framework builds** (`net461`, `net6.0`, `net8.0`)  
-- Enable **automated builds and testing** via GitHub Actions  
-- Simplify **deployment** with an installer and clear structure 
+This repository provides the technical foundation for custom rule development, multi-targeted builds, and packaging. While internal tooling and installers are under development, this release focuses on structural readiness and early reference value.
 
 ---
 
-## ✅ Current Status
+## 📌 Project Goals
 
-- ✔️ Multi-targeted build setup  
-- ✔️ Basic "NullOperation" rules implemented and recognized by UiPath Studio  
-- ✔️ Unit testing via xUnit and Moq  
-- 🚧 Code reviews of the minimal examples
-- 🚧 Ease of deployment with a flexible installer 
-- 🔧 Next: building blocks of custom rules; multi-project code structure
+- Provide a reliable starting point for authoring custom rules  
+- Support **multi-framework builds** (`net461`, `net6.0`, `net8.0`)  
+- Enable Git-based collaboration and iterative experimentation  
+- Lay the foundation for future educational content and tooling
+
+---
+
+## ✅ Current Status (v0.1.0-alpha)
+
+- ✔️ Project structure and solution layout finalized  
+- ✔️ Custom rules (e.g., "NullOperation") recognized by UiPath Studio  
+- ✔️ Builds across all supported target frameworks  
+- 🚧 Internal work on CI, installer, and SDK reverse-engineering in progress  
+- 📚 Documentation and learning artifacts planned for future milestones
+
+> ℹ️ This is an internal-facing alpha release. It is not yet intended for general consumption or end-to-end rule authoring guidance.
 
 ---
 
 ## 📂 Project Structure
 
 ```
-CPRIMA-UiPath-Studio-WorkflowAnalyzerRules
-│── .gitignore
-│── LICENSE
+WatchfulAnvil
+│── AUTHORS.md
+│── CHANGELOG.md
+│── LICENCE.md
 │── README.md
-│── CPRIMA.WorkflowAnalyzerRules.sln
+│── WatchfulAnvil.WorkflowAnalyzerRules.sln
 │
 ├── src
-│   ├── CPRIMA.WorkflowAnalyzerRules
-│   │   ├── CPRIMA.WorkflowAnalyzerRules.csproj
-│   │   ├── RegisterAnalyzerConfiguration.cs
-│   │   ├── Rules
-│   │   │   ├── Noop
-│   │   │   │   ├── NullOperationActivityRule.cs
-│   │   │   │   ├── NullOperationWorkflowRule.cs
-│   │   │   │   ├── NullOperationProjectRule.cs
+│   ├── CPM.WorkflowAnalyzerRules
+│   │   ├── CPM.WorkflowAnalyzerRules.csproj
+│   │   └── RegisterAnalyzerConfiguration.cs
+│   └── YOU.WorkflowAnalyzerRules
+│       ├── YOU.WorkflowAnalyzerRules.csproj
+│       └── RegisterAnalyzerConfiguration.cs
 │
-├── tests
-│   ├── CPRIMA.WorkflowAnalyzerRules.Tests
-│   │   ├── CPRIMA.WorkflowAnalyzerRules.Tests.csproj
-│   │   ├── NullOperationRuleTests.cs
-│
-├── docs
-│── .vs
-│── bin
-│── obj
+├── templates
+│   └── workflow-analyzer-rule
+│       ├── Project.csproj
+│       └── lib-deps
+│           └── UiPath.Activities.Api
+│               ├── net461\UiPath.Studio.Activities.Api.dll
+│               ├── net6.0\UiPath.Studio.Activities.Api.dll
+│               └── net8.0\UiPath.Studio.Activities.Api.dll
 ```
 
 ---
 
-## 🚀 Getting Started
 
-### 🔹 Prerequisites
-- **.NET SDK** (`6.0` and `8.0` required)
-- **UiPath Studio** (supports `net461`, `net6.0`, and `net8.0`)
-- **Visual Studio** (recommended for development)
+## 📦 Deployment Notes
 
-### 🔹 Build & Test
+The analyzer rules are compiled into DLLs and must be placed into folders that UiPath Studio scans for Workflow Analyzer rules. This can be done manually, or automatically via the installer (in development).
 
-To **restore dependencies**, **build the solution**, and **run tests**:
+> ⚠️ **Note:** Deployment paths are partly based on reverse-engineering and observed behavior across multiple Studio versions. They are not comprehensively documented by UiPath and may change in future releases.
 
-```sh
-dotnet restore
-dotnet build
-dotnet test
-```
+### 🔹 Manual Deployment (Current)
 
-To **run tests** with detailed output:
+You can manually copy the appropriate DLL (e.g., `net6.0` or `net461`) into the matching UiPath Studio folder. These locations differ by Studio version and installation type.
 
-```sh
-dotnet test --verbosity detailed
-```
+#### Per-Machine Installations
 
----
+| Studio Version     | Target Framework | Folder Path                                  |
+| ------------------ | ---------------- | -------------------------------------------- |
+| < 2021.10          | `net461`         | `%ProgramFiles%\UiPath\Studio\Rules\`        |
+| 2021.10 – <2024.10 | `net461`         | `%ProgramFiles%\UiPath\Studio\net461\Rules\` |
+| 2021.10 – <2024.10 | `net6.0`         | `%ProgramFiles%\UiPath\Studio\Rules\net6.0\` |
+| 2024.10+           | `net8.0`         | `%ProgramFiles%\UiPath\Studio\Rules\net8.0\` |
+| 2024.10+           | `net461`         | `%ProgramFiles%\UiPath\Studio\net472\Rules\` |
 
-## 📦 Deployment: Making Rules Available in UiPath Studio
+#### Per-User Installations
 
-Once built, the **compiled DLLs** must be placed in specific **UiPath Studio Rules folders** for **global** availability in all projects.
+| Studio Version     | Target Framework | Folder Path                                           |
+| ------------------ | ---------------- | ----------------------------------------------------- |
+| < 2021.10          | `net461`         | `%LocalAppData%\Programs\UiPath\Studio\Rules\`        |
+| 2021.10 – <2024.10 | `net461`         | `%LocalAppData%\Programs\UiPath\Studio\net461\Rules\` |
+| 2021.10 – <2024.10 | `net6.0`         | `%LocalAppData%\Programs\UiPath\Studio\Rules\net6.0\` |
+| 2024.10+           | `net8.0`         | `%LocalAppData%\Programs\UiPath\Studio\Rules\net8.0\` |
+| 2024.10+           | `net461`         | `%LocalAppData%\Programs\UiPath\Studio\net472\Rules\` |
 
-### 🔹 Deployment Paths (Per-Machine Installations)
+If no matching folders exist, you may use this fallback path:
 
-| Studio Version  | Target Framework    | Deployment Path                              |
-| --------------- | ------------------- | -------------------------------------------- |
-| **2021.10.6+**  | .NET 6 & 8          | `%ProgramFiles%\UiPath\Studio\Rules\net6.0\` |
-|                 | Legacy (.NET 4.6.1) | `%ProgramFiles%\UiPath\Studio\net461\Rules\` |
-| **Pre-2021.10** | All                 | `%ProgramFiles%\UiPath\Studio\Rules\`        |
+- `%Public%\Documents\UiPath\Rules` (recognized by Studio in some cases)
 
-### 🔹 Deployment Paths (Per-User Installations)
-
-| Studio Version  | Target Framework    | Deployment Path                                       |
-| --------------- | ------------------- | ----------------------------------------------------- |
-| **2021.10.6+**  | .NET 6 & 8          | `%LocalAppData%\Programs\UiPath\Studio\Rules\net6.0\` |
-|                 | Legacy (.NET 4.6.1) | `%LocalAppData%\Programs\UiPath\Studio\net461\Rules\` |
-| **Pre-2021.10** | All                 | `%LocalAppData%\Programs\UiPath\Studio\Rules\`        |
-
-After placing the **DLL files**, **restart UiPath Studio** to apply the changes.
+After copying, restart UiPath Studio.
 
 ---
 
-## 🛣️ Roadmap
+### 🔧 Installer (Preview)
 
-- [x] Initial rule visibility in Studio as proof of concept
-- [ ] demonstrate complete lifecycle of a rule through all DevSecOps stages
-- [ ] invite the UiPath community for collaboration
+An installer is in development. It will:
+
+- Detect which Studio versions and paths exist
+- Install appropriate rule DLLs for each detected environment
+- Support both admin (system) and user (per-user) installations
+- Allow custom folder override
+- Work in silent mode for unattended deployment
+
+> 🧪 Current status: internal testing only. Not recommended for public use in v0.1.0.
+
+---
 
 ## 🛠️ Contributing
-This is a personal project, but contributions or feedback are welcome! 
+
+This is a personal project. Contributions are welcome, but coordinated participation is currently invite-only. Feel free to open issues for questions or feedback.
+
+---
 
 ## 📄 License
 
-Content by Christian Prior-Mamulyan, licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). [LICENSE.md](LICENSE.md) for details.
+Licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENCE.md)
+See [AUTHORS.md](AUTHORS.md) for contributors.
