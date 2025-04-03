@@ -63,6 +63,9 @@ build_gif () {
 }
 
 # --- Build all animations ---
+build_gif DOWNLOAD_IMAGES getting_started__download____COUNT____animation__en__1600x900.gif
+
+exit 0;
 build_gif NET461_IMAGES getting_started__net461____COUNT____animation__en__1600x900.gif
 build_gif SDK60_IMAGES getting_started__sdk60____COUNT____animation__en__1600x900.gif
 build_gif SDK80_IMAGES getting_started__sdk80____COUNT____animation__en__1600x900.gif
