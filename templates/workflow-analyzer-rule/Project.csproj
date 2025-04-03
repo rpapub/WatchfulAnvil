@@ -9,17 +9,15 @@
 		<FileVersion>0.1.0.0</FileVersion>
 		<AssemblyVersion>0.1.0.0</AssemblyVersion>
 		<InformationalVersion>0.1.0-alpha</InformationalVersion>
-		<Authors>Christian Prior-Mamulyan</Authors>
-		<Company>cprima.net</Company>
+		<Authors>{{ORGANIZATION}}</Authors>
+		<Company>{{ORGANIZATION}}</Company>
 		<PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
-		<PackageDescription>Custom UiPath Workflow Analyzer rules by Christian Prior-Mamulyan.</PackageDescription>
+		<PackageDescription>Custom UiPath Workflow Analyzer rules by {{ORGANIZATION}}.</PackageDescription>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
 		<LangVersion>7.3</LangVersion>
-		<!-- Explicitly set C# 7.3 -->
 		<ImplicitUsings>disable</ImplicitUsings>
-		<!-- Disable Implicit Usings -->
 		<Nullable>disable</Nullable>
 	</PropertyGroup>
 
@@ -47,21 +45,6 @@
 			<ExcludeAssets>runtime</ExcludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="LocalizationResources\Strings.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Strings.resx</DependentUpon>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Update="LocalizationResources\Strings.resx">
-			<Generator>PublicResXFileCodeGenerator</Generator>
-			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
 	</ItemGroup>
 
 </Project>
