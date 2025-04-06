@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Solarized Sprite Filter</title>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: auto; padding: 1em; }
+    label { margin-right: 1em; }
+    select { margin-right: 1em; }
+    ul { list-style-type: none; padding-left: 0; }
+    li { margin: 0.3em 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Solarized Sprite Filter</h1>
+
+  <div id="filterControls">
+    <label>
+      Shape:
+      <select id="shapeFilter"></select>
+    </label>
+    <label>
+      Color:
+      <select id="colorFilter"></select>
+    </label>
+    <label>
+      Size:
+      <select id="sizeFilter"></select>
+    </label>
+  </div>
+
+  <div id="results" style="margin-top:2em;"></div>
+
+  <!-- 🔽 Paste full JSON into this script tag -->
+  <script id="spriteData" type="application/json">
+{
+  "metadata": {
+    "colors": [
+      "base0",
+      "base00",
+      "base01",
+      "base02",
+      "base03",
+      "base1",
+      "base2",
+      "base3",
+      "blue",
+      "cyan",
+      "green",
+      "magenta",
+      "orange",
+      "red",
+      "violet",
+      "yellow"
+    ],
+    "shapes": [
+      "bar",
+      "circle"
+    ],
+    "sizes": [
+      {
+        "height": 16,
+        "width": 16
+      },
+      {
+        "height": 8,
+        "width": 360
+      },
+      {
+        "height": 16,
+        "width": 720
+      },
+      {
+        "height": 8,
+        "width": 8
+      },
+      {
+        "height": 4,
+        "width": 4
+      }
+    ]
+  },
+  "files": [
+    {
+      "filename": "bar-base0-16x16.svg",
+      "shape": "bar",
+      "color": "base0",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-base0-360x8.svg",
+      "shape": "bar",
+      "color": "base0",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-base0-720x16.svg",
+      "shape": "bar",
+      "color": "base0",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-base0-8x8.svg",
+      "shape": "bar",
+      "color": "base0",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-base00-16x16.svg",
+      "shape": "bar",
+      "color": "base00",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-base00-360x8.svg",
+      "shape": "bar",
+      "color": "base00",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-base00-720x16.svg",
+      "shape": "bar",
+      "color": "base00",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-base00-8x8.svg",
+      "shape": "bar",
+      "color": "base00",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-base01-16x16.svg",
+      "shape": "bar",
+      "color": "base01",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-base01-360x8.svg",
+      "shape": "bar",
+      "color": "base01",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-base01-720x16.svg",
+      "shape": "bar",
+      "color": "base01",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-base01-8x8.svg",
+      "shape": "bar",
+      "color": "base01",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-base02-16x16.svg",
+      "shape": "bar",
+      "color": "base02",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-base02-360x8.svg",
+      "shape": "bar",
+      "color": "base02",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-base02-720x16.svg",
+      "shape": "bar",
+      "color": "base02",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-base02-8x8.svg",
+      "shape": "bar",
+      "color": "base02",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-base03-16x16.svg",
+      "shape": "bar",
+      "color": "base03",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-base03-360x8.svg",
+      "shape": "bar",
+      "color": "base03",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-base03-720x16.svg",
+      "shape": "bar",
+      "color": "base03",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-base03-8x8.svg",
+      "shape": "bar",
+      "color": "base03",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-base1-16x16.svg",
+      "shape": "bar",
+      "color": "base1",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-base1-360x8.svg",
+      "shape": "bar",
+      "color": "base1",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-base1-720x16.svg",
+      "shape": "bar",
+      "color": "base1",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-base1-8x8.svg",
+      "shape": "bar",
+      "color": "base1",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-base2-16x16.svg",
+      "shape": "bar",
+      "color": "base2",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-base2-360x8.svg",
+      "shape": "bar",
+      "color": "base2",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-base2-720x16.svg",
+      "shape": "bar",
+      "color": "base2",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-base2-8x8.svg",
+      "shape": "bar",
+      "color": "base2",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-base3-16x16.svg",
+      "shape": "bar",
+      "color": "base3",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-base3-360x8.svg",
+      "shape": "bar",
+      "color": "base3",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-base3-720x16.svg",
+      "shape": "bar",
+      "color": "base3",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-base3-8x8.svg",
+      "shape": "bar",
+      "color": "base3",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-blue-16x16.svg",
+      "shape": "bar",
+      "color": "blue",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-blue-360x8.svg",
+      "shape": "bar",
+      "color": "blue",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-blue-720x16.svg",
+      "shape": "bar",
+      "color": "blue",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-blue-8x8.svg",
+      "shape": "bar",
+      "color": "blue",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-cyan-16x16.svg",
+      "shape": "bar",
+      "color": "cyan",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-cyan-360x8.svg",
+      "shape": "bar",
+      "color": "cyan",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-cyan-720x16.svg",
+      "shape": "bar",
+      "color": "cyan",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-cyan-8x8.svg",
+      "shape": "bar",
+      "color": "cyan",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-green-16x16.svg",
+      "shape": "bar",
+      "color": "green",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-green-360x8.svg",
+      "shape": "bar",
+      "color": "green",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-green-720x16.svg",
+      "shape": "bar",
+      "color": "green",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-green-8x8.svg",
+      "shape": "bar",
+      "color": "green",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-magenta-16x16.svg",
+      "shape": "bar",
+      "color": "magenta",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-magenta-360x8.svg",
+      "shape": "bar",
+      "color": "magenta",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-magenta-720x16.svg",
+      "shape": "bar",
+      "color": "magenta",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-magenta-8x8.svg",
+      "shape": "bar",
+      "color": "magenta",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-orange-16x16.svg",
+      "shape": "bar",
+      "color": "orange",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-orange-360x8.svg",
+      "shape": "bar",
+      "color": "orange",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-orange-720x16.svg",
+      "shape": "bar",
+      "color": "orange",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-orange-8x8.svg",
+      "shape": "bar",
+      "color": "orange",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-red-16x16.svg",
+      "shape": "bar",
+      "color": "red",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-red-360x8.svg",
+      "shape": "bar",
+      "color": "red",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-red-720x16.svg",
+      "shape": "bar",
+      "color": "red",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-red-8x8.svg",
+      "shape": "bar",
+      "color": "red",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-violet-16x16.svg",
+      "shape": "bar",
+      "color": "violet",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-violet-360x8.svg",
+      "shape": "bar",
+      "color": "violet",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-violet-720x16.svg",
+      "shape": "bar",
+      "color": "violet",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-violet-8x8.svg",
+      "shape": "bar",
+      "color": "violet",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "bar-yellow-16x16.svg",
+      "shape": "bar",
+      "color": "yellow",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "bar-yellow-360x8.svg",
+      "shape": "bar",
+      "color": "yellow",
+      "width": 360,
+      "height": 8
+    },
+    {
+      "filename": "bar-yellow-720x16.svg",
+      "shape": "bar",
+      "color": "yellow",
+      "width": 720,
+      "height": 16
+    },
+    {
+      "filename": "bar-yellow-8x8.svg",
+      "shape": "bar",
+      "color": "yellow",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-base0-16x16.svg",
+      "shape": "circle",
+      "color": "base0",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-base0-4x4.svg",
+      "shape": "circle",
+      "color": "base0",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-base0-8x8.svg",
+      "shape": "circle",
+      "color": "base0",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-base00-16x16.svg",
+      "shape": "circle",
+      "color": "base00",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-base00-4x4.svg",
+      "shape": "circle",
+      "color": "base00",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-base00-8x8.svg",
+      "shape": "circle",
+      "color": "base00",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-base01-16x16.svg",
+      "shape": "circle",
+      "color": "base01",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-base01-4x4.svg",
+      "shape": "circle",
+      "color": "base01",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-base01-8x8.svg",
+      "shape": "circle",
+      "color": "base01",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-base02-16x16.svg",
+      "shape": "circle",
+      "color": "base02",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-base02-4x4.svg",
+      "shape": "circle",
+      "color": "base02",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-base02-8x8.svg",
+      "shape": "circle",
+      "color": "base02",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-base03-16x16.svg",
+      "shape": "circle",
+      "color": "base03",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-base03-4x4.svg",
+      "shape": "circle",
+      "color": "base03",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-base03-8x8.svg",
+      "shape": "circle",
+      "color": "base03",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-base1-16x16.svg",
+      "shape": "circle",
+      "color": "base1",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-base1-4x4.svg",
+      "shape": "circle",
+      "color": "base1",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-base1-8x8.svg",
+      "shape": "circle",
+      "color": "base1",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-base2-16x16.svg",
+      "shape": "circle",
+      "color": "base2",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-base2-4x4.svg",
+      "shape": "circle",
+      "color": "base2",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-base2-8x8.svg",
+      "shape": "circle",
+      "color": "base2",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-base3-16x16.svg",
+      "shape": "circle",
+      "color": "base3",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-base3-4x4.svg",
+      "shape": "circle",
+      "color": "base3",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-base3-8x8.svg",
+      "shape": "circle",
+      "color": "base3",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-blue-16x16.svg",
+      "shape": "circle",
+      "color": "blue",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-blue-4x4.svg",
+      "shape": "circle",
+      "color": "blue",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-blue-8x8.svg",
+      "shape": "circle",
+      "color": "blue",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-cyan-16x16.svg",
+      "shape": "circle",
+      "color": "cyan",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-cyan-4x4.svg",
+      "shape": "circle",
+      "color": "cyan",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-cyan-8x8.svg",
+      "shape": "circle",
+      "color": "cyan",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-green-16x16.svg",
+      "shape": "circle",
+      "color": "green",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-green-4x4.svg",
+      "shape": "circle",
+      "color": "green",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-green-8x8.svg",
+      "shape": "circle",
+      "color": "green",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-magenta-16x16.svg",
+      "shape": "circle",
+      "color": "magenta",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-magenta-4x4.svg",
+      "shape": "circle",
+      "color": "magenta",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-magenta-8x8.svg",
+      "shape": "circle",
+      "color": "magenta",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-orange-16x16.svg",
+      "shape": "circle",
+      "color": "orange",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-orange-4x4.svg",
+      "shape": "circle",
+      "color": "orange",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-orange-8x8.svg",
+      "shape": "circle",
+      "color": "orange",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-red-16x16.svg",
+      "shape": "circle",
+      "color": "red",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-red-4x4.svg",
+      "shape": "circle",
+      "color": "red",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-red-8x8.svg",
+      "shape": "circle",
+      "color": "red",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-violet-16x16.svg",
+      "shape": "circle",
+      "color": "violet",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-violet-4x4.svg",
+      "shape": "circle",
+      "color": "violet",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-violet-8x8.svg",
+      "shape": "circle",
+      "color": "violet",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "filename": "circle-yellow-16x16.svg",
+      "shape": "circle",
+      "color": "yellow",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "filename": "circle-yellow-4x4.svg",
+      "shape": "circle",
+      "color": "yellow",
+      "width": 4,
+      "height": 4
+    },
+    {
+      "filename": "circle-yellow-8x8.svg",
+      "shape": "circle",
+      "color": "yellow",
+      "width": 8,
+      "height": 8
+    }
+  ]
+}
+  </script>
+
+  <script>
+    const data = JSON.parse(document.getElementById('spriteData').textContent);
+
+    const shapeFilter = document.getElementById('shapeFilter');
+    const colorFilter = document.getElementById('colorFilter');
+    const sizeFilter = document.getElementById('sizeFilter');
+    const results = document.getElementById('results');
+
+    // Init filters
+    function populateFilters() {
+      fillSelect(shapeFilter, data.metadata.shapes);
+      fillSelect(colorFilter, data.metadata.colors);
+      const sizeLabels = data.metadata.sizes.map(s => `${s.width}x${s.height}`);
+      fillSelect(sizeFilter, sizeLabels);
+    }
+
+    function fillSelect(select, items) {
+      select.innerHTML = '<option value="">All</option>';
+      items.forEach(value => {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = value;
+        select.appendChild(opt);
+      });
+    }
+
+    // Filtering logic
+    function applyFilters() {
+      const shape = shapeFilter.value;
+      const color = colorFilter.value;
+      const size = sizeFilter.value;
+
+      const filtered = data.files.filter(f => {
+        const matchShape = !shape || f.shape === shape;
+        const matchColor = !color || f.color === color;
+        const matchSize = !size || `${f.width}x${f.height}` === size;
+        return matchShape && matchColor && matchSize;
+      });
+
+      results.innerHTML = `<h2>${filtered.length} Result(s)</h2><ul>` +
+        filtered.map(f => `<li><a href="${f.filename}">${f.filename}</a></li>`).join('') +
+        `</ul>`;
+    }
+
+    // Bind events
+    [shapeFilter, colorFilter, sizeFilter].forEach(el => el.addEventListener('change', applyFilters));
+
+    // Init
+    populateFilters();
+    applyFilters();
+  </script>
+
+</body>
+</html>
