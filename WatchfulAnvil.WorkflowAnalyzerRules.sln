@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPM.WorkflowAnalyzerRules",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPM.WorkflowAnalyzerRules.Tests", "tests\CPM.WorkflowAnalyzerRules.Tests\CPM.WorkflowAnalyzerRules.Tests.csproj", "{9A9357DC-0EE1-42CD-B239-E8F4BFE6D5AC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorld.WorkflowAnalyzerRules", "src\HelloWorld.WorkflowAnalyzerRules\HelloWorld.WorkflowAnalyzerRules.csproj", "{205DEA6C-1190-4267-999E-507CF0C02C9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorld.WorkflowAnalyzerRules.Tests", "tests\HelloWorld.WorkflowAnalyzerRules.Tests\HelloWorld.WorkflowAnalyzerRules.Tests.csproj", "{72F323A0-AF15-42CF-9179-6CA8675DA0CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +77,30 @@ Global
 		{9A9357DC-0EE1-42CD-B239-E8F4BFE6D5AC}.Release|x64.Build.0 = Release|Any CPU
 		{9A9357DC-0EE1-42CD-B239-E8F4BFE6D5AC}.Release|x86.ActiveCfg = Release|Any CPU
 		{9A9357DC-0EE1-42CD-B239-E8F4BFE6D5AC}.Release|x86.Build.0 = Release|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Debug|x64.Build.0 = Debug|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Debug|x86.Build.0 = Debug|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Release|x64.ActiveCfg = Release|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Release|x64.Build.0 = Release|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Release|x86.ActiveCfg = Release|Any CPU
+		{205DEA6C-1190-4267-999E-507CF0C02C9D}.Release|x86.Build.0 = Release|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Debug|x64.Build.0 = Debug|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Debug|x86.Build.0 = Debug|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Release|x64.ActiveCfg = Release|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Release|x64.Build.0 = Release|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Release|x86.ActiveCfg = Release|Any CPU
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,6 +110,8 @@ Global
 		{BA265EFF-4DED-4C5A-A467-A619145295F2} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{27B120E2-C456-43E7-ACB0-63D2D4F609B7} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{9A9357DC-0EE1-42CD-B239-E8F4BFE6D5AC} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{205DEA6C-1190-4267-999E-507CF0C02C9D} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{72F323A0-AF15-42CF-9179-6CA8675DA0CB} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4CCB100C-1ABD-448E-9A27-1F5B4AF648F0}
