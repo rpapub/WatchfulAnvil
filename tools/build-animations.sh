@@ -12,7 +12,7 @@
 set -euo pipefail
 
 OUTDIR="./animations"
-NORMALIZED_DIR="docs/assets/img/getting-started/normalized"
+NORMALIZED_DIR="docs/assets/img/incoming/normalized"
 DARK_FRAME="./frames/frame__base03__1600x900.png"
 
 # Define delays at the top of the script
@@ -63,12 +63,15 @@ build_gif () {
 }
 
 # --- Build all animations ---
-build_gif DOWNLOAD_IMAGES getting_started__download____COUNT____animation__en__1600x900.gif
+build_gif REPO_CLONE getting_started__repo-clone____COUNT____animation__en__1600x900.gif
+build_gif NUGET_FEED getting_started__customize-nuget-feeds____COUNT____animation__en__1600x900.gif
+build_gif BUILD_HELLO_WORLD_RULE getting_started__build-hello-world-rule____COUNT____animation__en__1600x900.gif
 
 exit 0;
-build_gif NET461_IMAGES getting_started__net461____COUNT____animation__en__1600x900.gif
-build_gif SDK60_IMAGES getting_started__sdk60____COUNT____animation__en__1600x900.gif
-build_gif SDK80_IMAGES getting_started__sdk80____COUNT____animation__en__1600x900.gif
-build_gif VISUALSTUDIO_IMAGES getting_started__visualstudio____COUNT____animation__en__1600x900.gif
+#build_gif DOWNLOAD_IMAGES getting_started__download____COUNT____animation__en__1600x900.gif
+#build_gif NET461_IMAGES getting_started__net461____COUNT____animation__en__1600x900.gif
+#build_gif SDK60_IMAGES getting_started__sdk60____COUNT____animation__en__1600x900.gif
+#build_gif SDK80_IMAGES getting_started__sdk80____COUNT____animation__en__1600x900.gif
+#build_gif VISUALSTUDIO_IMAGES getting_started__visualstudio____COUNT____animation__en__1600x900.gif
 
 

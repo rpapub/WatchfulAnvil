@@ -47,5 +47,8 @@ generate_page NET461_IMAGES "net461_images"
 generate_page SDK60_IMAGES "sdk60_images"
 generate_page SDK80_IMAGES "sdk80_images"
 generate_page VISUALSTUDIO_IMAGES "visualstudio_images"
+generate_page REPO_CLONE "repo_clone"
+generate_page NUGET_FEED "nuget_feed"
+generate_page BUILD_HELLO_WORLD_RULE "build_hello_world_rule"
 
 echo "✅ All wiki pages generated successfully!"

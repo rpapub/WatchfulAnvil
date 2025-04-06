@@ -22,6 +22,7 @@ ROOT_DIR="$(pwd)"
 # Directories to process (relative to root)
 DIRS=(
   "docs/assets/img/getting-started"
+  "docs/assets/img/incoming"
   "docs/assets/img/logo"
 )
 
