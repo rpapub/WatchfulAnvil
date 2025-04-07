@@ -4,8 +4,8 @@ $ErrorActionPreference = 'Stop'
 $templatesOk = @{
   RegisterAnalyzerConfiguration = Test-Path ".\templates\workflow-analyzer-rule\RegisterAnalyzerConfiguration.cs"
   ProjectFileTemplate           = Test-Path ".\templates\workflow-analyzer-rule\Project.csproj"
-  LibDepsFolder                 = Test-Path ".\templates\workflow-analyzer-rule\lib-deps\"
   SampleRule                    = Test-Path ".\templates\workflow-analyzer-rule\Rules\SampleRule.cs"
+  TestProjectFileTemplate       = Test-Path ".\templates\tests\WorkflowAnalyzerRules.Tests.csproj"
 }
 
 if ($templatesOk.Values -contains $false) {
@@ -28,7 +28,7 @@ $ProjectBaseName = "HelloWorld"
 
 # --- Input with Defaults ---
 $defaultOrg       = "ACME"
-$defaultRulePrefix = "HWD"
+$defaultRulePrefix = "HWR"
 
 $Organization = Read-Host "Enter your organization name [$defaultOrg]"
 if ([string]::IsNullOrWhiteSpace($Organization)) { $Organization = $defaultOrg }
@@ -43,9 +43,9 @@ if ($RulePrefix -notmatch '^[A-Z]{2,5}$') {
 }
 
 # --- Derived Values ---
-$ProjectName     = "$ProjectBaseName.WorkflowAnalyzerRules"
-$Namespace       = "$Organization.$ProjectName"
-$TestProjectName = "$ProjectName.Tests"
+$ProjectName     = "$Organization.$ProjectBaseName.WorkflowAnalyzerRules"
+$Namespace       = "$Organization.$ProjectBaseName"
+$TestProjectName = "$Organization.$ProjectBaseName.Tests"
 
 # --- Determine Root Directory ---
 $ScriptDir = $PSScriptRoot
@@ -138,6 +138,7 @@ function Copy-And-ReplacePlaceholders {
     $content = $content -replace '{{NAMESPACE}}', $Namespace
     $content = $content -replace '{{PREFIX}}', $RulePrefix
     $content = $content -replace '{{ORGANIZATION}}', $Organization
+    $content = $content -replace '{{PATHCSPROJ}}', $ProjFile
 
     Set-Content -Path $TargetPath -Value $content
 }
@@ -146,12 +147,13 @@ function Copy-And-ReplacePlaceholders {
 Copy-And-ReplacePlaceholders ".\templates\workflow-analyzer-rule\RegisterAnalyzerConfiguration.cs" (Join-Path $SrcPath "RegisterAnalyzerConfiguration.cs")
 Copy-And-ReplacePlaceholders ".\templates\workflow-analyzer-rule\Project.csproj" $ProjFile
 Copy-And-ReplacePlaceholders ".\templates\workflow-analyzer-rule\Rules\SampleRule.cs" (Join-Path $SrcPath "Rules\SampleRule.cs")
+Copy-And-ReplacePlaceholders ".\templates\tests\WorkflowAnalyzerRules.Tests.csproj" $TestProjFile
 
 # --- Copy lib-deps ---
-New-Item -ItemType Directory -Force -Path (Join-Path $SrcPath "lib-deps") | Out-Null
-Copy-Item -Path ".\templates\workflow-analyzer-rule\lib-deps\*" `
-          -Destination (Join-Path $SrcPath "lib-deps") `
-          -Recurse -Force
+#New-Item -ItemType Directory -Force -Path (Join-Path $SrcPath "lib-deps") | Out-Null
+#Copy-Item -Path ".\templates\workflow-analyzer-rule\lib-deps\*" `
+#          -Destination (Join-Path $SrcPath "lib-deps") `
+#          -Recurse -Force
 
 Write-Host "`n📁 Project scaffolding completed."
 Write-Host "✅ You can now open the solution and build the new project."
