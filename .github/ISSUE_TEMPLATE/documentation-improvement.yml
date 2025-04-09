@@ -1,0 +1,48 @@
+name: 📘 Documentation Improvement
+description: Report unclear, incorrect, outdated, or incomplete documentation
+title: "[Docs] "
+labels: [documentation]
+body:
+
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping to improve the documentation! Please fill out the form below to describe the issue or suggestion.
+
+  - type: input
+    id: location
+    attributes:
+      label: 📄 Affected Page or Section
+      description: Link to the page or provide the file path where the issue exists.
+      placeholder: e.g., https://github.com/rpapub/WatchfulAnvil/wiki/... or /Plan-System-Requirements-for-Workflow-Analyzer-Development.md
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🐞 Description of the Problem
+      description: Describe what's unclear, inaccurate, or missing.
+      placeholder: Be specific — what did you expect to see?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: ✍️ Suggested Improvement
+      description: (Optional) Any correction or wording suggestion?
+      placeholder: Suggest new wording, additional context, etc.
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: 📸 Screenshot or Example
+      description: (Optional) Add screenshots or command output to help clarify.
+      placeholder: Drag and drop, or paste images or text here.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: ✅ Acknowledgements
+      options:
+        - label: I’ve verified this issue hasn’t already been reported.
+          required: false
