@@ -1,0 +1,53 @@
+name: Sync Docs to Wiki
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  update-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Detect changes to docs
+        id: check
+        run: |
+          CHANGED=$(git diff --name-only HEAD^ HEAD || true)
+          echo "CHANGED=$CHANGED" >> $GITHUB_ENV
+          echo "roadmap_changed=false" >> $GITHUB_ENV
+          echo "contributing_changed=false" >> $GITHUB_ENV
+          echo "readme_changed=false" >> $GITHUB_ENV
+          echo "$CHANGED" | grep -q '^ROADMAP.md$' && echo "roadmap_changed=true" >> $GITHUB_ENV
+          echo "$CHANGED" | grep -q '^CONTRIBUTING.md$' && echo "contributing_changed=true" >> $GITHUB_ENV
+          echo "$CHANGED" | grep -q '^README.md$' && echo "readme_changed=true" >> $GITHUB_ENV
+
+      - name: Clone wiki repo
+        if: env.roadmap_changed == 'true' || env.contributing_changed == 'true' || env.readme_changed == 'true'
+        run: |
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git wiki
+
+      - name: Copy updated files to wiki
+        if: env.roadmap_changed == 'true' || env.contributing_changed == 'true' || env.readme_changed == 'true'
+        run: |
+          if [ "${{ env.roadmap_changed }}" = "true" ]; then
+            cp ROADMAP.md wiki/Project-WatchfulAnvil-Roadmap.md
+          fi
+          if [ "${{ env.contributing_changed }}" = "true" ]; then
+            cp CONTRIBUTING.md wiki/Project-WatchfulAnvil-Contributing-Guide.md
+          fi
+          if [ "${{ env.readme_changed }}" = "true" ]; then
+            cp README.md wiki/Home.md
+          fi
+
+      - name: Commit and push to wiki
+        if: env.roadmap_changed == 'true' || env.contributing_changed == 'true' || env.readme_changed == 'true'
+        run: |
+          cd wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Sync docs to wiki: README, ROADMAP, CONTRIBUTING"
+          git push
