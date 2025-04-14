@@ -22,9 +22,9 @@ As of 2025-Q2, Watchful Anvil is an early-phase initiative designed to evolve in
 - Enable Git-based collaboration and iterative experimentation  
 - Lay the foundation for future educational content and tooling
 
-## **Project Roadmap**
+## 🛣️ Project Roadmap
 
-See [ROADMAP.md](../ROADMAP.md) for current milestones, upcoming releases, and long-term vision.
+See [ROADMAP.md](https://github.com/rpapub/WatchfulAnvil/blob/main/ROADMAP.md) for current milestones, upcoming releases, and long-term vision.
 
 
 ## 🎯 Target Personas
