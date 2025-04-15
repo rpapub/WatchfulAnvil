@@ -1,0 +1,70 @@
+name: 🔍 Feasibility Study
+description: Investigate whether a solution or idea is technically or practically possible.
+title: "[Feasibility Study] "
+labels: ["feasibility", "investigation", "needs-decision"]
+assignees:
+  - your-github-username
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🔍 Feasibility Study
+
+        Use this form to propose and document a feasibility investigation into a potential solution, integration, or design decision.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Background / Context
+      description: What is the idea or problem space? Why is this study needed?
+      placeholder: |
+        We're considering integrating XYZ to solve...
+        This has been a recurring topic during our planning meetings.
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What specific question or concern are you trying to resolve?
+      placeholder: |
+        Determine if XYZ supports async workflows...
+        Understand if we can integrate it into our CI/CD pipeline with minimal disruption.
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: Study Approach
+      description: How do you plan to conduct the investigation?
+      placeholder: |
+        - Read API documentation
+        - Build minimal test project
+        - Interview team X
+        - Review benchmarks
+
+  - type: textarea
+    id: findings
+    attributes:
+      label: Initial Findings (Optional)
+      description: Record any findings already gathered.
+      placeholder: |
+        - XYZ API has partial support...
+        - Latency may be a concern...
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks or Unknowns
+      description: What might block implementation, or what is still unclear?
+      placeholder: |
+        - Unknown scalability under load
+        - Licensing terms unclear
+
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommendation / Next Steps
+      description: Based on the study, what should we do next?
+      placeholder: |
+        - Proceed with implementation
+        - Consider alternative solutions
+        - Requires deeper PoC
