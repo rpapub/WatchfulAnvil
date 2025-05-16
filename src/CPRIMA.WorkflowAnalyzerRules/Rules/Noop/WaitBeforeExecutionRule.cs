@@ -11,15 +11,15 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Noop
 {
     public class WaitBeforeExecutionRule : IRegisterAnalyzerConfiguration
     {
-        private const string RuleId = "CPM_NOOP_004";
+        private const string RuleId = "CPRIMA-NOOP-004";
 
         public Rule<IProjectModel> Get()
         {
-            return new Rule<IProjectModel>(Strings.CPM_WAIT_001_Name, RuleId, InspectProject)
+            return new Rule<IProjectModel>(Strings.CPRIMA_WAIT_001_Name, RuleId, InspectProject)
             {
-                RecommendationMessage = Strings.CPM_WAIT_001_Recommendation,
+                RecommendationMessage = Strings.CPRIMA_WAIT_001_Recommendation,
                 DefaultErrorLevel = TraceLevel.Info,
-                DocumentationLink = "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPM-NOOP-004",
+                DocumentationLink = "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPRIMA-NOOP-004",
                 DefaultIsEnabled = false
             };
         }

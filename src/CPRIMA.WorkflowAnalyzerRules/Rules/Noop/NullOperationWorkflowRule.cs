@@ -9,13 +9,13 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Noop
 {
     public class NullOperationWorkflowRule : IRegisterAnalyzerConfiguration
     {
-        private const string RuleId = "CPM_NOOP_002";
+        private const string RuleId = "CPRIMA-NOOP-002";
 
         public Rule<IWorkflowModel> Get()
         {
-            return new Rule<IWorkflowModel>(Strings.CPM_NOOP_002_Name, RuleId, InspectWorkflow)
+            return new Rule<IWorkflowModel>(Strings.CPRIMA_NOOP_002_Name, RuleId, InspectWorkflow)
             {
-                RecommendationMessage = Strings.CPM_NOOP_002_Recommendation,
+                RecommendationMessage = Strings.CPRIMA_NOOP_002_Recommendation,
                 DefaultErrorLevel = TraceLevel.Info,
                 DocumentationLink = "https://github.com/rpapub/WatchfulAnvil"
             };
