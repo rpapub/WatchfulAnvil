@@ -48,8 +48,47 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
             LogPackageBindings(activity);
             LogParent(activity);
 
+            IActivityModel root = FindRootContainer(activity);
+            if (root == null)
+            {
+                RuleLogger.LogAndReturn("RootContainer", "<null>");
+            }
+            else
+            {
+                RuleLogger.LogAndReturn("RootContainer", root.DisplayName);
+            }
+
             return new InspectionResult { HasErrors = false };
         }
+
+        /// <summary>
+        /// Traverses the activity tree to find the top-level (root) container.
+        /// Assumes <paramref name="activity"/> is non-null; throws if not.
+        /// </summary>
+        /// <param name="activity">The activity to start from.</param>
+        /// <returns>The root activity in the hierarchy.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="activity"/> is null.</exception>
+        /// <remarks>
+        /// TODO: Evaluate whether this method should support nullable input for broader compatibility scenarios,
+        /// especially if invoked in contexts where null activities are legitimate (e.g., defensive logging).
+        /// </remarks>
+        private IActivityModel FindRootContainer(IActivityModel activity)
+        {
+            if (activity == null)
+            {
+                throw new ArgumentNullException(nameof(activity));
+            }
+
+            var current = activity;
+            while (current.Parent != null)
+            {
+                current = current.Parent;
+            }
+
+            return current;
+        }
+
+
 
         /// <summary>
         /// Logs basic information about the activity.
