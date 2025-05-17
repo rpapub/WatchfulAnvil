@@ -58,6 +58,21 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
                 RuleLogger.LogAndReturn("RootContainer", root.DisplayName);
             }
 
+            foreach (var prop in activity.InternalProperties ?? Enumerable.Empty<IPropertyModel>())
+            {
+                bool ContainsIgnoreCase(string source, string toCheck)
+                {
+                    return source?.IndexOf(toCheck, StringComparison.OrdinalIgnoreCase) >= 0;
+                }
+
+                if (ContainsIgnoreCase(prop.DisplayName, "target"))
+                {
+                    RuleLogger.LogAndReturn("SelectorTargetMatch", $"{prop.DisplayName} = {prop.DefinedExpression}");
+                }
+
+            }
+
+
             return new InspectionResult { HasErrors = false };
         }
 
