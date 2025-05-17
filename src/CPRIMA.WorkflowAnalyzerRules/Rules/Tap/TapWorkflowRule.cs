@@ -18,11 +18,13 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
     /// </remarks>
     public class TapWorkflowRule : IRegisterAnalyzerConfiguration
     {
+        private const string RuleId = "CPRIMA-TAP-001";
+
         public void Initialize(IAnalyzerConfigurationService config) =>
             config.AddRule<IWorkflowModel>(Get());
 
         public Rule<IWorkflowModel> Get() =>
-            new Rule<IWorkflowModel>("Tap Workflow Rule", "CPRIMA-TAP-001", InspectWorkflow)
+            new Rule<IWorkflowModel>("Tap Workflow Rule", RuleId, InspectWorkflow)
             {
                 // TODO: Move this recommendation message to localization resources.
                 RecommendationMessage = "You are in Workflow mode.",

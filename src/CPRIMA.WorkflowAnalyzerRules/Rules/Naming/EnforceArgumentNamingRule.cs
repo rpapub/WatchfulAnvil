@@ -21,15 +21,16 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
     /// </remarks>
     public class EnforceXamlArgumentNamingRule : IRegisterAnalyzerConfiguration
     {
+        private const string RuleId = "CPRIMA-NMG-001";
         // TODO: Move regex patterns and all user-facing strings to localization resources.
         private static readonly Regex ValidNamePattern = new Regex(@"^(in|out|io)_[a-z][a-zA-Z0-9]*$", RegexOptions.Compiled);
-        private static readonly Regex IgnorePattern = new Regex(@"@ignore\s+CPRIMA-NMG-001", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex IgnorePattern = new Regex($@"@ignore\s+{RuleId}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public void Initialize(IAnalyzerConfigurationService config) =>
             config.AddRule<IWorkflowModel>(Get());
 
         public Rule<IWorkflowModel> Get() =>
-            new Rule<IWorkflowModel>("Enforce XAML Argument Naming", "CPRIMA-NMG-001", InspectXamlForNaming)
+            new Rule<IWorkflowModel>("Enforce XAML Argument Naming", RuleId, InspectXamlForNaming)
             {
                 // TODO: Move this recommendation message to localization resources.
                 RecommendationMessage = "Arguments in x:Members must follow naming convention (e.g., in_filePath, out_status).",

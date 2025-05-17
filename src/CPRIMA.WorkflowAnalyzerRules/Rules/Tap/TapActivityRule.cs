@@ -20,11 +20,13 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
     /// </remarks>
     public class TapActivityRule : IRegisterAnalyzerConfiguration
     {
+        private const string RuleId = "CPRIMA-TAP-001";
+
         public void Initialize(IAnalyzerConfigurationService config) =>
             config.AddRule<IActivityModel>(Get());
 
         public Rule<IActivityModel> Get() =>
-            new Rule<IActivityModel>("Tap Activity Rule", "CPRIMA-TAP-001", InspectActivity)
+            new Rule<IActivityModel>("Tap Activity Rule", RuleId, InspectActivity)
             {
                 // TODO: Move this recommendation message to localization resources.
                 RecommendationMessage = "You are in Activity mode.",

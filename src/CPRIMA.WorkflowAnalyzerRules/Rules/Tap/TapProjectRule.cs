@@ -20,11 +20,13 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
     /// </remarks>
     public class TapProjectRule : IRegisterAnalyzerConfiguration
     {
+        private const string RuleId = "CPRIMA-TAP-003";
+
         public void Initialize(IAnalyzerConfigurationService config) =>
             config.AddRule<IProjectModel>(Get());
 
         public Rule<IProjectModel> Get() =>
-            new Rule<IProjectModel>("Tap Project Rule", "CPRIMA-TAP-003", InspectProject)
+            new Rule<IProjectModel>("Tap Project Rule", RuleId, InspectProject)
             {
                 // TODO: Move this recommendation message to localization resources.
                 RecommendationMessage = "You are in Project mode.",
