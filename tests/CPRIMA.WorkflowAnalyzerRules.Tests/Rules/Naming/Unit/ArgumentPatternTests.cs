@@ -26,7 +26,7 @@ namespace CPRIMA.WorkflowAnalyzerRules.Tests.Rules.Naming.Unit
             var workflow = new Mock<IWorkflowModel>();
             
             // Use test XAML file
-            var xamlPath = Path.Combine(AppContext.BaseDirectory, "TestData", "Workflows", shouldBeValid ? "ValidArguments.xaml" : "InvalidArguments.xaml");
+            var xamlPath = Path.Combine(AppContext.BaseDirectory, "TestData", "Workflows", argumentName + ".xaml");
             workflow.Setup(w => w.RelativePath).Returns(xamlPath);
             
             // Act

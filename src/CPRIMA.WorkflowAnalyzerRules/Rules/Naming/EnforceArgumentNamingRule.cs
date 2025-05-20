@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+#if NET461
+using System.ValueTuple;
+#endif
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -69,9 +73,23 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
         /// <param name="workflow">The workflow model.</param>
         /// <param name="rule">The rule metadata.</param>
         /// <returns>InspectionResult indicating if any errors were found.</returns>
-        private (bool isValid, string reason) ValidateArgumentName(string name, string type)
+        private struct ValidationResult
         {
-            string requiredPrefix = type switch
+            public bool IsValid { get; set; }
+            public string Reason { get; set; }
+
+            public void Deconstruct(out bool isValid, out string reason)
+            {
+                isValid = IsValid;
+                reason = Reason ?? string.Empty;
+            }
+
+            public static ValidationResult Create(bool isValid, string reason) => new ValidationResult { IsValid = isValid, Reason = reason };
+        }
+
+        private ValidationResult ValidateArgumentName(string name, string type)
+        {
+            string? requiredPrefix = type switch
             {
                 var t when t.StartsWith("InArgument") => "in_",
                 var t when t.StartsWith("OutArgument") => "out_",
@@ -84,13 +102,13 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
             if (requiredPrefix == null)
             {
                 RuleLogger.LogAndReturn("ValidationSkip", $"Skipping validation for unknown type: {type}");
-                return (true, "Unknown type");
+                return ValidationResult.Create(true, "Unknown type");
             }
 
             if (!name.StartsWith(requiredPrefix, StringComparison.OrdinalIgnoreCase) || !name.StartsWith(requiredPrefix, StringComparison.Ordinal))
             {
                 RuleLogger.LogAndReturn("ValidationFail", $"Name '{name}' does not start with required prefix '{requiredPrefix}'");
-                return (false, $"Must start with {requiredPrefix}");
+                return ValidationResult.Create(false, $"Must start with {requiredPrefix}");
             }
 
             // Check if the part after the prefix follows the naming pattern
@@ -99,7 +117,7 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
             
             RuleLogger.LogAndReturn("ValidationSuffix", $"Checking suffix '{nameSuffix}' against pattern '{NameSuffixPattern}': {(isValidSuffix ? "valid" : "invalid")}");
             
-            return (isValidSuffix, isValidSuffix ? "Valid" : $"Suffix must be in {PATTERN_NAMES[ACTIVE_PATTERN]} format");
+            return ValidationResult.Create(isValidSuffix, isValidSuffix ? "Valid" : $"Suffix must be in {PATTERN_NAMES[ACTIVE_PATTERN]} format");
         }
 
         private InspectionResult InspectXamlForNaming(IWorkflowModel workflow, Rule rule)
