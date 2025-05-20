@@ -22,9 +22,35 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
     public class EnforceXamlArgumentNamingRule : IRegisterAnalyzerConfiguration
     {
         private const string RuleId = "CPRIMA-NMG-001";
+
+        // Naming patterns
+        private const string PATTERN_PASCAL_CASE = @"^[A-Z][a-zA-Z0-9]*$";
+        private const string PATTERN_CAMEL_CASE = @"^[a-z][a-zA-Z0-9]*$";
+        private const string PATTERN_SNAKE_CASE = @"^[a-z][a-z0-9_]*$";
+        private const string PATTERN_KEBAB_CASE = @"^[a-z][a-z0-9-]*$";
+
+        // Pattern names for messages
+        private static readonly Dictionary<string, string> PATTERN_NAMES = new Dictionary<string, string>
+        {
+            { PATTERN_PASCAL_CASE, "PascalCase" },
+            { PATTERN_CAMEL_CASE, "camelCase" },
+            { PATTERN_SNAKE_CASE, "snake_case" },
+            { PATTERN_KEBAB_CASE, "kebab-case" }
+        };
+
+        // Current active pattern - easily changeable
+        private static readonly string ACTIVE_PATTERN = PATTERN_PASCAL_CASE;
+
         // TODO: Move regex patterns and all user-facing strings to localization resources.
-        private static readonly Regex ValidNamePattern = new Regex(@"^(in|out|io)_[a-z][a-zA-Z0-9]*$", RegexOptions.Compiled);
-        private static readonly Regex IgnorePattern = new Regex($@"@ignore\s+{RuleId}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex NameSuffixPattern = new Regex(ACTIVE_PATTERN, RegexOptions.Compiled);
+        public static bool IsIgnored(string annotation)
+        {
+            if (string.IsNullOrEmpty(annotation)) return false;
+            var parts = annotation.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0 || !parts[0].Equals("@ignore", StringComparison.OrdinalIgnoreCase)) return false;
+            if (parts.Length == 1) return false; // Just @ignore without a rule ID
+            return parts[1].Equals(RuleId, StringComparison.OrdinalIgnoreCase);
+        }
 
         public void Initialize(IAnalyzerConfigurationService config) =>
             config.AddRule<IWorkflowModel>(Get());
@@ -43,9 +69,42 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
         /// <param name="workflow">The workflow model.</param>
         /// <param name="rule">The rule metadata.</param>
         /// <returns>InspectionResult indicating if any errors were found.</returns>
+        private (bool isValid, string reason) ValidateArgumentName(string name, string type)
+        {
+            string requiredPrefix = type switch
+            {
+                var t when t.StartsWith("InArgument") => "in_",
+                var t when t.StartsWith("OutArgument") => "out_",
+                var t when t.StartsWith("InOutArgument") => "io_",
+                _ => null
+            };
+
+            RuleLogger.LogAndReturn("ValidationCheck", $"Checking name={name}, type={type}, requiredPrefix={requiredPrefix ?? "<none>"}");
+
+            if (requiredPrefix == null)
+            {
+                RuleLogger.LogAndReturn("ValidationSkip", $"Skipping validation for unknown type: {type}");
+                return (true, "Unknown type");
+            }
+
+            if (!name.StartsWith(requiredPrefix, StringComparison.OrdinalIgnoreCase) || !name.StartsWith(requiredPrefix, StringComparison.Ordinal))
+            {
+                RuleLogger.LogAndReturn("ValidationFail", $"Name '{name}' does not start with required prefix '{requiredPrefix}'");
+                return (false, $"Must start with {requiredPrefix}");
+            }
+
+            // Check if the part after the prefix follows the naming pattern
+            string nameSuffix = name.Substring(requiredPrefix.Length);
+            bool isValidSuffix = !string.IsNullOrEmpty(nameSuffix) && NameSuffixPattern.IsMatch(nameSuffix);
+            
+            RuleLogger.LogAndReturn("ValidationSuffix", $"Checking suffix '{nameSuffix}' against pattern '{NameSuffixPattern}': {(isValidSuffix ? "valid" : "invalid")}");
+            
+            return (isValidSuffix, isValidSuffix ? "Valid" : $"Suffix must be in {PATTERN_NAMES[ACTIVE_PATTERN]} format");
+        }
+
         private InspectionResult InspectXamlForNaming(IWorkflowModel workflow, Rule rule)
         {
-            var result = new InspectionResult();
+            var result = new InspectionResult { ErrorLevel = TraceLevel.Warning };
             try
             {
                 var fullPath = workflow.RelativePath;
@@ -61,21 +120,22 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
                 foreach (var arg in arguments)
                 {
                     // If annotation contains the ignore pattern, skip this argument.
-                    if (IgnorePattern.IsMatch(arg.Annotation ?? ""))
+                    if (!string.IsNullOrEmpty(arg.Annotation) && IsIgnored(arg.Annotation))
                     {
                         // TODO: Move this log message to localization resources.
                         RuleLogger.LogAndReturn("IgnoredArgument", $"Name={arg.Name} skipped due to ignore tag.");
                         continue;
                     }
 
-                    // If name does not match the valid pattern, log and set error.
-                    if (!ValidNamePattern.IsMatch(arg.Name))
+                    // Validate the argument name
+                    var (isValid, reason) = ValidateArgumentName(arg.Name, arg.Type);
+                    if (!isValid)
                     {
                         // TODO: Move this log message to localization resources.
-                        RuleLogger.LogAndReturn("InvalidArgumentName", $"Name={arg.Name}, Type={arg.Type}, Annotation={arg.Annotation}");
+                        RuleLogger.LogAndReturn("InvalidArgumentName", $"Name={arg.Name}, Type={arg.Type}, Reason={reason}, Annotation={arg.Annotation}");
                         result.HasErrors = true;
                         result.ErrorLevel = rule.DefaultErrorLevel;
-                        result.RecommendationMessage = rule.RecommendationMessage;
+                        result.RecommendationMessage = $"{rule.RecommendationMessage} Error: {reason}";
                     }
                 }
             }
