@@ -70,13 +70,23 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
         /// <returns>InspectionResult indicating if any errors were found.</returns>
         private Tuple<bool, string> ValidateArgumentName(string name, string type)
         {
-            string? requiredPrefix = type switch
+            // Check if name starts with required prefix
+            string requiredPrefix = null;
+            if (!string.IsNullOrEmpty(type))
             {
-                var t when t.StartsWith("InArgument") => "in_",
-                var t when t.StartsWith("OutArgument") => "out_",
-                var t when t.StartsWith("InOutArgument") => "io_",
-                _ => null
-            };
+                if (type.StartsWith("InArgument"))
+                {
+                    requiredPrefix = "in_";
+                }
+                else if (type.StartsWith("OutArgument"))
+                {
+                    requiredPrefix = "out_";
+                }
+                else if (type.StartsWith("InOutArgument"))
+                {
+                    requiredPrefix = "io_";
+                }
+            }
 
             RuleLogger.LogAndReturn("ValidationCheck", $"Checking name={name}, type={type}, requiredPrefix={requiredPrefix ?? "<none>"}");
 
