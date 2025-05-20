@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if NET461
-using System.ValueTuple;
-#endif
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -29,7 +26,6 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
 
         // Naming patterns
         private const string PATTERN_PASCAL_CASE = @"^[A-Z][a-zA-Z0-9]*$";
-        private const string PATTERN_CAMEL_CASE = @"^[a-z][a-zA-Z0-9]*$";
         private const string PATTERN_SNAKE_CASE = @"^[a-z][a-z0-9_]*$";
         private const string PATTERN_KEBAB_CASE = @"^[a-z][a-z0-9-]*$";
 
@@ -37,7 +33,6 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
         private static readonly Dictionary<string, string> PATTERN_NAMES = new Dictionary<string, string>
         {
             { PATTERN_PASCAL_CASE, "PascalCase" },
-            { PATTERN_CAMEL_CASE, "camelCase" },
             { PATTERN_SNAKE_CASE, "snake_case" },
             { PATTERN_KEBAB_CASE, "kebab-case" }
         };
@@ -73,21 +68,7 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
         /// <param name="workflow">The workflow model.</param>
         /// <param name="rule">The rule metadata.</param>
         /// <returns>InspectionResult indicating if any errors were found.</returns>
-        private struct ValidationResult
-        {
-            public bool IsValid { get; set; }
-            public string Reason { get; set; }
-
-            public void Deconstruct(out bool isValid, out string reason)
-            {
-                isValid = IsValid;
-                reason = Reason ?? string.Empty;
-            }
-
-            public static ValidationResult Create(bool isValid, string reason) => new ValidationResult { IsValid = isValid, Reason = reason };
-        }
-
-        private ValidationResult ValidateArgumentName(string name, string type)
+        private Tuple<bool, string> ValidateArgumentName(string name, string type)
         {
             string? requiredPrefix = type switch
             {
@@ -102,22 +83,34 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
             if (requiredPrefix == null)
             {
                 RuleLogger.LogAndReturn("ValidationSkip", $"Skipping validation for unknown type: {type}");
-                return ValidationResult.Create(true, "Unknown type");
+                return Tuple.Create(true, "Unknown type");
             }
 
-            if (!name.StartsWith(requiredPrefix, StringComparison.OrdinalIgnoreCase) || !name.StartsWith(requiredPrefix, StringComparison.Ordinal))
+            if (!name.StartsWith(requiredPrefix, StringComparison.Ordinal))
             {
                 RuleLogger.LogAndReturn("ValidationFail", $"Name '{name}' does not start with required prefix '{requiredPrefix}'");
-                return ValidationResult.Create(false, $"Must start with {requiredPrefix}");
+                return Tuple.Create(false, $"Must start with {requiredPrefix}");
             }
 
             // Check if the part after the prefix follows the naming pattern
+            // Check if name starts with underscore
+            if (name.StartsWith("_"))
+            {
+                return Tuple.Create(false, "Name cannot start with underscore");
+            }
+
+            // Get and validate suffix
             string nameSuffix = name.Substring(requiredPrefix.Length);
-            bool isValidSuffix = !string.IsNullOrEmpty(nameSuffix) && NameSuffixPattern.IsMatch(nameSuffix);
-            
+            if (string.IsNullOrEmpty(nameSuffix))
+            {
+                return Tuple.Create(false, "Name must have a suffix after prefix");
+            }
+
+            bool isValidSuffix = NameSuffixPattern.IsMatch(nameSuffix);
             RuleLogger.LogAndReturn("ValidationSuffix", $"Checking suffix '{nameSuffix}' against pattern '{NameSuffixPattern}': {(isValidSuffix ? "valid" : "invalid")}");
             
-            return ValidationResult.Create(isValidSuffix, isValidSuffix ? "Valid" : $"Suffix must be in {PATTERN_NAMES[ACTIVE_PATTERN]} format");
+            return Tuple.Create(isValidSuffix, 
+                isValidSuffix ? "Valid" : $"Suffix must be in {PATTERN_NAMES[ACTIVE_PATTERN]} format");
         }
 
         private InspectionResult InspectXamlForNaming(IWorkflowModel workflow, Rule rule)
@@ -146,7 +139,9 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
                     }
 
                     // Validate the argument name
-                    var (isValid, reason) = ValidateArgumentName(arg.Name, arg.Type);
+                    var validation = ValidateArgumentName(arg.Name, arg.Type);
+                    var isValid = validation.Item1;
+                    var reason = validation.Item2;
                     if (!isValid)
                     {
                         // TODO: Move this log message to localization resources.
