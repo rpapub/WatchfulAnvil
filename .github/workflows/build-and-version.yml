@@ -77,14 +77,14 @@ jobs:
 
       - name: Build Solution
         run: |
-          dotnet build --configuration Release \
+          dotnet build \
             /p:Version=${{ env.FULL_VERSION }} \
             /p:FileVersion=${{ env.FILE_VERSION }} \
             /p:AssemblyVersion=${{ env.ASSEMBLY_VERSION }}
 
       - name: Pack NuGet Package
         run: |
-          dotnet pack --configuration Release --no-build --output ./nupkg \
+          dotnet pack --no-build --output ./nupkg \
             /p:PackageVersion=${{ env.NUGET_VERSION }} \
             /p:Version=${{ env.FULL_VERSION }} \
             /p:FileVersion=${{ env.FILE_VERSION }} \

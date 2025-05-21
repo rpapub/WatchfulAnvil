@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <!-- 🔧 Repo-wide MSBuild Defaults -->
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+
+    <!-- 🔢 Version properties (can be overridden by GitVersion or CLI) -->
+    <Version Condition="'$(Version)' == ''">0.0.0-local</Version>
+    <FileVersion Condition="'$(FileVersion)' == ''">0.0.0.0</FileVersion>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">0.0.0.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <!-- 📘 Note: This file applies to all .csproj files under this directory tree -->
+</Project>
