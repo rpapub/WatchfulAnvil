@@ -71,7 +71,7 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
         private Tuple<bool, string> ValidateArgumentName(string name, string type)
         {
             // Check if name starts with required prefix
-            string requiredPrefix = null;
+            string requiredPrefix = "";
             if (!string.IsNullOrEmpty(type))
             {
                 if (type.StartsWith("InArgument"))
@@ -90,13 +90,13 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
 
             RuleLogger.LogAndReturn("ValidationCheck", $"Checking name={name}, type={type}, requiredPrefix={requiredPrefix ?? "<none>"}");
 
-            if (requiredPrefix == null)
+            if (requiredPrefix == "")
             {
                 RuleLogger.LogAndReturn("ValidationSkip", $"Skipping validation for unknown type: {type}");
                 return Tuple.Create(true, "Unknown type");
             }
 
-            if (!name.StartsWith(requiredPrefix, StringComparison.Ordinal))
+            if (!string.IsNullOrEmpty(requiredPrefix) && !name.StartsWith(requiredPrefix, StringComparison.Ordinal))
             {
                 RuleLogger.LogAndReturn("ValidationFail", $"Name '{name}' does not start with required prefix '{requiredPrefix}'");
                 return Tuple.Create(false, $"Must start with {requiredPrefix}");
@@ -110,7 +110,7 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
             }
 
             // Get and validate suffix
-            string nameSuffix = name.Substring(requiredPrefix.Length);
+            string nameSuffix = name.Substring(requiredPrefix?.Length ?? 0);
             if (string.IsNullOrEmpty(nameSuffix))
             {
                 return Tuple.Create(false, "Name must have a suffix after prefix");

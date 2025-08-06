@@ -20,7 +20,7 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
     /// </remarks>
     public class TapActivityRule : IRegisterAnalyzerConfiguration
     {
-        private const string RuleId = "CPRIMA-TAP-001";
+        private const string RuleId = "CPRIMA-TAP-005";
 
         public void Initialize(IAnalyzerConfigurationService config) =>
             config.AddRule<IActivityModel>(Get());
