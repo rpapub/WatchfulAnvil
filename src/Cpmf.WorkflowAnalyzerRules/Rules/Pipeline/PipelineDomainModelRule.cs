@@ -11,7 +11,7 @@ namespace Cpmf.Rules.Pipeline
     public class PipelineDomainModelRule : IRegisterAnalyzerConfiguration
     {
         private const string RuleId = "CPMF-PLN-002";
-        private const string DomainModelPrefix = "@domain-model:";
+        private const string DomainModelKey = "@domain-model";
 
         public void Initialize(IAnalyzerConfigurationService api)
         {
@@ -41,7 +41,8 @@ namespace Cpmf.Rules.Pipeline
             var lines = annotation.Split(new[] { '\n', '\r' }, System.StringSplitOptions.RemoveEmptyEntries);
 
             var domainModelLine = System.Linq.Enumerable.FirstOrDefault(lines,
-                l => l.TrimStart().StartsWith(DomainModelPrefix));
+                l => l.Contains(":") &&
+                     l.Substring(0, l.IndexOf(':')).Trim() == DomainModelKey);
 
             var messages = new List<string>();
 
@@ -54,7 +55,8 @@ namespace Cpmf.Rules.Pipeline
             }
             else
             {
-                var typeName = domainModelLine.TrimStart().Substring(DomainModelPrefix.Length).Trim();
+                var colonIndex = domainModelLine.IndexOf(':');
+                var typeName = domainModelLine.Substring(colonIndex + 1).Trim();
                 if (string.IsNullOrWhiteSpace(typeName))
                     messages.Add(
                         $"The '@domain-model:' annotation is present but the TypeName is empty. " +

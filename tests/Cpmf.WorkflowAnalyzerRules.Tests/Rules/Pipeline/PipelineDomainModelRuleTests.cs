@@ -78,6 +78,13 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Pipeline
         }
 
         [Fact]
+        public void Pass_WhenDomainModelLineHasSpaceAroundColon()
+        {
+            var wf = Workflow("@pipeline\n@domain-model: MyNamespace.MyDomainModel");
+            Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
+        }
+
+        [Fact]
         public void Fail_WhenPipelineAnnotationMissesDomainModelLine()
         {
             var wf = Workflow("@pipeline");
