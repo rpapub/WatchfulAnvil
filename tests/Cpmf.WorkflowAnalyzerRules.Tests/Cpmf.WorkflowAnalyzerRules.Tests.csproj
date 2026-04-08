@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\D:\github.com\rpapub\WatchfulAnvil\src\Cpmf.WorkflowAnalyzerRules\Cpmf.WorkflowAnalyzerRules.csproj" />
+    <ProjectReference Include="..\..\src\Cpmf.WorkflowAnalyzerRules\Cpmf.WorkflowAnalyzerRules.csproj" />
   </ItemGroup>
 
 </Project>

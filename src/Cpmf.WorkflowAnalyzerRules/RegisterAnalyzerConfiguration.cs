@@ -1,7 +1,6 @@
+using Cpmf.Rules.Pipeline;
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer;
-using UiPath.Studio.Analyzer.Models;
-using Cpmf.Rules.Sample;
 
 namespace Cpmf
 {
@@ -9,10 +8,8 @@ namespace Cpmf
     {
         public void Initialize(IAnalyzerConfigurationService workflowAnalyzerConfigService)
         {
-            // Registering Activity-Level Rules
-            var sampleRule = new SampleRule().Get();
-            workflowAnalyzerConfigService.AddRule<IActivityModel>(sampleRule);
+            workflowAnalyzerConfigService.AddRule<UiPath.Studio.Analyzer.Models.IWorkflowModel>(
+                new PipelineSequenceOrderRule().Get());
         }
     }
 }
-
