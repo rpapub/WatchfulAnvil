@@ -11,11 +11,8 @@ namespace Cpmf.Rules.Pipeline
     public class PipelineSequenceOrderRule : IRegisterAnalyzerConfiguration
     {
         private const string RuleId = "CPMF-PLN-001";
-
-        private static readonly string[] ExpectedOrder = new[]
-        {
-            "Initialize", "Ingest", "Enrich", "Decide", "Execute", "Complete", "Finalize"
-        };
+        private const string StagesKey = "Stages";
+        private const string DefaultStages = "Initialize,Ingest,Enrich,Decide,Execute,Complete,Finalize";
 
         public void Initialize(IAnalyzerConfigurationService api)
         {
@@ -23,17 +20,37 @@ namespace Cpmf.Rules.Pipeline
                 api.AddRule<IWorkflowModel>(Get());
         }
 
-        public Rule<IWorkflowModel> Get() =>
-            new Rule<IWorkflowModel>("Pipeline Structure", RuleId, Inspect)
+        public Rule<IWorkflowModel> Get()
+        {
+            var rule = new Rule<IWorkflowModel>("Pipeline Structure", RuleId, Inspect)
             {
                 RecommendationMessage =
                     "Workflows annotated @pipeline must: " +
                     "(1) declare an In argument 'in_TransactionItem' of type UiPath.Core.QueueItem; " +
-                    "(2) contain the sequences Initialize, Ingest, Enrich, Decide, Execute, Complete, Finalize " +
-                    "as direct children of the root, in that order.",
+                    "(2) contain the configured pipeline stages as direct children of the root, in that order.",
                 DefaultErrorLevel = TraceLevel.Error,
                 DocumentationLink = "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-001"
             };
+            rule.Parameters.Add(StagesKey, new Parameter
+            {
+                Key = StagesKey,
+                DefaultValue = DefaultStages,
+                Value = DefaultStages,
+                LocalizedDisplayName = "Pipeline Stages (ordered, comma-separated)"
+            });
+            return rule;
+        }
+
+        private static string[] ParseStages(Rule rule)
+        {
+            var raw = rule.Parameters[StagesKey]?.Value;
+            if (string.IsNullOrWhiteSpace(raw))
+                raw = DefaultStages;
+            return raw.Split(new[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries)
+                      .Select(s => s.Trim())
+                      .Where(s => s.Length > 0)
+                      .ToArray();
+        }
 
         private static InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
@@ -43,6 +60,9 @@ namespace Cpmf.Rules.Pipeline
             var annotation = workflow.Root.AnnotationText;
             if (string.IsNullOrWhiteSpace(annotation) || !annotation.Contains("@pipeline"))
                 return new InspectionResult { HasErrors = false };
+
+            var expectedOrder = ParseStages(rule);
+            var expectedSet = new HashSet<string>(expectedOrder);
 
             // Check in_TransactionItem argument
             var transactionArg = workflow.Arguments == null ? null :
@@ -56,8 +76,6 @@ namespace Cpmf.Rules.Pipeline
             if (transactionArg == null)
                 messages.Add("Missing required In argument 'in_TransactionItem' of type UiPath.Core.QueueItem.");
 
-            var expectedSet = new HashSet<string>(ExpectedOrder);
-
             // Direct children that match a pipeline stage name, preserving document order
             var pipelineChildren = (workflow.Root.Children ?? (IEnumerable<IActivityModel>)new IActivityModel[0])
                 .Where(c => expectedSet.Contains(c.DisplayName))
@@ -65,21 +83,20 @@ namespace Cpmf.Rules.Pipeline
                 .ToList();
 
             // Missing stages
-            foreach (var stage in ExpectedOrder)
+            foreach (var stage in expectedOrder)
             {
                 if (!pipelineChildren.Contains(stage))
                     messages.Add($"Missing required pipeline stage: '{stage}'.");
             }
 
-            // Order check: filter ExpectedOrder to only stages that are present,
-            // then compare against what we actually found
-            var expectedPresent = ExpectedOrder.Where(e => pipelineChildren.Contains(e)).ToList();
+            // Order check
+            var expectedPresent = expectedOrder.Where(e => pipelineChildren.Contains(e)).ToList();
             if (!pipelineChildren.SequenceEqual(expectedPresent))
             {
                 messages.Add(
                     $"Pipeline stage order is incorrect. " +
                     $"Found: [{string.Join(", ", pipelineChildren)}]. " +
-                    $"Expected order: [{string.Join(", ", ExpectedOrder)}].");
+                    $"Expected order: [{string.Join(", ", expectedOrder)}].");
             }
 
             if (messages.Count > 0)

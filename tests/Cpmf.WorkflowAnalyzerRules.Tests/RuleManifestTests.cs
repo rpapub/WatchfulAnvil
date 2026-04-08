@@ -28,7 +28,7 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests
             var ids = Capture().Select(r => r.Id).OrderBy(x => x).ToList();
 
             Assert.Equal(
-                new[] { "CPMF-PLN-001", "CPMF-PLN-002", "CPMF-PLN-C001" }.OrderBy(x => x).ToList(),
+                new[] { "CPMF-PLN-001", "CPMF-PLN-002", "CPMF-PLN-C001", "CPMF-WFL-001" }.OrderBy(x => x).ToList(),
                 ids);
         }
 
