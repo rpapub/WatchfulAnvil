@@ -16,6 +16,7 @@ namespace Cpmf
                 api.AddRule<IWorkflowModel>(new PipelineSequenceOrderRule().Get());
                 api.AddRule<IWorkflowModel>(new PipelineDomainModelRule().Get());
                 api.AddRule<IWorkflowModel>(new LogMessageBookendsRule().Get());
+                api.AddRule<IWorkflowModel>(new UnitOutStatusRule().Get());
                 api.AddRule<IProjectModel>(new PipelinePresenceCounter().Get());
             }
         }
