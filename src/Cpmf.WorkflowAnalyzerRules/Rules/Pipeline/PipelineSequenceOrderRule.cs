@@ -23,11 +23,12 @@ namespace Cpmf.Rules.Pipeline
         }
 
         public Rule<IWorkflowModel> Get() =>
-            new Rule<IWorkflowModel>("Pipeline Sequence Order", RuleId, Inspect)
+            new Rule<IWorkflowModel>("Pipeline Structure", RuleId, Inspect)
             {
                 RecommendationMessage =
-                    "Workflows annotated @pipeline must contain the sequences " +
-                    "Initialize, Ingest, Enrich, Decide, Execute, Complete, Finalize " +
+                    "Workflows annotated @pipeline must: " +
+                    "(1) declare an In argument 'in_TransactionItem' of type UiPath.Core.QueueItem; " +
+                    "(2) contain the sequences Initialize, Ingest, Enrich, Decide, Execute, Complete, Finalize " +
                     "as direct children of the root, in that order.",
                 DefaultErrorLevel = TraceLevel.Error,
                 DocumentationLink = "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-001"
@@ -42,6 +43,18 @@ namespace Cpmf.Rules.Pipeline
             if (string.IsNullOrWhiteSpace(annotation) || !annotation.Contains("@pipeline"))
                 return new InspectionResult { HasErrors = false };
 
+            // Check in_TransactionItem argument
+            var transactionArg = workflow.Arguments == null ? null :
+                System.Linq.Enumerable.FirstOrDefault(workflow.Arguments, a =>
+                    a.DisplayName == "in_TransactionItem" &&
+                    a.Direction == ArgumentDirection.In &&
+                    a.Type == "UiPath.Core.QueueItem");
+
+            var messages = new List<string>();
+
+            if (transactionArg == null)
+                messages.Add("Missing required In argument 'in_TransactionItem' of type UiPath.Core.QueueItem.");
+
             var expectedSet = new HashSet<string>(ExpectedOrder);
 
             // Direct children that match a pipeline stage name, preserving document order
@@ -49,8 +62,6 @@ namespace Cpmf.Rules.Pipeline
                 .Where(c => expectedSet.Contains(c.DisplayName))
                 .Select(c => c.DisplayName)
                 .ToList();
-
-            var messages = new List<string>();
 
             // Missing stages
             foreach (var stage in ExpectedOrder)

@@ -23,7 +23,25 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Pipeline
             return m;
         }
 
-        private static Mock<IWorkflowModel> Workflow(string annotation, IReadOnlyCollection<IActivityModel> children)
+        private static Mock<IArgumentModel> Arg(string name, ArgumentDirection direction, string type)
+        {
+            var m = new Mock<IArgumentModel>();
+            m.Setup(a => a.DisplayName).Returns(name);
+            m.Setup(a => a.Direction).Returns(direction);
+            m.Setup(a => a.Type).Returns(type);
+            return m;
+        }
+
+        private static IReadOnlyCollection<IArgumentModel> ValidArgs() =>
+            new List<IArgumentModel>
+            {
+                Arg("in_TransactionItem", ArgumentDirection.In, "UiPath.Core.QueueItem").Object
+            };
+
+        private static Mock<IWorkflowModel> Workflow(
+            string annotation,
+            IReadOnlyCollection<IActivityModel> children,
+            IReadOnlyCollection<IArgumentModel> arguments = null)
         {
             var root = new Mock<IActivityModel>();
             root.Setup(r => r.AnnotationText).Returns(annotation);
@@ -32,8 +50,19 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Pipeline
             var wf = new Mock<IWorkflowModel>();
             wf.Setup(w => w.Root).Returns(root.Object);
             wf.Setup(w => w.DisplayName).Returns("Process");
+            wf.Setup(w => w.Arguments).Returns(arguments ?? ValidArgs());
             return wf;
         }
+
+        private List<IActivityModel> AllStageChildren()
+        {
+            var children = new List<IActivityModel>();
+            foreach (var stage in AllStages)
+                children.Add(Child(stage).Object);
+            return children;
+        }
+
+        // --- Registration ---
 
         [Fact]
         public void Initialize_RegistersRule_WithCorrectId()
@@ -46,40 +75,79 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Pipeline
                     r.DefaultErrorLevel == TraceLevel.Error)));
         }
 
+        // --- Annotation gate ---
+
         [Fact]
         public void Pass_WhenNoAnnotation()
         {
-            var children = new List<IActivityModel> { Child("Initialize").Object };
-            var wf = Workflow("", children);
-            var result = _rule.Get().Inspect(wf.Object, _rule.Get());
-            Assert.False(result.HasErrors);
+            var wf = Workflow("", new List<IActivityModel> { Child("Initialize").Object });
+            Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
         }
 
         [Fact]
         public void Pass_WhenAnnotationDoesNotContainPipeline()
         {
-            var children = new List<IActivityModel> { Child("Initialize").Object };
-            var wf = Workflow("@unit", children);
-            var result = _rule.Get().Inspect(wf.Object, _rule.Get());
-            Assert.False(result.HasErrors);
+            var wf = Workflow("@unit", new List<IActivityModel> { Child("Initialize").Object });
+            Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
         }
+
+        [Fact]
+        public void Pass_WhenRootIsNull()
+        {
+            var wf = new Mock<IWorkflowModel>();
+            wf.Setup(w => w.Root).Returns((IActivityModel)null);
+            Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
+        }
+
+        // --- Argument checks ---
+
+        [Fact]
+        public void Fail_WhenTransactionItemArgumentMissing()
+        {
+            var wf = Workflow("@pipeline", AllStageChildren(), new List<IArgumentModel>() as IReadOnlyCollection<IArgumentModel>);
+            var result = _rule.Get().Inspect(wf.Object, _rule.Get());
+            Assert.True(result.HasErrors);
+            Assert.Contains(result.Messages, m => m.Contains("in_TransactionItem"));
+        }
+
+        [Fact]
+        public void Fail_WhenTransactionItemHasWrongType()
+        {
+            var args = new List<IArgumentModel>
+            {
+                Arg("in_TransactionItem", ArgumentDirection.In, "System.String").Object
+            } as IReadOnlyCollection<IArgumentModel>;
+            var wf = Workflow("@pipeline", AllStageChildren(), args);
+            var result = _rule.Get().Inspect(wf.Object, _rule.Get());
+            Assert.True(result.HasErrors);
+            Assert.Contains(result.Messages, m => m.Contains("in_TransactionItem"));
+        }
+
+        [Fact]
+        public void Fail_WhenTransactionItemHasWrongDirection()
+        {
+            var args = new List<IArgumentModel>
+            {
+                Arg("in_TransactionItem", ArgumentDirection.Out, "UiPath.Core.QueueItem").Object
+            } as IReadOnlyCollection<IArgumentModel>;
+            var wf = Workflow("@pipeline", AllStageChildren(), args);
+            var result = _rule.Get().Inspect(wf.Object, _rule.Get());
+            Assert.True(result.HasErrors);
+            Assert.Contains(result.Messages, m => m.Contains("in_TransactionItem"));
+        }
+
+        // --- Sequence checks ---
 
         [Fact]
         public void Pass_WhenAllStagesPresentInCorrectOrder()
         {
-            var children = new List<IActivityModel>();
-            foreach (var stage in AllStages)
-                children.Add(Child(stage).Object);
-
-            var wf = Workflow("@pipeline", children);
-            var result = _rule.Get().Inspect(wf.Object, _rule.Get());
-            Assert.False(result.HasErrors);
+            var wf = Workflow("@pipeline", AllStageChildren());
+            Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
         }
 
         [Fact]
         public void Pass_WhenNonPipelineChildrenInterspersed()
         {
-            // LogMessage activities between stages should be ignored
             var children = new List<IActivityModel>
             {
                 Child("Log Message Process Start").Object,
@@ -93,8 +161,7 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Pipeline
                 Child("Log Message Process End").Object,
             };
             var wf = Workflow("@pipeline", children);
-            var result = _rule.Get().Inspect(wf.Object, _rule.Get());
-            Assert.False(result.HasErrors);
+            Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
         }
 
         [Fact]
@@ -104,7 +171,7 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Pipeline
             {
                 Child("Initialize").Object,
                 Child("Ingest").Object,
-                // Enrich is missing
+                // Enrich missing
                 Child("Decide").Object,
                 Child("Execute").Object,
                 Child("Complete").Object,
@@ -133,15 +200,6 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Pipeline
             var result = _rule.Get().Inspect(wf.Object, _rule.Get());
             Assert.True(result.HasErrors);
             Assert.Contains(result.Messages, m => m.Contains("order"));
-        }
-
-        [Fact]
-        public void Fail_WhenRootIsNull()
-        {
-            var wf = new Mock<IWorkflowModel>();
-            wf.Setup(w => w.Root).Returns((IActivityModel)null);
-            var result = _rule.Get().Inspect(wf.Object, _rule.Get());
-            Assert.False(result.HasErrors);
         }
     }
 }
