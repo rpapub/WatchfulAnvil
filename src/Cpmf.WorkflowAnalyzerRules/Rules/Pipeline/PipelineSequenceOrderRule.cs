@@ -17,9 +17,10 @@ namespace Cpmf.Rules.Pipeline
             "Initialize", "Ingest", "Enrich", "Decide", "Execute", "Complete", "Finalize"
         };
 
-        public void Initialize(IAnalyzerConfigurationService config)
+        public void Initialize(IAnalyzerConfigurationService api)
         {
-            config.AddRule<IWorkflowModel>(Get());
+            if (api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
+                api.AddRule<IWorkflowModel>(Get());
         }
 
         public Rule<IWorkflowModel> Get() =>

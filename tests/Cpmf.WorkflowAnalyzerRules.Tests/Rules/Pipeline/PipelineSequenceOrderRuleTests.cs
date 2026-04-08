@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Cpmf.Rules.Pipeline;
 using Moq;
+using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
@@ -67,9 +68,10 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Pipeline
         [Fact]
         public void Initialize_RegistersRule_WithCorrectId()
         {
-            var config = new Mock<IAnalyzerConfigurationService>();
-            _rule.Initialize(config.Object);
-            config.Verify(s => s.AddRule(
+            var api = new Mock<IAnalyzerConfigurationService>();
+            api.Setup(a => a.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9)).Returns(true);
+            _rule.Initialize(api.Object);
+            api.Verify(s => s.AddRule(
                 It.Is<Rule<IWorkflowModel>>(r =>
                     r.Id == "CPMF-PLN-001" &&
                     r.DefaultErrorLevel == TraceLevel.Error)));

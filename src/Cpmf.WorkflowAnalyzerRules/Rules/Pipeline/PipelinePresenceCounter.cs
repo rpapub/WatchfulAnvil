@@ -12,9 +12,10 @@ namespace Cpmf.Rules.Pipeline
     {
         private const string CounterId = "CPMF-PLN-C001";
 
-        public void Initialize(IAnalyzerConfigurationService config)
+        public void Initialize(IAnalyzerConfigurationService api)
         {
-            config.AddRule<IProjectModel>(Get());
+            if (api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
+                api.AddRule<IProjectModel>(Get());
         }
 
         public Rule<IProjectModel> Get() =>

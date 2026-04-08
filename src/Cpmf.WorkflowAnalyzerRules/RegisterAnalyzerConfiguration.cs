@@ -7,10 +7,14 @@ namespace Cpmf
 {
     public sealed class RegisterAnalyzerConfiguration : IRegisterAnalyzerConfiguration
     {
-        public void Initialize(IAnalyzerConfigurationService workflowAnalyzerConfigService)
+        public void Initialize(IAnalyzerConfigurationService api)
         {
-            workflowAnalyzerConfigService.AddRule<IWorkflowModel>(new PipelineSequenceOrderRule().Get());
-            workflowAnalyzerConfigService.AddRule<IProjectModel>(new PipelinePresenceCounter().Get());
+            if (api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
+            {
+                // safe to use AnnotationText
+                api.AddRule<IWorkflowModel>(new PipelineSequenceOrderRule().Get());
+                api.AddRule<IProjectModel>(new PipelinePresenceCounter().Get());
+            }
         }
     }
 }
