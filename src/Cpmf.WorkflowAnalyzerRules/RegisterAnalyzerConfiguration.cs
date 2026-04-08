@@ -13,6 +13,7 @@ namespace Cpmf
             {
                 // safe to use AnnotationText
                 api.AddRule<IWorkflowModel>(new PipelineSequenceOrderRule().Get());
+                api.AddRule<IWorkflowModel>(new PipelineDomainModelRule().Get());
                 api.AddRule<IProjectModel>(new PipelinePresenceCounter().Get());
             }
         }
