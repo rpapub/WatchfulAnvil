@@ -15,8 +15,11 @@ namespace Cpmf.Rules.Workflow
 
         public void Initialize(IAnalyzerConfigurationService api)
         {
-            if (api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
-                api.AddRule<IWorkflowModel>(Get());
+            // AnnotationText requires WorkflowAnalyzerV9 (sdk-capabilities: 21.4.1+).
+            if (!api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
+                return; // Studio < 21.4 — rule cannot function without AnnotationText.
+
+            api.AddRule<IWorkflowModel>(Get());
         }
 
         public Rule<IWorkflowModel> Get() =>

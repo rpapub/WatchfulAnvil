@@ -5,10 +5,10 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Version>0.1.0-alpha</Version>
-		<FileVersion>0.1.0.0</FileVersion>
-		<AssemblyVersion>0.1.0.0</AssemblyVersion>
-		<InformationalVersion>0.1.0-alpha</InformationalVersion>
+		<Version>0.5.1-alpha.1</Version>
+		<FileVersion>0.5.1.1</FileVersion>
+		<AssemblyVersion>0.5.1.1</AssemblyVersion>
+		<InformationalVersion>0.5.1-alpha.1</InformationalVersion>
 		<Authors>Christian Prior-Mamulyan</Authors>
 		<Company>cprima.net</Company>
 		<PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>

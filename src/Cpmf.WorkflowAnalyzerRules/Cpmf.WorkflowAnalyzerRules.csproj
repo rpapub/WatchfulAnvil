@@ -5,10 +5,10 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Version>0.1.0-alpha</Version>
-		<FileVersion>0.1.0.0</FileVersion>
-		<AssemblyVersion>0.1.0.0</AssemblyVersion>
-		<InformationalVersion>0.1.0-alpha</InformationalVersion>
+		<Version>0.1.2-alpha</Version>
+		<FileVersion>0.1.2.0</FileVersion>
+		<AssemblyVersion>0.1.2.0</AssemblyVersion>
+		<InformationalVersion>0.1.2-alpha</InformationalVersion>
 		<Authors>Cpmf</Authors>
 		<Company>Cpmf</Company>
 		<PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>

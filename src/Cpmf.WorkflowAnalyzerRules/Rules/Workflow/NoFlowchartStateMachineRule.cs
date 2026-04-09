@@ -13,8 +13,9 @@ namespace Cpmf.Rules.Workflow
 
         public void Initialize(IAnalyzerConfigurationService api)
         {
-            if (api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
-                api.AddRule<IActivityModel>(Get());
+            // Type is available from WorkflowAnalyzerV4 (sdk-capabilities: 20.4.0+).
+            // ToolboxName is V9 but the Inspect method is null-safe — degrades gracefully on V4.
+            api.AddRule<IActivityModel>(Get());
         }
 
         public Rule<IActivityModel> Get() =>

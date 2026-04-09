@@ -14,8 +14,11 @@ namespace Cpmf.Rules.Pipeline
 
         public void Initialize(IAnalyzerConfigurationService api)
         {
-            if (api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
-                api.AddRule<IProjectModel>(Get());
+            // AnnotationText requires WorkflowAnalyzerV9 (sdk-capabilities: 21.4.1+).
+            if (!api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
+                return; // Studio < 21.4 — rule cannot function without AnnotationText.
+
+            api.AddRule<IProjectModel>(Get());
         }
 
         public Rule<IProjectModel> Get() =>
