@@ -1,0 +1,15 @@
+{
+  "packageId": "Cpmf.Standard",
+  "version": "0.1.0-alpha",
+  "description": "Standard CPMF workflow analyzer rules.",
+  "authors": "Cpmf",
+  "license": "CC-BY-4.0",
+  "rules": [
+    { "id": "CPMF-WFL-004" },
+    { "id": "CPMF-WFL-005" },
+    { "id": "CPMF-WFL-007" },
+    { "id": "CPMF-PLN-003" },
+    { "id": "CPMF-WFL-001", "parameters": { "StartPrefix": "Going to", "EndPrefix": "Finished" } },
+    { "id": "CPMF-PLN-001", "parameters": { "Stages": "Init,Process,Finalize" } }
+  ]
+}

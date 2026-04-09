@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net461;net6.0;net8.0</TargetFrameworks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <RootNamespace>Cpmf</RootNamespace>
+    <AssemblyName>Cpmf.Standard</AssemblyName>
+    <Version>0.1.0-alpha</Version>
+    <Authors>Cpmf</Authors>
+    <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
+    <PackageDescription>Standard CPMF workflow analyzer rules.</PackageDescription>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <!-- net461: LangVersion 7.3, no nullable, no implicit usings -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+    <LangVersion>7.3</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <!-- net6.0 / net8.0: full SDK features -->
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Rule source files: net6.0 and net8.0 only -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
+    <Compile Include="..\..\src\Cpmf.WorkflowAnalyzerRules\Rules\DotNetIdentifierValidator.cs" />
+    <Compile Include="..\..\src\Cpmf.WorkflowAnalyzerRules\Rules\Workflow\NoFlowchartStateMachineRule.cs" />
+    <Compile Include="..\..\src\Cpmf.WorkflowAnalyzerRules\Rules\Workflow\VariableNamingRule.cs" />
+    <Compile Include="..\..\src\Cpmf.WorkflowAnalyzerRules\Rules\Workflow\WorkflowNameRule.cs" />
+    <Compile Include="..\..\src\Cpmf.WorkflowAnalyzerRules\Rules\Pipeline\ProjectNameRule.cs" />
+    <Compile Include="..\..\src\Cpmf.WorkflowAnalyzerRules\Rules\Workflow\LogMessageBookendsRule.cs" />
+    <Compile Include="..\..\src\Cpmf.WorkflowAnalyzerRules\Rules\Pipeline\PipelineSequenceOrderRule.cs" />
+  </ItemGroup>
+
+  <!-- Generated bootstrapper: all targets -->
+  <ItemGroup>
+    <Compile Include="RegisterAnalyzerConfiguration.g.cs" />
+  </ItemGroup>
+
+  <!-- WatchfulAnvil.Sdk -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj" />
+  </ItemGroup>
+
+  <!-- UiPath.Activities.Api -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="UiPath.Activities.Api" Version="23.10.3">
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="UiPath.Activities.Api" Version="24.10.1">
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- R5: registry catalog + manifest embedded in nupkg -->
+  <ItemGroup>
+    <Content Include="..\..\registry\Cpmf\rules.yaml" Pack="true" PackagePath="content\" />
+    <Content Include="manifest.json" Pack="true" PackagePath="content\" />
+  </ItemGroup>
+
+</Project>
