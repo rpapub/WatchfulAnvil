@@ -1,38 +1,26 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using UiPath.Studio.Activities.Api;
-using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Pipeline
 {
-    public class PipelineDomainModelRule : IRegisterAnalyzerConfiguration
+    public class PipelineDomainModelRule : WorkflowRule
     {
-        private const string RuleId = "CPMF-PLN-002";
         private const string DomainModelKey = "@domain-model";
 
-        public void Initialize(IAnalyzerConfigurationService api)
-        {
-            // AnnotationText requires WorkflowAnalyzerV9 (sdk-capabilities: 21.4.1+).
-            if (!api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
-                return; // Studio < 21.4 — rule cannot function without AnnotationText.
+        protected override string Id => "CPMF-PLN-002";
+        protected override string Name => "Pipeline Domain Model";
+        protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
+        protected override string Recommendation =>
+            "Workflows annotated @pipeline must declare their domain model on a second annotation line: " +
+            "@domain-model:FullyQualifiedTypeName";
+        protected override string? DocumentationLink =>
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-002";
 
-            api.AddRule<IWorkflowModel>(Get());
-        }
-
-        public Rule<IWorkflowModel> Get() =>
-            new Rule<IWorkflowModel>("Pipeline Domain Model", RuleId, Inspect)
-            {
-                RecommendationMessage =
-                    "Workflows annotated @pipeline must declare their domain model on a second annotation line: " +
-                    "@domain-model:FullyQualifiedTypeName",
-                DefaultErrorLevel = TraceLevel.Error,
-                DocumentationLink = "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-002"
-            };
-
-        private static InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
+        protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
                 return new InspectionResult { HasErrors = false };

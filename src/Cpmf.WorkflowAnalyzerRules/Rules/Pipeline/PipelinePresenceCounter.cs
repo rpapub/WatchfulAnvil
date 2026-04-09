@@ -1,36 +1,23 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using UiPath.Studio.Activities.Api;
-using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Pipeline
 {
-    public class PipelinePresenceCounter : IRegisterAnalyzerConfiguration
+    public class PipelinePresenceCounter : ProjectRule
     {
-        private const string CounterId = "CPMF-PLN-C001";
+        protected override string Id => "CPMF-PLN-C001";
+        protected override string Name => "Pipeline Presence";
+        protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
+        protected override string Recommendation =>
+            "A CPMF project must contain at least one workflow annotated @pipeline.";
+        protected override string? DocumentationLink =>
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-C001";
 
-        public void Initialize(IAnalyzerConfigurationService api)
-        {
-            // AnnotationText requires WorkflowAnalyzerV9 (sdk-capabilities: 21.4.1+).
-            if (!api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
-                return; // Studio < 21.4 — rule cannot function without AnnotationText.
-
-            api.AddRule<IProjectModel>(Get());
-        }
-
-        public Rule<IProjectModel> Get() =>
-            new Rule<IProjectModel>("Pipeline Presence", CounterId, Inspect)
-            {
-                RecommendationMessage =
-                    "A CPMF project must contain at least one workflow annotated @pipeline.",
-                DefaultErrorLevel = TraceLevel.Error,
-                DocumentationLink = "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-C001"
-            };
-
-        private static InspectionResult Inspect(IProjectModel project, Rule rule)
+        protected override InspectionResult Inspect(IProjectModel project, Rule rule)
         {
             var workflows = project.Workflows;
             if (workflows == null)

@@ -1,0 +1,76 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net461;net6.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <!-- net461: stub target for Studio Windows-Legacy. LangVersion 7.3, no modern features. -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+    <LangVersion>7.3</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <!-- net6.0 / net8.0: full SDK with modern C# -->
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Version>0.1.0-alpha</Version>
+    <Authors>WatchfulAnvil</Authors>
+    <Company>WatchfulAnvil</Company>
+    <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
+    <PackageDescription>Base classes and utilities for building UiPath Workflow Analyzer rules.</PackageDescription>
+  </PropertyGroup>
+
+  <!-- net461: only StubRule; exclude all modern Core files -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <Compile Remove="Core\AnalyzerBase.cs" />
+    <Compile Remove="Core\RuleBase.cs" />
+    <Compile Remove="Core\CounterBase.cs" />
+    <Compile Remove="Core\RuleCategory.cs" />
+    <Compile Remove="Core\ScopedRule.cs" />
+  </ItemGroup>
+
+  <!-- net6.0 / net8.0: exclude StubRule (net461-only) -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
+    <Compile Remove="Core\StubRule.cs" />
+  </ItemGroup>
+
+  <!-- Package references per target -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="UiPath.Activities.Api" Version="23.10.3">
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- net6.0: targets Studio Windows < 2024.10 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="UiPath.Activities.Api" Version="23.10.3">
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- net8.0: targets Studio Windows 2024.10+ -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="UiPath.Activities.Api" Version="24.10.1">
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="content\analyzer-capabilities.yaml" Pack="true" PackagePath="content\" />
+    <Content Include="content\rule-categories.json"       Pack="true" PackagePath="content\" />
+    <Content Include="schemas\rule-category.schema.json"  Pack="true" PackagePath="schemas\" />
+    <Content Include="schemas\rule.schema.json"            Pack="true" PackagePath="schemas\" />
+    <Content Include="schemas\catalog.schema.json"         Pack="true" PackagePath="schemas\" />
+    <Content Include="schemas\pack-manifest.schema.json"   Pack="true" PackagePath="schemas\" />
+    <Content Include="schemas\rules.schema.json"            Pack="true" PackagePath="schemas\" />
+  </ItemGroup>
+
+</Project>

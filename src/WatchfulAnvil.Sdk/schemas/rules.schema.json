@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Rules",
+  "description": "Hand-authored rule registry for a Workflow Analyzer rule package. One file per package, lives at registry/<PackageName>/rules.yaml. Consumed by the delivery-package generator; never shipped in a nupkg directly.",
+  "type": "object",
+  "required": ["package", "namespace", "version", "categories", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "package": {
+      "type": "string",
+      "description": "C# project name of the source library, e.g. 'Cpmf.WorkflowAnalyzerRules'."
+    },
+    "namespace": {
+      "type": "string",
+      "description": "Root namespace for rule classes, e.g. 'Cpmf.WorkflowAnalyzerRules.Rules'."
+    },
+    "version": {
+      "type": "string",
+      "description": "Registry version, e.g. '0.1.0'."
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "rule-category.schema.json" },
+      "description": "Category definitions declared by this package. The codes appear as the category segment in rule IDs."
+    },
+    "rules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/RegistryRule" },
+      "description": "All rules implemented in the source library."
+    }
+  },
+  "$defs": {
+    "RegistryRule": {
+      "type": "object",
+      "description": "A rule entry in the hand-authored registry. Extends the rule schema with implementation fields needed by the generator.",
+      "required": ["id", "className", "name", "description", "recommendation", "categoryCode", "scope", "type", "defaultSeverity", "defaultIsEnabled"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9-]*$",
+          "description": "Rule identifier in hyphen form, e.g. CPRIMA-T-001 or F401. This is the value passed to the Rule<T> constructor."
+        },
+        "className": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Za-z0-9]+$",
+          "description": "C# class name of the rule implementation, e.g. 'NoFlowchartStateMachineRule'. Used by the generator to locate the source file without scanning."
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name shown in Studio."
+        },
+        "description": {
+          "type": "string",
+          "description": "One-line description of what the rule checks."
+        },
+        "recommendation": {
+          "type": "string",
+          "description": "Actionable guidance shown to the user on violation."
+        },
+        "categoryCode": {
+          "type": "string",
+          "pattern": "^[A-Z]{1,4}$",
+          "description": "Category code, e.g. T. Must match a code declared in this registry's categories array."
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["IActivityModel", "IWorkflowModel", "IProjectModel", "IProjectSummary"],
+          "description": "SDK model type the rule inspects."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["Rule", "Counter"],
+          "description": "SDK type. Counters have no severity."
+        },
+        "defaultSeverity": {
+          "type": ["string", "null"],
+          "enum": ["Error", "Warning", "Info", null],
+          "description": "Default error level. Null for Counter (always Info)."
+        },
+        "defaultIsEnabled": {
+          "type": "boolean",
+          "description": "Whether the rule is enabled by default in Studio."
+        },
+        "requiredFeature": {
+          "type": ["string", "null"],
+          "description": "DesignFeatureKeys constant required to register this rule, or null. The generator emits a feature guard when this is set."
+        },
+        "documentationLink": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "URL to rule documentation, or null."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Arbitrary labels for filtering and grouping."
+        },
+        "parameters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/RuleParameter" },
+          "description": "Configurable parameters exposed in Studio. Keys must be stable — they appear in pack manifests and generated code."
+        }
+      }
+    },
+    "RuleParameter": {
+      "type": "object",
+      "required": ["key", "displayName", "defaultValue"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Parameter key used in code, e.g. 'Prefix'. Must be stable across versions."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Label shown in Studio."
+        },
+        "defaultValue": {
+          "type": "string",
+          "description": "Default value as a string."
+        },
+        "description": {
+          "type": ["string", "null"],
+          "description": "Optional explanation of the parameter."
+        }
+      }
+    }
+  }
+}

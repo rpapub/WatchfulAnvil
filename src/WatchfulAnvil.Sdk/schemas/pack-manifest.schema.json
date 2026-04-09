@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PackManifest",
+  "description": "Input manifest for the delivery package generator (tools/New-DeliveryPackage.ps1). Declares which rules to include and any per-package overrides.",
+  "type": "object",
+  "required": ["packageId", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "packageId": {
+      "type": "string",
+      "description": "NuGet package identifier, e.g. Cpmf.Standard."
+    },
+    "description": {
+      "type": "string",
+      "description": "Package description surfaced in NuGet metadata."
+    },
+    "authors": {
+      "type": "string",
+      "description": "Package authors."
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX license expression, e.g. CC-BY-4.0."
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/PackManifestRule" },
+      "description": "Rules to include in this delivery package."
+    }
+  },
+  "$defs": {
+    "PackManifestRule": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Rule ID to include, e.g. CPMF-WFL-001. Must exist in the source rule library."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["Error", "Warning", "Info"],
+          "description": "Override DefaultErrorLevel for this package. Omit to keep the rule's default."
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Parameter key/value overrides. Keys must match declared parameter keys in the rule."
+        }
+      }
+    }
+  }
+}

@@ -1,35 +1,24 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using UiPath.Studio.Activities.Api;
-using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Workflow
 {
-    public class VariableNamingRule : IRegisterAnalyzerConfiguration
+    public class VariableNamingRule : ActivityRule
     {
-        private const string RuleId = "CPMF-WFL-005";
+        protected override string Id => "CPMF-WFL-005";
+        protected override string Name => "Variable Naming Convention";
+        protected override TraceLevel DefaultSeverity => TraceLevel.Warning;
+        protected override string Recommendation =>
+            "Variable names must follow .NET camelCase conventions: " +
+            "start with a lowercase letter and contain no underscores. " +
+            "Avoid Hungarian notation prefixes (str_, int_, bool_, dt_, etc.).";
+        protected override string? DocumentationLink =>
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-005";
 
-        public void Initialize(IAnalyzerConfigurationService api)
-        {
-            // IActivityModel.Variables is available from WorkflowAnalyzerV4 (sdk-capabilities: 20.4.0+).
-            api.AddRule<IActivityModel>(Get());
-        }
-
-        public Rule<IActivityModel> Get() =>
-            new Rule<IActivityModel>("Variable Naming Convention", RuleId, Inspect)
-            {
-                RecommendationMessage =
-                    "Variable names must follow .NET camelCase conventions: " +
-                    "start with a lowercase letter and contain no underscores. " +
-                    "Avoid Hungarian notation prefixes (str_, int_, bool_, dt_, etc.).",
-                DefaultErrorLevel = TraceLevel.Warning,
-                DocumentationLink = "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-005"
-            };
-
-        private static InspectionResult Inspect(IActivityModel activity, Rule rule)
+        protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {
             if (activity.Variables == null)
                 return new InspectionResult { HasErrors = false };

@@ -1,41 +1,33 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Workflow
 {
-    public class LogMessageBookendsRule : IRegisterAnalyzerConfiguration
+    public class LogMessageBookendsRule : WorkflowRule
     {
-        private const string RuleId = "CPMF-WFL-001";
         private const string StartPrefixKey = "StartPrefix";
         private const string EndPrefixKey = "EndPrefix";
         private const string DefaultStartPrefix = "Going to";
         private const string DefaultEndPrefix = "Finished";
 
-        public void Initialize(IAnalyzerConfigurationService api)
-        {
-            // AnnotationText requires WorkflowAnalyzerV9 (sdk-capabilities: 21.4.1+).
-            if (!api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
-                return; // Studio < 21.4 — rule cannot function without AnnotationText.
+        protected override string Id => "CPMF-WFL-001";
+        protected override string Name => "Log Message Bookends";
+        protected override TraceLevel DefaultSeverity => TraceLevel.Warning;
+        protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
+        protected override string Recommendation =>
+            "Workflows annotated @module or @unit must begin with a Log Message whose " +
+            "Message starts with the configured StartPrefix (default: \"Going to\") and " +
+            "end with a Log Message whose Message starts with the configured EndPrefix (default: \"Finished\").";
+        protected override string? DocumentationLink =>
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-001";
 
-            api.AddRule<IWorkflowModel>(Get());
-        }
-
-        public Rule<IWorkflowModel> Get()
+        protected override void ConfigureParameters(Rule<IWorkflowModel> rule)
         {
-            var rule = new Rule<IWorkflowModel>("Log Message Bookends", RuleId, Inspect)
-            {
-                RecommendationMessage =
-                    "Workflows annotated @module or @unit must begin with a Log Message whose " +
-                    "Message starts with the configured StartPrefix (default: \"Going to\") and " +
-                    "end with a Log Message whose Message starts with the configured EndPrefix (default: \"Finished\").",
-                DefaultErrorLevel = TraceLevel.Warning,
-                DocumentationLink = "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-001"
-            };
             rule.Parameters.Add(StartPrefixKey, new Parameter
             {
                 Key = StartPrefixKey,
@@ -50,16 +42,9 @@ namespace Cpmf.Rules.Workflow
                 Value = DefaultEndPrefix,
                 LocalizedDisplayName = "End log message prefix"
             });
-            return rule;
         }
 
-        private static string GetParameterValue(Rule rule, string key, string fallback)
-        {
-            var raw = rule.Parameters[key]?.Value;
-            return string.IsNullOrWhiteSpace(raw) ? fallback : raw;
-        }
-
-        private static InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
+        protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
                 return new InspectionResult { HasErrors = false };
@@ -76,8 +61,8 @@ namespace Cpmf.Rules.Workflow
             var startPrefix = GetParameterValue(rule, StartPrefixKey, DefaultStartPrefix);
             var endPrefix = GetParameterValue(rule, EndPrefixKey, DefaultEndPrefix);
 
-            var children = (workflow.Root.Children ?? (IEnumerable<IActivityModel>)new IActivityModel[0])
-                .ToList();
+            var children = new List<IActivityModel>(
+                workflow.Root.Children ?? (IEnumerable<IActivityModel>)new IActivityModel[0]);
 
             if (children.Count == 0)
                 return new InspectionResult
@@ -89,7 +74,6 @@ namespace Cpmf.Rules.Workflow
                 };
 
             var messages = new List<string>();
-
             var first = children[0];
             var last = children[children.Count - 1];
 
@@ -110,6 +94,12 @@ namespace Cpmf.Rules.Workflow
                 };
 
             return new InspectionResult { HasErrors = false };
+        }
+
+        private static string GetParameterValue(Rule rule, string key, string fallback)
+        {
+            var raw = rule.Parameters[key]?.Value;
+            return string.IsNullOrWhiteSpace(raw) ? fallback : raw;
         }
 
         private static void CheckBookend(
@@ -135,7 +125,7 @@ namespace Cpmf.Rules.Workflow
         private static bool IsLogMessage(IActivityModel activity)
             => activity.ToolboxName == "Log Message";
 
-        private static string GetMessageExpression(IActivityModel activity)
+        private static string? GetMessageExpression(IActivityModel activity)
         {
             if (activity.Properties == null)
                 return null;
@@ -144,18 +134,11 @@ namespace Cpmf.Rules.Workflow
             return messageProp?.DefinedExpression;
         }
 
-        /// <summary>
-        /// Returns true if the Message property expression represents a string literal
-        /// whose value starts with <paramref name="prefix"/>.
-        /// VB string literals are double-quoted: "Going to do X" → DefinedExpression = "Going to do X"
-        /// </summary>
         private static bool MessageStartsWith(IActivityModel activity, string prefix)
         {
             var expr = GetMessageExpression(activity);
             if (expr == null)
                 return false;
-
-            // Strip leading double-quote (VB string literal delimiter) before comparing
             var value = expr.TrimStart('"');
             return value.StartsWith(prefix);
         }

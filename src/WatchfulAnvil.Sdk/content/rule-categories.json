@@ -1,0 +1,12 @@
+[
+  { "code": "NAM", "name": "Naming",        "description": "Conventions for naming workflows, variables, arguments, and annotations." },
+  { "code": "WFL", "name": "Workflow Design","description": "Structural and design rules applying to individual workflow files." },
+  { "code": "REL", "name": "Reliability",   "description": "Error handling, fault tolerance, and retry patterns." },
+  { "code": "LOG", "name": "Logging",       "description": "Presence, level, and content of log message activities." },
+  { "code": "SEC", "name": "Security",      "description": "Detection of hardcoded credentials, sensitive data exposure, and unsafe patterns." },
+  { "code": "DEP", "name": "Dependencies",  "description": "Package reference hygiene, restricted or required activity packages." },
+  { "code": "PLN", "name": "Pipeline",      "description": "Project-level pipeline structure: stages, entry points, and lifecycle annotations." },
+  { "code": "CFG", "name": "Configuration", "description": "Project settings, properties, and runtime configuration correctness." },
+  { "code": "DOC", "name": "Documentation", "description": "Presence and content of workflow annotations and descriptions." },
+  { "code": "PRF", "name": "Performance",   "description": "Detection of patterns with known performance impact: delays, infinite loops, large waits." }
+]

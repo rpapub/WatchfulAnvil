@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Rule",
+  "description": "A single Workflow Analyzer rule as declared in a package catalog.",
+  "type": "object",
+  "required": ["id", "name", "description", "recommendation", "categoryCode", "scope", "type", "defaultSeverity", "defaultIsEnabled"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9-]*$",
+      "description": "Rule identifier in hyphen form, e.g. CPRIMA-T-001 or F401. This is the value passed to the Rule<T> constructor. Resource keys (localization, display strings) use the underscore form CPRIMA_T_001_Name — that is a derived form and is not stored here."
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name shown in Studio."
+    },
+    "description": {
+      "type": "string",
+      "description": "One-line description of what the rule checks."
+    },
+    "recommendation": {
+      "type": "string",
+      "description": "Actionable guidance shown to the user on violation."
+    },
+    "categoryCode": {
+      "type": "string",
+      "pattern": "^[A-Z]{1,4}$",
+      "description": "Category code, e.g. T. Resolves against the catalog's categories."
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["IActivityModel", "IWorkflowModel", "IProjectModel", "IProjectSummary"],
+      "description": "SDK model type the rule inspects."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["Rule", "Counter"],
+      "description": "SDK type. Counters have no severity."
+    },
+    "defaultSeverity": {
+      "type": ["string", "null"],
+      "enum": ["Error", "Warning", "Info", null],
+      "description": "Default error level. Null for Counter (always Info)."
+    },
+    "defaultIsEnabled": {
+      "type": "boolean",
+      "description": "Whether the rule is enabled by default in Studio."
+    },
+    "requiredFeature": {
+      "type": ["string", "null"],
+      "description": "DesignFeatureKeys constant required to register this rule, or null."
+    },
+    "documentationLink": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "URL to rule documentation, or null."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Arbitrary labels for filtering and grouping."
+    },
+    "parameters": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/RuleParameter" },
+      "description": "Configurable parameters exposed in Studio."
+    }
+  },
+  "$defs": {
+    "RuleParameter": {
+      "type": "object",
+      "required": ["key", "displayName", "defaultValue"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Parameter key used in code, e.g. 'Prefix'."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Label shown in Studio."
+        },
+        "defaultValue": {
+          "type": "string",
+          "description": "Default value as a string."
+        },
+        "description": {
+          "type": ["string", "null"],
+          "description": "Optional explanation of the parameter."
+        }
+      }
+    }
+  }
+}

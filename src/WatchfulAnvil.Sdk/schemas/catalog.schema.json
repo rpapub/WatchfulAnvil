@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Catalog",
+  "description": "Machine-readable inventory of all rules and categories in a Workflow Analyzer rule package.",
+  "type": "object",
+  "required": ["name", "version", "categories", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Package display name, e.g. 'CPRIMA Forge'."
+    },
+    "version": {
+      "type": "string",
+      "description": "Catalog version, e.g. '0.1.0'."
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "rule-category.schema.json" },
+      "description": "Category definitions used by rules in this catalog."
+    },
+    "rules": {
+      "type": "array",
+      "items": { "$ref": "rule.schema.json" },
+      "description": "All rules declared in this package."
+    }
+  }
+}

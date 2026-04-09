@@ -1,40 +1,26 @@
-using System.Collections.Generic;
-using System.Diagnostics;
-using UiPath.Studio.Activities.Api;
-using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Workflow
 {
-    public class NoFlowchartStateMachineRule : IRegisterAnalyzerConfiguration
+    public class NoFlowchartStateMachineRule : ActivityRule
     {
-        private const string RuleId = "CPMF-WFL-004";
+        protected override string Id => "CPMF-WFL-004";
+        protected override string Name => "No Flowchart or State Machine";
+        protected override string Recommendation =>
+            "Flowchart and State Machine activities are not permitted. Use Sequence instead.";
+        protected override string? DocumentationLink =>
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-004";
 
-        public void Initialize(IAnalyzerConfigurationService api)
-        {
-            // Type is available from WorkflowAnalyzerV4 (sdk-capabilities: 20.4.0+).
-            // ToolboxName is V9 but the Inspect method is null-safe — degrades gracefully on V4.
-            api.AddRule<IActivityModel>(Get());
-        }
-
-        public Rule<IActivityModel> Get() =>
-            new Rule<IActivityModel>("No Flowchart or State Machine", RuleId, Inspect)
-            {
-                RecommendationMessage =
-                    "Flowchart and State Machine activities are not permitted. Use Sequence instead.",
-                DefaultErrorLevel = TraceLevel.Error,
-                DocumentationLink = "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-004"
-            };
-
-        private static InspectionResult Inspect(IActivityModel activity, Rule rule)
+        protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {
             if (IsFlowchartOrStateMachine(activity))
                 return new InspectionResult
                 {
                     HasErrors = true,
                     RecommendationMessage = rule.RecommendationMessage,
-                    Messages = new List<string>
+                    Messages = new System.Collections.Generic.List<string>
                     {
                         $"Activity '{activity.DisplayName}' is a {FriendlyName(activity)}, which is not permitted. " +
                         "Use Sequence instead."

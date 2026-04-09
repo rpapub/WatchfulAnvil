@@ -1,0 +1,852 @@
+# Workflow Analyzer SDK capabilities — rule-relevant members by feature gate.
+# Source: UiPath.Activities.Api nuget_available members in Analyzer and Models namespaces.
+# Generated once from sdk-capabilities exploration data.
+
+- feature_gate: WorkflowAnalyzerV4
+  nuget_introduced: 20.4.0
+  types:
+    ActivityMessage:
+    - member: ActivityId
+      property_type: String
+      member_type: Property
+      summary: The id of the activity related to the message.
+    - member: SourceMember
+      property_type: IMemberModel
+      member_type: Property
+      summary: '[Optional] The source of the result. For example, a variable or property'
+    AnalyzerInspector:
+    - member: ApplicableScopes
+      property_type: List`1
+      member_type: Property
+      summary: The target configuration where this rule should apply.
+    - member: DefaultIsEnabled
+      property_type: Boolean
+      member_type: Property
+      summary: Represents the default value for IsEnabled flag
+    - member: DocumentationLink
+      property_type: String
+      member_type: Property
+      summary: The configurable documentation link.
+    - member: Id
+      property_type: String
+      member_type: Property
+      summary: Id of this object
+    - member: Name
+      property_type: String
+      member_type: Property
+      summary: Name of this object
+    - member: Parameters
+      property_type: IDictionary`2
+      member_type: Property
+      summary: Represents this object's execution parameters.
+    Counter`1:
+    - member: Inspect
+      property_type: Func`3
+      member_type: Property
+      summary: Inspects the target and returns an inspection result.
+    DesignFeatureKeys:
+    - member: WorkflowAnalyzer
+      field_type: String
+      member_type: Field
+      summary: Studio 19.10
+    - member: WorkflowAnalyzerV2
+      field_type: String
+      member_type: Field
+      summary: Studio 19.10.2
+    - member: WorkflowAnalyzerV3
+      field_type: String
+      member_type: Field
+      summary: Studio 19.10.3
+    - member: WorkflowAnalyzerV4
+      field_type: String
+      member_type: Field
+      summary: Studio 20.2
+    IActivityContext:
+    - member: DelegateArguments
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: Delegate arguments in scope.
+    - member: Project
+      property_type: IProjectSummary
+      member_type: Property
+      summary: The Project this activity belongs to.
+    - member: Variables
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: Variables in scope.
+    - member: WorkflowArguments
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: Workflow arguments.
+    IActivityModel:
+    - member: Arguments
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of first level arguments of this activity.
+    - member: Children
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of children of this acitivity.
+    - member: Context
+      property_type: IActivityContext
+      member_type: Property
+      summary: Inherited context of this activity.
+    - member: DelegateArguments
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of delegate arguments defined in this activity.
+    - member: ObjectReferences
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: References in the object library used by this activity
+    - member: Parent
+      property_type: IActivityModel
+      member_type: Property
+      summary: The parent.
+    - member: Properties
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of first level properties of this activity.
+    - member: SupportsObjectReferences
+      property_type: Boolean
+      member_type: Property
+      summary: True if this activity supports using the objects library
+    - member: Type
+      property_type: String
+      member_type: Property
+      summary: The
+    - member: Variables
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of variables
+    IArgumentModel:
+    - member: Direction
+      property_type: ArgumentDirection
+      member_type: Property
+      summary: The direction of this argument.
+    ICaseModel:
+    - member: Activity
+      property_type: IActivityModel
+      member_type: Property
+      summary: Activity associated with the Case.
+    - member: CaseExpression
+      property_type: String
+      member_type: Property
+      summary: Case expression associated with the Case as
+    ICatchBlockModel:
+    - member: Activity
+      property_type: IActivityModel
+      member_type: Property
+      summary: The Activity associated with a Catch block.
+    - member: ExceptionType
+      property_type: String
+      member_type: Property
+      summary: The type of Exception caught by the Catch block, as
+    IConnection:
+    - member: KeyExpression
+      property_type: String
+      member_type: Property
+      summary: The corresponding key value of this connection
+    - member: KeyType
+      property_type: String
+      member_type: Property
+      summary: The
+    - member: Node
+      property_type: IFlowNodeModel
+      member_type: Property
+      summary: The source/destination FlowNode
+    IDependency:
+    - member: Assemblies
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: List of referenced assemblies.
+    - member: Name
+      property_type: String
+      member_type: Property
+      summary: The name of the dependency.
+    IFileModel:
+    - member: RelativePath
+      property_type: String
+      member_type: Property
+      summary: Relative path of the file, including extension.
+    IFlowNodeModel:
+    - member: ChildActivity
+      property_type: IActivityModel
+      member_type: Property
+      summary: The Activity contained inside a FlowNode
+    - member: Expression
+      property_type: IMemberModel
+      member_type: Property
+      summary: The expression that needs to be evaluated to decide the next step
+    - member: InConnections
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: Incoming connections
+    - member: OutConnections
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: Outgoing connections
+    - member: Owner
+      property_type: IFlowchartModel
+      member_type: Property
+      summary: The Flowchart owner of this node
+    IFlowchartModel:
+    - member: Nodes
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The nodes of this Flowchart
+    - member: StartNode
+      property_type: IFlowNodeModel
+      member_type: Property
+      summary: First step of the Flowchart
+    IIfElseModel:
+    - member: ElseBlock
+      property_type: IActivityModel
+      member_type: Property
+      summary: Activity associated with the Else block.
+    - member: ThenBlock
+      property_type: IActivityModel
+      member_type: Property
+      summary: Activity associated with the Then block.
+    IInspectionObject:
+    - member: DisplayName
+      property_type: String
+      member_type: Property
+      summary: The name of the object to inspect.
+    IMemberModel:
+    - member: DisplayName
+      property_type: String
+      member_type: Property
+      summary: The displayed name of the memeber.
+    - member: Type
+      property_type: String
+      member_type: Property
+      summary: The
+    IPackageReference:
+    - member: Version
+      property_type: String
+      member_type: Property
+      summary: The version of the package.
+    IParameter:
+    - member: ConstraintRegex
+      property_type: String
+      member_type: Property
+      summary: The constraint regex for the value
+    - member: DefaultValue
+      property_type: String
+      member_type: Property
+      summary: The default value for this parameter
+    - member: Key
+      property_type: String
+      member_type: Property
+      summary: Unique key for this parameter in this rule.
+    - member: LocalizedDisplayName
+      property_type: String
+      member_type: Property
+      summary: Current localized display name
+    - member: Value
+      property_type: String
+      member_type: Property
+      summary: A value from user for this parameter.
+    IPickBranchModel:
+    - member: Action
+      property_type: IActivityModel
+      member_type: Property
+      summary: Represents a Pick Branch Action Activity.
+    - member: Trigger
+      property_type: IActivityModel
+      member_type: Property
+      summary: Represents a Pick Branch Trigger Activity.
+    IPickModel:
+    - member: PickBranches
+      property_type: IEnumerable`1
+      member_type: Property
+      summary: Collection of
+    IProjectModel:
+    - member: EntryPoint
+      property_type: IWorkflowModel
+      member_type: Property
+      summary: The entry point workflow of the project.
+    - member: ExceptionHandlerWorkflow
+      property_type: IWorkflowModel
+      member_type: Property
+      summary: The exception handling workflow of this project.
+    - member: Workflows
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: . The workflows in the project.
+    IProjectSummary:
+    - member: Dependencies
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The dependencies of this project.
+    - member: EntryPointName
+      property_type: String
+      member_type: Property
+      summary: The entry point workflow name of the project.
+    - member: ExceptionHandlerWorkflowName
+      property_type: String
+      member_type: Property
+      summary: The exception handling workflow name of this project.
+    - member: ExpressionLanguage
+      property_type: String
+      member_type: Property
+      summary: The expression language of this project.
+    - member: FileNames
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The workflow file names in this project.
+    - member: ProjectFilePath
+      property_type: String
+      member_type: Property
+      summary: The project.json file path.
+    - member: ProjectOutputType
+      property_type: String
+      member_type: Property
+      summary: Type of output.
+    - member: ProjectProfileType
+      property_type: String
+      member_type: Property
+      summary: Type of profile.
+    - member: RequiresUserInteraction
+      property_type: Boolean
+      member_type: Property
+      summary: Indicates if project requires user interaction.
+    - member: SupportsPersistence
+      property_type: Boolean
+      member_type: Property
+      summary: Indicates if project supports persistence.
+    IPropertyModel:
+    - member: Arguments
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The list of browsable arguments of this member.
+    - member: Properties
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The list of browsable properties of this member.
+    IResult:
+    - member: HasErrors
+      property_type: Boolean
+      member_type: Property
+      summary: True if the inspection had errors.
+    - member: Messages
+      property_type: ICollection`1
+      member_type: Property
+      summary: The message.
+    IStateMachineModel:
+    - member: InitialState
+      property_type: IStateModel
+      member_type: Property
+      summary: The start point of the StateMachine
+    - member: States
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of State of this StateMachine
+    IStateModel:
+    - member: Context
+      property_type: IActivityContext
+      member_type: Property
+      summary: The inherited context of this State
+    - member: Entry
+      property_type: IActivityModel
+      member_type: Property
+      summary: Entry action of the State
+    - member: Exit
+      property_type: IActivityModel
+      member_type: Property
+      summary: Exit action of the State
+    - member: IsFinal
+      property_type: Boolean
+      member_type: Property
+      summary: Indicates if this State is final
+    - member: Owner
+      property_type: IStateMachineModel
+      member_type: Property
+      summary: The StateMachine owner of this State
+    - member: Transitions
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The outgoing transitions available from this State
+    - member: Variables
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of variables
+    ISwitchModel:
+    - member: Cases
+      property_type: IEnumerable`1
+      member_type: Property
+      summary: The collection of
+    - member: Default
+      property_type: IActivityModel
+      member_type: Property
+      summary: Activity associated with the Default block.
+    ITransition:
+    - member: Action
+      property_type: IActivityModel
+      member_type: Property
+      summary: Action activity which should be executed when the Transition is taken
+    - member: Condition
+      property_type: IMemberModel
+      member_type: Property
+      summary: The condition to decide whether the Transition should be taken after
+        the Trigger activity is completed
+    - member: From
+      property_type: IStateModel
+      member_type: Property
+      summary: The State that this transition comes from
+    - member: To
+      property_type: IStateModel
+      member_type: Property
+      summary: The State that this transition leads to
+    - member: Trigger
+      property_type: IActivityModel
+      member_type: Property
+      summary: Trigger activity of the Transition
+    ITryCatchModel:
+    - member: Catches
+      property_type: IEnumerable`1
+      member_type: Property
+      summary: The collection of
+    - member: FinallyBlock
+      property_type: IActivityModel
+      member_type: Property
+      summary: Activity associated with the Finally block.
+    - member: TryBlock
+      property_type: IActivityModel
+      member_type: Property
+      summary: Activity associated with the Try block.
+    IVariableModel:
+    - member: DefaultValue
+      property_type: String
+      member_type: Property
+      summary: The default value of this expression.
+    IWebServiceRerefence:
+    - member: WebDocumentUri
+      property_type: String
+      member_type: Property
+      summary: Web document address.
+    - member: WebServiceType
+      property_type: String
+      member_type: Property
+      summary: Type of the web service.
+    IWorkflowModel:
+    - member: Arguments
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The arguments of the workflow.
+    - member: ImportedNamespaces
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The imported namespaces.
+    - member: Project
+      property_type: IProjectSummary
+      member_type: Property
+      summary: The project this workflow belongs to.
+    - member: Root
+      property_type: IActivityModel
+      member_type: Property
+      summary: The root activity of the workflow. Can be null.
+    InspectionMessage:
+    - member: Message
+      property_type: String
+      member_type: Property
+      summary: The message.
+    InspectionResult:
+    - member: DocumentationLink
+      property_type: String
+      member_type: Property
+      summary: The documentation link of this result
+    - member: ErrorLevel
+      property_type: TraceLevel
+      member_type: Property
+      summary: The error level of this result.
+    - member: HasErrors
+      property_type: Boolean
+      member_type: Property
+      summary: ''
+    - member: InspectionMessages
+      property_type: ICollection`1
+      member_type: Property
+      summary: Better, scalable and detailed messages. Specialized types are available
+    - member: Messages
+      property_type: ICollection`1
+      member_type: Property
+      summary: ''
+    - member: RecommendationMessage
+      property_type: String
+      member_type: Property
+      summary: The recommandetion for this result.
+    Parameter:
+    - member: ConstraintRegex
+      property_type: String
+      member_type: Property
+      summary: ''
+    - member: DefaultValue
+      property_type: String
+      member_type: Property
+      summary: ''
+    - member: Key
+      property_type: String
+      member_type: Property
+      summary: ''
+    - member: LocalizedDisplayName
+      property_type: String
+      member_type: Property
+      summary: ''
+    - member: Value
+      property_type: String
+      member_type: Property
+      summary: ''
+    Rule:
+    - member: DefaultErrorLevel
+      property_type: TraceLevel
+      member_type: Property
+      summary: The default error level for this rule.
+    - member: ErrorLevel
+      property_type: TraceLevel
+      member_type: Property
+      summary: The configurable error level for this rule. Only use this at runtime
+        to read the effective error level.
+    - member: RecommendationMessage
+      property_type: String
+      member_type: Property
+      summary: The configurable recommendation message.
+    RuleConstants:
+    - member: BusinessRule
+      field_type: String
+      member_type: Field
+      summary: Represents a rule that applies to StudioX Kept for comaptibility reasons.
+        DO NOT USE
+    - member: BusinessRuleConstant
+      field_type: String
+      member_type: Field
+      summary: Represents a rule that applies to StudioX
+    - member: DevelopmentRule
+      field_type: String
+      member_type: Field
+      summary: Represents a rule that applies to Studio. Kept for comaptibility reasons.
+        DO NOT USE
+    - member: DevelopmentRuleConstant
+      field_type: String
+      member_type: Field
+      summary: Represents a rule that applies to Studio
+    - member: TestAutomationRuleConstant
+      field_type: String
+      member_type: Field
+      summary: Represents a rule that applies to StudioT
+    Rule`1:
+    - member: Inspect
+      property_type: Func`3
+      member_type: Property
+      summary: Inspects the target and returns an inspection result.
+    WorkflowMessage:
+    - member: SourceMember
+      property_type: IMemberModel
+      member_type: Property
+      summary: '[Optional] The source of the result'
+- feature_gate: WorkflowAnalyzerV9
+  nuget_introduced: 21.4.1
+  types:
+    ActivityMessage:
+    - member: ActivityDisplayName
+      property_type: String
+      member_type: Property
+      summary: The activity namedisplay.
+    DesignFeatureKeys:
+    - member: WorkflowAnalyzerV5
+      field_type: String
+      member_type: Field
+      summary: Studio 20.4.2
+    - member: WorkflowAnalyzerV6
+      field_type: String
+      member_type: Field
+      summary: Studio 20.8.0
+    - member: WorkflowAnalyzerV7
+      field_type: String
+      member_type: Field
+      summary: Studio 20.9.0
+    - member: WorkflowAnalyzerV8
+      field_type: String
+      member_type: Field
+      summary: Studio 20.10.3
+    - member: WorkflowAnalyzerV9
+      field_type: String
+      member_type: Field
+      summary: Studio 21.3
+    IActivityModel:
+    - member: AnnotationText
+      property_type: String
+      member_type: Property
+      summary: The text of the annotation
+    - member: InternalArguments
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of first level non browsable arguments of this activity.
+        (BrowsableAttribute set to false)
+    - member: InternalProperties
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of first level non browsable properties of this activity.
+        (BrowsableAttribute set to false)
+    - member: PackageBinding
+      property_type: IPackageBindingModel
+      member_type: Property
+      summary: Associated package binding for this activity
+    - member: ToolboxName
+      property_type: String
+      member_type: Property
+      summary: Activity name as it is registered in toolbox.
+    IExpressionContainer:
+    - member: GetChildExpressionContainers
+      return_type: IEnumerable`1
+      parameters: []
+      member_type: Method
+      summary: Returns all children that are possible expression containers i.e. activities,
+        nodes, states, transitions.
+    - member: GetExpressions
+      return_type: IEnumerable`1
+      parameters: []
+      member_type: Method
+      summary: Returns all expression models from this workflow element i.e. variable
+        default values, argument default values, property arguments expressions, conditions
+        etc.
+    IExpressionModel:
+    - member: DefaultValue
+      property_type: String
+      member_type: Property
+      summary: The default value of this variable/argument.
+    IMemberModel:
+    - member: DefinedExpression
+      property_type: String
+      member_type: Property
+      summary: 'The expression or value of the member. If the expression is a Literal<string>
+        it will be between "" Ex: ""This is a plain string""'
+    IPickBranchModel:
+    - member: Parent
+      property_type: IActivityModel
+      member_type: Property
+      summary: The parent Pick activity
+    IProjectSummary:
+    - member: Directory
+      property_type: String
+      member_type: Property
+      summary: The project directory.
+    IPropertyModel:
+    - member: InternalArguments
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of non browsable arguments of this member. (BrowsableAttribute
+        set to false)
+    - member: InternalProperties
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of non browsable properties of this member. (BrowsableAttribute
+        set to false) Non browsable properties are not parsed in depth.
+    IVariableContainer:
+    - member: GetChildVariableContainers
+      return_type: IEnumerable`1
+      parameters: []
+      member_type: Method
+      summary: Get the children that suport a list o variables.
+    - member: Variables
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The collection of variables
+    IWorkflowElement:
+    - member: GetChildren
+      return_type: IEnumerable`1
+      parameters: []
+      member_type: Method
+      summary: The immediate first level children (not only IActivityModel)
+    - member: Id
+      property_type: String
+      member_type: Property
+      summary: Generated workflow id. Can be null.
+    - member: ImmediateParent
+      property_type: IWorkflowElement
+      member_type: Property
+      summary: The immediate parent of the workflow element. It can be a
+    - member: Type
+      property_type: String
+      member_type: Property
+      summary: The
+    IWorkflowModel:
+    - member: Assemblies
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The assemblies of the workflow.
+    ProjectMessage:
+    - member: Dependency
+      property_type: IDependency
+      member_type: Property
+      summary: '[Optional] The dependency with error'
+- feature_gate: WorkflowAnalyzerV10
+  nuget_introduced: 21.10.3
+  types:
+    DesignFeatureKeys:
+    - member: WorkflowAnalyzerV10
+      field_type: String
+      member_type: Field
+      summary: Studio 21.10
+- feature_gate: WorkflowAnalyzerV13
+  nuget_introduced: 22.4.1
+  types:
+    DesignFeatureKeys:
+    - member: WorkflowAnalyzerV11
+      field_type: String
+      member_type: Field
+      summary: Studio 21.12
+    - member: WorkflowAnalyzerV12
+      field_type: String
+      member_type: Field
+      summary: Studio 21.12
+    - member: WorkflowAnalyzerV13
+      field_type: String
+      member_type: Field
+      summary: Studio 22.4
+    IAnalyzerConfigurationService:
+    - member: ActiveProfile
+      property_type: String
+      member_type: Property
+      summary: Active profile (Studio, StudioX, etc.)
+    IMemberModel:
+    - member: HasLiteralExpression
+      property_type: Nullable`1
+      member_type: Property
+      summary: True if the defined expression is a Literal<string>
+    IObjectBrowserSummary:
+    - member: ClientDependencies
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: Project dependencies that register for object browser features.
+    - member: HasObjectsInLocalSource
+      property_type: Boolean
+      member_type: Property
+      summary: True if at least one object is defined in the project local objects
+        repository
+    IProjectSummary:
+    - member: HasModernBehavior
+      property_type: Boolean
+      member_type: Property
+      summary: Indicates if the project has modern design experience
+    ITemplateModel:
+    - member: DataVariation
+      property_type: String
+      member_type: Property
+      summary: The path of the data variation.
+    - member: Path
+      property_type: String
+      member_type: Property
+      summary: The path of the template.
+    - member: Type
+      property_type: TemplateType
+      member_type: Property
+      summary: The type of the template (execution, testCase, generic)
+- feature_gate: WorkflowAnalyzerV16
+  nuget_introduced: 22.10.3
+  types:
+    DesignFeatureKeys:
+    - member: WorkflowAnalyzerV14
+      field_type: String
+      member_type: Field
+      summary: Studio 22.6
+    - member: WorkflowAnalyzerV15
+      field_type: String
+      member_type: Field
+      summary: Studio 22.8
+    - member: WorkflowAnalyzerV16
+      field_type: String
+      member_type: Field
+      summary: Studio 22.10
+    IActivityModel:
+    - member: PackageBindings
+      property_type: IEnumerable`1
+      member_type: Property
+      summary: Associated package bindings for this activity
+    IProjectModel:
+    - member: SkippedWorkflows
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: . Workflows that were not included for analysis, for example at publish
+        time where some workflows are not publishable. Still, some rules may need
+        them, like unused dependencies rule, that can only work with the entire set
+        of workflows in the project.
+- feature_gate: WorkflowAnalyzerV17
+  nuget_introduced: 24.10.1
+  types:
+    DesignFeatureKeys:
+    - member: WorkflowAnalyzerV17
+      field_type: String
+      member_type: Field
+      summary: Studio 22.12
+    IActivityModel:
+    - member: IsRootOrActivityContainer
+      property_type: Boolean
+      member_type: Property
+      summary: Specifies if the activity model is the root activity of the workflow
+        or is an activity container. Should be used to determine if when HideSequences
+        project setting flag is set, this activity is hidden.
+    - member: UiPathActivityTypeId
+      property_type: String
+      member_type: Property
+      summary: The dynamic activity type id, if applicable.
+    - member: SupportsSyncObjects
+      property_type: Boolean
+      member_type: Property
+      summary: True if this activity supports synchronizing library objects
+    IProjectModel:
+    - member: CodeSourceFiles
+      property_type: IReadOnlyCollection`1
+      member_type: Property
+      summary: The code source files in the project.
+    IWorkflowModel:
+    - member: TriggerModel
+      property_type: ITriggerModel
+      member_type: Property
+      summary: Information about any trigger related activities inside this workflow.
+    MetadataMessage:
+    - member: MetadataType
+      property_type: MetadataType
+      member_type: Property
+      summary: The type of metadata.
+    MetadataResult:
+    - member: MetadataMessages
+      property_type: ICollection`1
+      member_type: Property
+      summary: 'Metadata collected from the inspected object. Currently supported:'
+    MetadataType:
+    - member: Generic
+      field_type: MetadataType
+      member_type: Field
+      summary: Used for generic metadata messages.
+    - member: UseApplication
+      field_type: MetadataType
+      member_type: Field
+      summary: 'Used for metadata related to external app usage. See:'
+    Metadata`1:
+    - member: Inspect
+      property_type: Func`3
+      member_type: Property
+      summary: Inspects the target and returns an inspection result.
+    UseApplicationMessage:
+    - member: ApplicationType
+      property_type: String
+      member_type: Property
+      summary: The type of the application that is being referenced. See
+    - member: Arguments
+      property_type: UseAplicationResource
+      member_type: Property
+      summary: The parameters passed to the referenced application.
+    - member: ExecutablePath
+      property_type: UseAplicationResource
+      member_type: Property
+      summary: The executable path of the referenced application.
+    - member: Url
+      property_type: UseAplicationResource
+      member_type: Property
+      summary: The URL that is being referenced, if any.
+    - member: Version
+      property_type: String
+      member_type: Property
+      summary: The version of the referenced application.

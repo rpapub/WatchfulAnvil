@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RuleCategory",
+  "description": "A category grouping for Workflow Analyzer rules. The code is used as the category segment in rule IDs (e.g. CPRIMA-T-001).",
+  "type": "object",
+  "required": ["code", "name", "description"],
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "type": "string",
+      "pattern": "^[A-Z]{1,4}$",
+      "description": "Short uppercase code used in rule IDs. Ideally one character, maximum four."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable category name, e.g. 'UI Targeting'."
+    },
+    "description": {
+      "type": "string",
+      "description": "One-line description of what rules in this category check."
+    },
+    "includes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Concerns explicitly covered by this category."
+    },
+    "excludes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Concerns explicitly outside this category, to prevent overlap with adjacent categories."
+    }
+  }
+}

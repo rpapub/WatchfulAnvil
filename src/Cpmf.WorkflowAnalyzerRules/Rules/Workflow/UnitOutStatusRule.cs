@@ -1,37 +1,23 @@
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using UiPath.Studio.Activities.Api;
-using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Workflow
 {
-    public class UnitOutStatusRule : IRegisterAnalyzerConfiguration
+    public class UnitOutStatusRule : WorkflowRule
     {
-        private const string RuleId = "CPMF-WFL-002";
         private const string ArgumentName = "out_Status";
 
-        public void Initialize(IAnalyzerConfigurationService api)
-        {
-            // AnnotationText requires WorkflowAnalyzerV9 (sdk-capabilities: 21.4.1+).
-            if (!api.HasFeature(DesignFeatureKeys.WorkflowAnalyzerV9))
-                return; // Studio < 21.4 — rule cannot function without AnnotationText.
+        protected override string Id => "CPMF-WFL-002";
+        protected override string Name => "Unit Out Status Argument";
+        protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
+        protected override string Recommendation =>
+            "Workflows annotated @unit must declare an Out argument named 'out_Status'.";
+        protected override string? DocumentationLink =>
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-002";
 
-            api.AddRule<IWorkflowModel>(Get());
-        }
-
-        public Rule<IWorkflowModel> Get() =>
-            new Rule<IWorkflowModel>("Unit Out Status Argument", RuleId, Inspect)
-            {
-                RecommendationMessage =
-                    "Workflows annotated @unit must declare an Out argument named 'out_Status'.",
-                DefaultErrorLevel = TraceLevel.Error,
-                DocumentationLink = "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-002"
-            };
-
-        private static InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
+        protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
                 return new InspectionResult { HasErrors = false };
@@ -52,7 +38,7 @@ namespace Cpmf.Rules.Workflow
             {
                 HasErrors = true,
                 RecommendationMessage = rule.RecommendationMessage,
-                Messages = new List<string>
+                Messages = new System.Collections.Generic.List<string>
                 {
                     $"Workflow annotated @unit is missing required Out argument '{ArgumentName}'."
                 },
