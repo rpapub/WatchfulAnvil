@@ -10,13 +10,13 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Usage
 {
     public class ShouldStopActivityRule : IRegisterAnalyzerConfiguration
     {
-        private const string RuleId = "CPM-USG-000";
+        private const string RuleId = "CPRIMA-USG-001";
 
         public Rule<IProjectModel> Get()
         {
-            return new Rule<IProjectModel>(Strings.CPM_USG_000_Name, RuleId, InspectProjectForShouldStop)
+            return new Rule<IProjectModel>(Strings.CPRIMA_USG_001_Name, RuleId, InspectProjectForShouldStop)
             {
-                RecommendationMessage = Strings.CPM_USG_000_Recommendation,
+                RecommendationMessage = Strings.CPRIMA_USG_001_Recommendation,
                 DefaultErrorLevel = TraceLevel.Error,
                 DocumentationLink = "https://github.com/rpapub/WatchfulAnvil"
             };

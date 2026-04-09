@@ -117,40 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CPM_NOOP_000_Name" xml:space="preserve">
+  <data name="CPRIMA_NOOP_000_Name" xml:space="preserve">
     <value>Null Operation Rule</value>
   </data>
-  <data name="CPM_NOOP_000_Recommendation" xml:space="preserve">
+  <data name="CPRIMA_NOOP_000_Recommendation" xml:space="preserve">
     <value>This rule does nothing and always passes.</value>
   </data>
-  <data name="CPM_NOOP_001_Name" xml:space="preserve">
+  <data name="CPRIMA_NOOP_001_Name" xml:space="preserve">
     <value>Null Project Rule</value>
   </data>
-  <data name="CPM_NOOP_001_Recommendation" xml:space="preserve">
+  <data name="CPRIMA_NOOP_001_Recommendation" xml:space="preserve">
     <value>This rule does nothing and always passes.</value>
   </data>
-  <data name="CPM_NOOP_002_Name" xml:space="preserve">
+  <data name="CPRIMA_NOOP_002_Name" xml:space="preserve">
     <value>Null Workflow Rule</value>
   </data>
-  <data name="CPM_NOOP_002_Recommendation" xml:space="preserve">
+  <data name="CPRIMA_NOOP_002_Recommendation" xml:space="preserve">
     <value>This rule does nothing and always passes.</value>
   </data>
-  <data name="CPM_NOOP_003_Name" xml:space="preserve">
+  <data name="CPRIMA_NOOP_003_Name" xml:space="preserve">
     <value>Null Activity Rule</value>
   </data>
-  <data name="CPM_NOOP_003_Recommendation" xml:space="preserve">
+  <data name="CPRIMA_NOOP_003_Recommendation" xml:space="preserve">
     <value>This rule does nothing and always passes.</value>
   </data>
-  <data name="CPM_USG_000_Name" xml:space="preserve">
+  <data name="CPRIMA_USG_001_Name" xml:space="preserve">
     <value>Ensure ShouldStop Activity Usage</value>
   </data>
-  <data name="CPM_USG_000_Recommendation" xml:space="preserve">
+  <data name="CPRIMA_USG_001_Recommendation" xml:space="preserve">
     <value>Project must include at least one 'ShouldStop' activity.</value>
   </data>
-  <data name="CPM_WAIT_001_Name" xml:space="preserve">
+  <data name="CPRIMA_WAIT_001_Name" xml:space="preserve">
     <value>Wait 10 Seconds</value>
   </data>
-  <data name="CPM_WAIT_001_Recommendation" xml:space="preserve">
+  <data name="CPRIMA_WAIT_001_Recommendation" xml:space="preserve">
     <value>This rule does nothing but waiting for 10 seconds</value>
   </data>
 </root>

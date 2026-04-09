@@ -1,0 +1,108 @@
+name: 🤖 UiPath Studio - Custom Workflow Analyzer Rule Request
+description: Submit a formal request to define and implement a new custom Workflow Analyzer rule for UiPath Studio
+title: "[Custom Rule Request] <Short summary of the rule's purpose>"
+labels: [custom-rule-request, needs-triage]
+assignees:
+  - cg371p
+
+body:
+  - type: input
+    id: rule_id_and_title
+    attributes:
+      label: Proposed Rule Identifier and Title (Required)
+      description: Provide a clear, unique name that identifies this rule. This will become the rule's display name in documentation and implementation.
+      placeholder: e.g., VariableNaming_CamelCase
+    validations:
+      required: true
+
+  - type: textarea
+    id: rule_objective
+    attributes:
+      label: Rule Objective and Purpose (Required)
+      description: Describe the specific purpose of the rule. What problem does it solve or prevent? What behavior or pattern should it enforce in UiPath Studio workflows?
+      placeholder: e.g., To prevent inconsistent variable naming by enforcing camelCase format across all variable declarations in UiPath workflows.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ### 📎 Mandatory Attachment
+
+        Please attach a **sample UiPath Studio project** (as a `.zip` file or direct `.xaml` files) that includes example workflows demonstrating the activities or patterns this rule should evaluate.
+
+        Your sample project **must include both**:
+        - At least one **compliant example** (passes the rule)
+        - At least one **non-compliant example** (violates the rule)
+
+  - type: checkboxes
+    id: attachment_confirmation
+    attributes:
+      label: Sample Project Attachment Confirmation (Required)
+      description: You must confirm that the required sample project is attached to this issue.
+      options:
+        - label: I confirm that a UiPath Studio sample project with both compliant and non-compliant examples will be attached
+          required: true
+
+
+  - type: dropdown
+    id: rule_scope
+    attributes:
+      label: Rule Scope (What the Rule Applies To) (Required)
+      description: Select the scope level that this custom rule should analyze. This defines the type of element in a UiPath solution where the rule is intended to apply.
+      options:
+        - Project (entire automation solution or package)
+        - Workflow (specific .xaml files or flowcharts/sequences)
+        - Activity (individual activities inside a workflow)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: rule_category
+    attributes:
+      label: Rule Category (Required)
+      description: Select the most appropriate category that best describes the purpose of this rule.
+      options:
+        - Naming Rules
+        - Design Best Practices
+        - Project Anatomy Rules
+        - Maintainability and Readability Rules
+        - Usage Rules
+        - Performance and Reusability Rules
+        - Reliability Rules
+        - Security Rules
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: rule_category_other
+    attributes:
+      label: Specify Category if "Other" Selected
+      description: If you selected "Other" above, please provide a custom category name or description.
+      placeholder: e.g., Logging and Traceability Standards
+
+  - type: dropdown
+    id: severity_level
+    attributes:
+      label: Desired Severity Level (Required)
+      description: Choose the severity level you believe this rule should have when it is triggered in the Workflow Analyzer.
+      options:
+        - Info (informational only)
+        - Warning (violations are flagged but allowed)
+        - Error (violations block publishing/running)
+    validations:
+      required: true
+
+  - type: textarea
+    id: message_template
+    attributes:
+      label: Suggested Violation Message Template (Optional)
+      description: Propose the message that should appear in UiPath Studio when this rule is violated. This message will help developers understand and resolve the issue.
+      placeholder: e.g., "Variable '{0}' does not follow camelCase naming convention. Please rename it accordingly."
+
+  - type: input
+    id: additional_stakeholders
+    attributes:
+      label: Additional Stakeholders to Notify (Optional)
+      description: Provide names or GitHub handles of team members who should be notified or consulted about this rule request.

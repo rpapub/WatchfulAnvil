@@ -1,0 +1,81 @@
+name: Sync Docs to Wiki
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force sync even if no files changed'
+        required: false
+        default: 'false'
+
+jobs:
+  update-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Detect changes to docs or force sync
+        id: check
+        run: |
+          set +e
+
+          FORCE="${{ github.event.inputs.force }}"
+          echo "Force input: $FORCE"
+
+          REV=$(git rev-list --max-count=2 HEAD | tail -n 1)
+          CHANGED=$(git diff --name-only "$REV" HEAD || true)
+
+          echo "roadmap_changed=false" >> $GITHUB_ENV
+          echo "contributing_changed=false" >> $GITHUB_ENV
+          echo "readme_changed=false" >> $GITHUB_ENV
+
+          if [[ "$FORCE" == "true" ]]; then
+            echo "roadmap_changed=true" >> $GITHUB_ENV
+            echo "contributing_changed=true" >> $GITHUB_ENV
+            echo "readme_changed=true" >> $GITHUB_ENV
+          else
+            echo "$CHANGED" | grep -q '^ROADMAP.md$' && echo "roadmap_changed=true" >> $GITHUB_ENV
+            echo "$CHANGED" | grep -q '^CONTRIBUTING.md$' && echo "contributing_changed=true" >> $GITHUB_ENV
+            echo "$CHANGED" | grep -q '^README.md$' && echo "readme_changed=true" >> $GITHUB_ENV
+          fi
+
+          exit 0
+
+      - name: Clone wiki repo
+        if: env.roadmap_changed == 'true' || env.contributing_changed == 'true' || env.readme_changed == 'true'
+        run: |
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git wiki
+
+      - name: Copy updated files to wiki
+        if: env.roadmap_changed == 'true' || env.contributing_changed == 'true'
+        run: |
+          if [ "${{ env.roadmap_changed }}" = "true" ]; then
+            cp ROADMAP.md wiki/Project-WatchfulAnvil-Roadmap.md
+          fi
+          if [ "${{ env.contributing_changed }}" = "true" ]; then
+            cp CONTRIBUTING.md wiki/Project-WatchfulAnvil-Contributing-Guide.md
+          fi
+
+      - name: Rewrite README.md links and copy to wiki
+        if: env.readme_changed == 'true'
+        run: |
+          sed 's|](https://github.com/rpapub/WatchfulAnvil/blob/main/ROADMAP.md)|](https://github.com/rpapub/WatchfulAnvil/wiki/Project-WatchfulAnvil-Roadmap)|g' README.md > wiki/Home.md
+
+      - name: Commit and push to wiki
+        if: env.roadmap_changed == 'true' || env.contributing_changed == 'true' || env.readme_changed == 'true'
+        run: |
+          cd wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "Nothing to commit. Skipping push."
+            exit 0
+          fi
+          git commit -m "Sync docs to wiki: README, ROADMAP, CONTRIBUTING"
+          git push

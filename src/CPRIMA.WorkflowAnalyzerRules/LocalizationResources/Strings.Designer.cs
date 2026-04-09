@@ -63,108 +63,108 @@ namespace CPRIMA.WorkflowAnalyzerRules.LocalizationResources {
         /// <summary>
         ///   Looks up a localized string similar to Null Operation Rule.
         /// </summary>
-        public static string CPM_NOOP_000_Name {
+        public static string CPRIMA_NOOP_000_Name {
             get {
-                return ResourceManager.GetString("CPM_NOOP_000_Name", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_NOOP_000_Name", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to This rule does nothing and always passes..
         /// </summary>
-        public static string CPM_NOOP_000_Recommendation {
+        public static string CPRIMA_NOOP_000_Recommendation {
             get {
-                return ResourceManager.GetString("CPM_NOOP_000_Recommendation", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_NOOP_000_Recommendation", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Null Project Rule.
         /// </summary>
-        public static string CPM_NOOP_001_Name {
+        public static string CPRIMA_NOOP_001_Name {
             get {
-                return ResourceManager.GetString("CPM_NOOP_001_Name", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_NOOP_001_Name", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to This rule does nothing and always passes..
         /// </summary>
-        public static string CPM_NOOP_001_Recommendation {
+        public static string CPRIMA_NOOP_001_Recommendation {
             get {
-                return ResourceManager.GetString("CPM_NOOP_001_Recommendation", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_NOOP_001_Recommendation", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Null Workflow Rule.
         /// </summary>
-        public static string CPM_NOOP_002_Name {
+        public static string CPRIMA_NOOP_002_Name {
             get {
-                return ResourceManager.GetString("CPM_NOOP_002_Name", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_NOOP_002_Name", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to This rule does nothing and always passes..
         /// </summary>
-        public static string CPM_NOOP_002_Recommendation {
+        public static string CPRIMA_NOOP_002_Recommendation {
             get {
-                return ResourceManager.GetString("CPM_NOOP_002_Recommendation", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_NOOP_002_Recommendation", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Null Activity Rule.
         /// </summary>
-        public static string CPM_NOOP_003_Name {
+        public static string CPRIMA_NOOP_003_Name {
             get {
-                return ResourceManager.GetString("CPM_NOOP_003_Name", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_NOOP_003_Name", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to This rule does nothing and always passes..
         /// </summary>
-        public static string CPM_NOOP_003_Recommendation {
+        public static string CPRIMA_NOOP_003_Recommendation {
             get {
-                return ResourceManager.GetString("CPM_NOOP_003_Recommendation", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_NOOP_003_Recommendation", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Ensure ShouldStop Activity Usage.
         /// </summary>
-        public static string CPM_USG_000_Name {
+        public static string CPRIMA_USG_001_Name {
             get {
-                return ResourceManager.GetString("CPM_USG_000_Name", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_USG_001_Name", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Project must include at least one &apos;ShouldStop&apos; activity..
         /// </summary>
-        public static string CPM_USG_000_Recommendation {
+        public static string CPRIMA_USG_001_Recommendation {
             get {
-                return ResourceManager.GetString("CPM_USG_000_Recommendation", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_USG_001_Recommendation", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Wait 10 Seconds.
         /// </summary>
-        public static string CPM_WAIT_001_Name {
+        public static string CPRIMA_WAIT_001_Name {
             get {
-                return ResourceManager.GetString("CPM_WAIT_001_Name", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_WAIT_001_Name", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to This rule does nothing but waiting for 10 seconds.
         /// </summary>
-        public static string CPM_WAIT_001_Recommendation {
+        public static string CPRIMA_WAIT_001_Recommendation {
             get {
-                return ResourceManager.GetString("CPM_WAIT_001_Recommendation", resourceCulture);
+                return ResourceManager.GetString("CPRIMA_WAIT_001_Recommendation", resourceCulture);
             }
         }
     }
