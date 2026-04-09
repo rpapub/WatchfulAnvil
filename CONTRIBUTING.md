@@ -48,9 +48,11 @@ Then follow the [Getting Started Guide](https://github.com/rpapub/WatchfulAnvil/
 ## 📏 Code Style & Standards
 
 - Use consistent naming: e.g., `HWR-` prefix for rules
-- Follow the `.editorconfig` and `.gitversion.yml`
+- Follow the [.editorconfig](./.editorconfig) and `.gitversion.yml`
 - Every rule should live in its own class
 - If your rule isn't testable, it's probably not mergeable yet
+
+> ℹ️ The [.editorconfig](./.editorconfig) file defines formatting and naming conventions for C#, scripts, and docs. Most modern editors (VS, VS Code) enforce it automatically.
 
 
 ## 🤝 Code of Conduct

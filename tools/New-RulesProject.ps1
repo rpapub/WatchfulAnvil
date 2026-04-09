@@ -23,15 +23,16 @@ if ($templatesOk.Values -contains $false) {
 Write-Host ""
 Write-Host "Starting project setup..."
 
-# --- Hardcoded Project Base Name (short) ---
-$ProjectBaseName = "HelloWorld"
-
 # --- Input with Defaults ---
-$defaultOrg       = "ACME"
+$defaultOrg        = "ACME"
 $defaultRulePrefix = "HWR"
 
 $Organization = Read-Host "Enter your organization name [$defaultOrg]"
 if ([string]::IsNullOrWhiteSpace($Organization)) { $Organization = $defaultOrg }
+
+# Optional: leave empty for flat naming (<Org>.WorkflowAnalyzerRules),
+# or provide a value for three-segment naming (<Org>.<Base>.WorkflowAnalyzerRules)
+$ProjectBaseName = Read-Host "Enter project base name, e.g. 'HelloWorld' (leave empty for flat naming)"
 
 $RulePrefix = Read-Host "Enter the rule ID prefix (2-5 uppercase letters) [$defaultRulePrefix]"
 if ([string]::IsNullOrWhiteSpace($RulePrefix)) { $RulePrefix = $defaultRulePrefix }
@@ -43,9 +44,15 @@ if ($RulePrefix -notmatch '^[A-Z]{2,5}$') {
 }
 
 # --- Derived Values ---
-$ProjectName     = "$Organization.$ProjectBaseName.WorkflowAnalyzerRules"
-$Namespace       = "$Organization.$ProjectBaseName"
-$TestProjectName = "$Organization.$ProjectBaseName.Tests"
+if ([string]::IsNullOrWhiteSpace($ProjectBaseName)) {
+    $ProjectName     = "$Organization.WorkflowAnalyzerRules"
+    $Namespace       = "$Organization"
+    $TestProjectName = "$Organization.WorkflowAnalyzerRules.Tests"
+} else {
+    $ProjectName     = "$Organization.$ProjectBaseName.WorkflowAnalyzerRules"
+    $Namespace       = "$Organization.$ProjectBaseName"
+    $TestProjectName = "$Organization.$ProjectBaseName.Tests"
+}
 
 # --- Determine Root Directory ---
 $ScriptDir = $PSScriptRoot
