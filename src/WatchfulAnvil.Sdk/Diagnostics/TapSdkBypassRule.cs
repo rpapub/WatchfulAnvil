@@ -1,7 +1,9 @@
 using System;
 using System.Diagnostics;
+
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+
 using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
@@ -18,19 +20,23 @@ namespace WatchfulAnvil.Sdk.Diagnostics
         private const string DefaultLogFile = @"%TEMP%\wa-tap-xaml.log";
 
         protected override string Id => "WA-TAP-XAML-001";
+
         protected override string Name => "Tap XAML SDK Bypass (Diagnostics)";
+
         protected override string Recommendation => "Diagnostic tap — logs XAML argument annotations to the configured log file.";
+
         protected override TraceLevel DefaultSeverity => TraceLevel.Info;
+
+        protected override bool IsEnabledByDefault => false;
 
         protected override void ConfigureParameters(Rule<IWorkflowModel> rule)
         {
-            rule.DefaultIsEnabled = false;
             rule.Parameters.Add(LogFileKey, new Parameter
             {
                 Key = LogFileKey,
                 DefaultValue = DefaultLogFile,
                 Value = DefaultLogFile,
-                LocalizedDisplayName = "Log file path"
+                LocalizedDisplayName = "Log file path",
             });
         }
 
@@ -49,7 +55,9 @@ namespace WatchfulAnvil.Sdk.Diagnostics
 
                 var arguments = XamlArgumentParser.ParseArguments(fullPath);
                 foreach (var arg in arguments)
+                {
                     RuleLogger.Log("XamlArgumentAnnotation", $"Name={arg.Name}, Type={arg.Type}, Annotation={arg.Annotation}", logFile);
+                }
             }
             catch (Exception ex)
             {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
 
@@ -40,12 +41,16 @@ namespace WatchfulAnvil.Sdk.Common
         public static string FormatArguments(IEnumerable<IArgumentModel> arguments)
         {
             if (!(arguments?.Any() ?? false))
+            {
                 return "<no arguments>";
+            }
 
             string SimplifyType(string rawType)
             {
                 if (string.IsNullOrWhiteSpace(rawType))
+                {
                     return "?";
+                }
 
                 // Handle generic types like Dictionary`2[[System.String,...],[System.Object,...]]
                 if (rawType.Contains("`"))

@@ -60,6 +60,12 @@ dotnet_diagnostic.SA1101.severity = none        # no this. prefix required
 dotnet_diagnostic.SA1200.severity = none        # using directives outside namespace
 dotnet_diagnostic.SA1309.severity = none        # allow _camelCase private fields
 dotnet_diagnostic.SA1633.severity = warning     # copyright header required (Apache 2.0)
+dotnet_diagnostic.SA1122.severity = none        # "" preferred over string.Empty
+dotnet_diagnostic.SA1009.severity = none        # closing parenthesis placement — multi-line LINQ style
+dotnet_diagnostic.SA1111.severity = none        # closing parenthesis on last parameter line — multi-line LINQ style
+dotnet_diagnostic.SA1116.severity = none        # parameter line placement — intentional in tap rule log calls
+dotnet_diagnostic.SA1117.severity = none        # parameter line placement — intentional in tap rule log calls
+dotnet_diagnostic.SA1118.severity = none        # parameter spans multiple lines — intentional in tap rule log calls
 
 ##################################################
 # PowerShell Scripts

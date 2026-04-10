@@ -53,7 +53,7 @@ namespace ACME.HelloWorld.WorkflowAnalyzerRules.Rules.Sample
                 HasErrors = true,
                 RecommendationMessage = rule.RecommendationMessage,
                 ErrorLevel = rule.DefaultErrorLevel,
-                Messages = messages
+                Messages = messages,
             };
         }
     }

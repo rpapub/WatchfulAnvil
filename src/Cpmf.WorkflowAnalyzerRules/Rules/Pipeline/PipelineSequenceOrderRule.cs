@@ -4,7 +4,6 @@ using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
-using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Pipeline
@@ -23,6 +22,7 @@ namespace Cpmf.Rules.Pipeline
             "(2) contain the configured pipeline stages as direct children of the root, in that order.";
         protected override string? DocumentationLink =>
             "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-001";
+        protected override string[] RequiresAnyTag => new[] { "@pipeline" };
 
         protected override void ConfigureParameters(Rule<IWorkflowModel> rule)
         {
@@ -38,9 +38,6 @@ namespace Cpmf.Rules.Pipeline
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
-                return new InspectionResult { HasErrors = false };
-
-            if (!AnnotationReader.HasTag(workflow.Root.AnnotationText, "@pipeline"))
                 return new InspectionResult { HasErrors = false };
 
             var expectedOrder = ParseStages(rule);

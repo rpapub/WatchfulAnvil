@@ -1,7 +1,6 @@
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
-using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Workflow
@@ -17,13 +16,11 @@ namespace Cpmf.Rules.Workflow
             "Workflows annotated @unit must declare an Out argument named 'out_Status'.";
         protected override string? DocumentationLink =>
             "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-002";
+        protected override string[] RequiresAnyTag => new[] { "@unit" };
 
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
-                return new InspectionResult { HasErrors = false };
-
-            if (!AnnotationReader.HasTag(workflow.Root.AnnotationText, "@unit"))
                 return new InspectionResult { HasErrors = false };
 
             var hasOutStatus = workflow.Arguments != null &&

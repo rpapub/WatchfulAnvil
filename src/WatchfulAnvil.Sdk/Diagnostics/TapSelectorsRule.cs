@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+
 using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
@@ -18,19 +20,23 @@ namespace WatchfulAnvil.Sdk.Diagnostics
         private const string DefaultLogFile = @"%TEMP%\wa-tap-selectors.log";
 
         protected override string Id => "WA-TAP-SEL-001";
+
         protected override string Name => "Tap Selectors (Diagnostics)";
+
         protected override string Recommendation => "Diagnostic tap — logs selector/Target data to the configured log file.";
+
         protected override TraceLevel DefaultSeverity => TraceLevel.Info;
+
+        protected override bool IsEnabledByDefault => false;
 
         protected override void ConfigureParameters(Rule<IActivityModel> rule)
         {
-            rule.DefaultIsEnabled = false;
             rule.Parameters.Add(LogFileKey, new Parameter
             {
                 Key = LogFileKey,
                 DefaultValue = DefaultLogFile,
                 Value = DefaultLogFile,
-                LocalizedDisplayName = "Log file path"
+                LocalizedDisplayName = "Log file path",
             });
         }
 
@@ -54,7 +60,9 @@ namespace WatchfulAnvil.Sdk.Diagnostics
         private static void LogMembers(string label, IEnumerable<IArgumentModel> args, string logFile)
         {
             foreach (var arg in args ?? Enumerable.Empty<IArgumentModel>())
+            {
                 RuleLogger.Log(label, $"{arg.DisplayName} => {arg.DefinedExpression ?? "<null>"}", logFile);
+            }
         }
 
         private static void LogProperties(string label, IEnumerable<IPropertyModel> props, string logFile, string prefix = "")
@@ -68,10 +76,14 @@ namespace WatchfulAnvil.Sdk.Diagnostics
                 LogProperties(label, prop.InternalProperties, logFile, path + ".");
 
                 foreach (var arg in prop.Arguments ?? Enumerable.Empty<IArgumentModel>())
+                {
                     RuleLogger.Log($"{label}.Argument", $"{path}.{arg.DisplayName} => {arg.DefinedExpression ?? "<null>"}", logFile);
+                }
 
                 foreach (var arg in prop.InternalArguments ?? Enumerable.Empty<IArgumentModel>())
+                {
                     RuleLogger.Log($"{label}.InternalArgument", $"{path}.{arg.DisplayName} => {arg.DefinedExpression ?? "<null>"}", logFile);
+                }
             }
         }
     }

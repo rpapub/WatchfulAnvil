@@ -15,11 +15,7 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Noop
         protected override string Recommendation => Strings.CPRIMA_WAIT_001_Recommendation;
         protected override TraceLevel DefaultSeverity => TraceLevel.Info;
         protected override string? DocumentationLink => "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPRIMA-NOOP-004";
-
-        protected override void ConfigureParameters(Rule<IProjectModel> rule)
-        {
-            rule.DefaultIsEnabled = false;
-        }
+        protected override bool IsEnabledByDefault => false;
 
         protected override InspectionResult Inspect(IProjectModel project, Rule rule)
         {

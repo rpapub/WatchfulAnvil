@@ -34,22 +34,4 @@ namespace WatchfulAnvil.Sdk.Common
                        ));
         }
     }
-
-    /// <summary>
-    /// Represents an argument defined in a XAML <c>x:Members</c> section,
-    /// including its annotation text as stored by UiPath Studio.
-    /// </summary>
-    public class XamlArgumentInfo
-    {
-        public string Name { get; }
-        public string Type { get; }
-        public string Annotation { get; }
-
-        public XamlArgumentInfo(string name, string type, string annotation)
-        {
-            Name = name;
-            Type = type;
-            Annotation = annotation;
-        }
-    }
 }

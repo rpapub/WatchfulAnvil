@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
@@ -25,7 +26,6 @@ public abstract class AnalyzerBase : IRegisterAnalyzerConfiguration
     public abstract void Initialize(IAnalyzerConfigurationService api);
 
     // ── InspectionResult factories ────────────────────────────────────────────
-
     protected static InspectionResult Pass()
         => new() { HasErrors = false };
 
@@ -35,7 +35,7 @@ public abstract class AnalyzerBase : IRegisterAnalyzerConfiguration
             HasErrors = true,
             RecommendationMessage = rule.RecommendationMessage,
             Messages = messages,
-            ErrorLevel = rule.DefaultErrorLevel
+            ErrorLevel = rule.DefaultErrorLevel,
         };
 
     protected static InspectionResult Fail(Rule rule, string message)
@@ -46,11 +46,10 @@ public abstract class AnalyzerBase : IRegisterAnalyzerConfiguration
         {
             HasErrors = false,
             ErrorLevel = TraceLevel.Info,
-            Messages = new List<string> { message }
+            Messages = new List<string> { message },
         };
 
     // ── Feature gate helper ───────────────────────────────────────────────────
-
     protected bool IsFeatureAvailable(IAnalyzerConfigurationService api)
         => RequiredFeature is null || api.HasFeature(RequiredFeature);
 }

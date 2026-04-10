@@ -2,8 +2,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+
 using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
@@ -19,19 +21,23 @@ namespace WatchfulAnvil.Sdk.Diagnostics
         private const string DefaultLogFile = @"%TEMP%\wa-tap-project.log";
 
         protected override string Id => "WA-TAP-PRJ-001";
+
         protected override string Name => "Tap Project (Diagnostics)";
+
         protected override string Recommendation => "Diagnostic tap — logs project metadata to the configured log file.";
+
         protected override TraceLevel DefaultSeverity => TraceLevel.Info;
+
+        protected override bool IsEnabledByDefault => false;
 
         protected override void ConfigureParameters(Rule<IProjectModel> rule)
         {
-            rule.DefaultIsEnabled = false;
             rule.Parameters.Add(LogFileKey, new Parameter
             {
                 Key = LogFileKey,
                 DefaultValue = DefaultLogFile,
                 Value = DefaultLogFile,
-                LocalizedDisplayName = "Log file path"
+                LocalizedDisplayName = "Log file path",
             });
         }
 

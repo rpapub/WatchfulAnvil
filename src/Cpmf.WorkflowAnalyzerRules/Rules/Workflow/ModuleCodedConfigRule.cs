@@ -1,7 +1,6 @@
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
-using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Workflow
@@ -18,16 +17,11 @@ namespace Cpmf.Rules.Workflow
             "(namespace may vary, e.g. MyProject.Config.CodedConfig).";
         protected override string? DocumentationLink =>
             "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-003";
+        protected override string[] RequiresAnyTag => new[] { "@module", "@pipeline" };
 
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
-                return new InspectionResult { HasErrors = false };
-
-            var annotation = workflow.Root.AnnotationText;
-            var isModule = AnnotationReader.HasTag(annotation, "@module");
-            var isPipeline = AnnotationReader.HasTag(annotation, "@pipeline");
-            if (!isModule && !isPipeline)
                 return new InspectionResult { HasErrors = false };
 
             var hasCodedConfig = workflow.Arguments != null &&

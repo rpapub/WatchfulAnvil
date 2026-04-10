@@ -19,6 +19,7 @@ namespace Cpmf.Rules.Pipeline
             "@domain-model:FullyQualifiedTypeName";
         protected override string? DocumentationLink =>
             "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-002";
+        protected override string[] RequiresAnyTag => new[] { "@pipeline" };
 
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
@@ -26,9 +27,6 @@ namespace Cpmf.Rules.Pipeline
                 return new InspectionResult { HasErrors = false };
 
             var annotation = workflow.Root.AnnotationText;
-            if (!AnnotationReader.HasTag(annotation, "@pipeline"))
-                return new InspectionResult { HasErrors = false };
-
             var typeName = AnnotationReader.GetTagValue(annotation, DomainModelKey);
             var messages = new List<string>();
 

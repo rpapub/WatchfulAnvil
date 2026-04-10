@@ -9,22 +9,6 @@ namespace WatchfulAnvil.Sdk.Core;
 /// </summary>
 public sealed class RuleCategory
 {
-    /// <summary>Short uppercase abbreviation used as the category segment in rule IDs.</summary>
-    public string Code { get; }
-
-    /// <summary>Human-readable category name.</summary>
-    public string Name { get; }
-
-    /// <summary>One-line description of what rules in this category check.</summary>
-    public string Description { get; }
-
-    private RuleCategory(string code, string name, string description)
-    {
-        Code        = code;
-        Name        = name;
-        Description = description;
-    }
-
     // ── Built-in categories ───────────────────────────────────────────────────
 
     /// <summary>Conventions for naming workflows, variables, arguments, and annotations.</summary>
@@ -87,7 +71,23 @@ public sealed class RuleCategory
         "Performance",
         "Detection of patterns with known performance impact: delays, infinite loops, large waits.");
 
+    private RuleCategory(string code, string name, string description)
+    {
+        Code = code;
+        Name = name;
+        Description = description;
+    }
+
     // ── Convenience ──────────────────────────────────────────────────────────
+
+    /// <summary>Short uppercase abbreviation used as the category segment in rule IDs.</summary>
+    public string Code { get; }
+
+    /// <summary>Human-readable category name.</summary>
+    public string Name { get; }
+
+    /// <summary>One-line description of what rules in this category check.</summary>
+    public string Description { get; }
 
     /// <inheritdoc cref="Code"/>
     public override string ToString() => Code;

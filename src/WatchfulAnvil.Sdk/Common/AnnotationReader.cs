@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using UiPath.Studio.Analyzer.Models;
 
 namespace WatchfulAnvil.Sdk.Common
@@ -49,8 +50,11 @@ namespace WatchfulAnvil.Sdk.Common
             foreach (var token in Tokenize(annotation))
             {
                 if (token.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                {
                     return token.Substring(prefix.Length);
+                }
             }
+
             return null;
         }
 
@@ -77,7 +81,6 @@ namespace WatchfulAnvil.Sdk.Common
             => IsNoCheck(workflow?.Root?.AnnotationText);
 
         // ── Internal ──────────────────────────────────────────────────────────
-
         private static IEnumerable<string> Tokenize(string? annotation)
             => annotation?.Split(new[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                ?? Enumerable.Empty<string>();

@@ -1,6 +1,10 @@
 using System.Diagnostics;
+using System.Linq;
+
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+
+using WatchfulAnvil.Sdk.Common;
 
 namespace WatchfulAnvil.Sdk.Core;
 
@@ -10,39 +14,87 @@ namespace WatchfulAnvil.Sdk.Core;
 /// Prefer the scope-typed aliases: <see cref="ActivityRule"/>, <see cref="WorkflowRule"/>,
 /// <see cref="ProjectRule"/>, <see cref="SummaryRule"/>.
 /// </summary>
-public abstract class ScopedRule<T> : RuleBase<T> where T : IInspectionObject
+public abstract class ScopedRule<T> : RuleBase<T>
+    where T : IInspectionObject
 {
     protected abstract string Id { get; }
+
     protected abstract string Name { get; }
+
     protected abstract string Recommendation { get; }
+
     protected virtual TraceLevel DefaultSeverity => TraceLevel.Error;
+
+    // Optional: omit to leave the documentation link unset.
     protected virtual string? DocumentationLink => null;
 
-    /// <summary>Override to add parameters to the rule.</summary>
-    protected virtual void ConfigureParameters(Rule<T> rule) { }
+    /// <summary>
+    /// Whether the rule is enabled by default. Override and return <c>false</c> to make the rule opt-in.
+    /// When <c>false</c>, users must explicitly enable the rule per-project in Studio.
+    /// </summary>
+    protected virtual bool IsEnabledByDefault => true;
 
-    protected abstract InspectionResult Inspect(T model, Rule rule);
+    /// <summary>
+    /// <c>Inspect</c> is called only if at least one of these tags is present on the model annotation (OR).
+    /// <c>null</c> (default) disables this filter.
+    /// </summary>
+    protected virtual string[]? RequiresAnyTag => null;
+
+    /// <summary>
+    /// <c>Inspect</c> is called only if all of these tags are present on the model annotation (AND).
+    /// <c>null</c> (default) disables this filter.
+    /// </summary>
+    protected virtual string[]? RequiresAllTags => null;
 
     public sealed override Rule<T> Get()
     {
-        var rule = new Rule<T>(Name, Id, Inspect);
+        var rule = new Rule<T>(Name, Id, FilteredInspect);
         rule.RecommendationMessage = Recommendation;
         rule.DefaultErrorLevel = DefaultSeverity;
         if (DocumentationLink != null)
+        {
             rule.DocumentationLink = DocumentationLink;
+        }
+
+        if (!IsEnabledByDefault)
+        {
+            rule.DefaultIsEnabled = false;
+        }
+
         ConfigureParameters(rule);
         return rule;
     }
+
+    /// <summary>Override to add parameters to the rule.</summary>
+    protected virtual void ConfigureParameters(Rule<T> rule)
+    {
+    }
+
+    protected abstract InspectionResult Inspect(T model, Rule rule);
+
+    private static string? GetAnnotation(T model) => model switch
+    {
+        IActivityModel a => a.AnnotationText,
+        IWorkflowModel w => w.Root?.AnnotationText,
+        _ => null,
+    };
+
+    private InspectionResult FilteredInspect(T model, Rule rule)
+    {
+        if (RequiresAllTags != null || RequiresAnyTag != null)
+        {
+            var annotation = GetAnnotation(model);
+            if (RequiresAllTags != null && !RequiresAllTags.All(t => AnnotationReader.HasTag(annotation, t)))
+            {
+                return Pass();
+            }
+
+            if (RequiresAnyTag != null && !RequiresAnyTag.Any(t => AnnotationReader.HasTag(annotation, t)))
+            {
+                return Pass();
+            }
+        }
+
+        return Inspect(model, rule);
+    }
 }
-
-/// <summary>Base class for rules that inspect individual activities.</summary>
-public abstract class ActivityRule : ScopedRule<IActivityModel> { }
-
-/// <summary>Base class for rules that inspect a single workflow file.</summary>
-public abstract class WorkflowRule : ScopedRule<IWorkflowModel> { }
-
-/// <summary>Base class for rules that inspect the full project model.</summary>
-public abstract class ProjectRule : ScopedRule<IProjectModel> { }
-
-/// <summary>Base class for rules that inspect the project summary.</summary>
-public abstract class SummaryRule : ScopedRule<IProjectSummary> { }

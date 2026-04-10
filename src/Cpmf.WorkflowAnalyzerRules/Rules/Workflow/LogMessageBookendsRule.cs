@@ -4,7 +4,6 @@ using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
-using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Workflow
@@ -26,6 +25,7 @@ namespace Cpmf.Rules.Workflow
             "end with a Log Message whose Message starts with the configured EndPrefix (default: \"Finished\").";
         protected override string? DocumentationLink =>
             "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-001";
+        protected override string[] RequiresAnyTag => new[] { "@module", "@unit" };
 
         protected override void ConfigureParameters(Rule<IWorkflowModel> rule)
         {
@@ -48,12 +48,6 @@ namespace Cpmf.Rules.Workflow
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
-                return new InspectionResult { HasErrors = false };
-
-            var annotation = workflow.Root.AnnotationText;
-            var isModule = AnnotationReader.HasTag(annotation, "@module");
-            var isUnit = AnnotationReader.HasTag(annotation, "@unit");
-            if (!isModule && !isUnit)
                 return new InspectionResult { HasErrors = false };
 
             var startPrefix = GetParameterValue(rule, StartPrefixKey, DefaultStartPrefix);

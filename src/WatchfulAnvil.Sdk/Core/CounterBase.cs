@@ -11,14 +11,17 @@ namespace WatchfulAnvil.Sdk.Core;
 /// Note: Counter Inspect receives IReadOnlyCollection&lt;T&gt;, not a single T.
 /// ErrorLevel for counters is always Info.
 /// </summary>
-public abstract class CounterBase<T> : AnalyzerBase where T : IInspectionObject
+public abstract class CounterBase<T> : AnalyzerBase
+    where T : IInspectionObject
 {
     public abstract Counter<T> Get();
 
     public override void Initialize(IAnalyzerConfigurationService api)
     {
         if (!IsFeatureAvailable(api))
+        {
             return;
+        }
 
         api.AddCounter<T>(Get());
     }

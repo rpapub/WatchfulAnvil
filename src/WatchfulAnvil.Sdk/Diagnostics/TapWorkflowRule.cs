@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Linq;
+
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+
 using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
@@ -17,19 +19,23 @@ namespace WatchfulAnvil.Sdk.Diagnostics
         private const string DefaultLogFile = @"%TEMP%\wa-tap-workflow.log";
 
         protected override string Id => "WA-TAP-WFL-001";
+
         protected override string Name => "Tap Workflow (Diagnostics)";
+
         protected override string Recommendation => "Diagnostic tap — logs workflow metadata to the configured log file.";
+
         protected override TraceLevel DefaultSeverity => TraceLevel.Info;
+
+        protected override bool IsEnabledByDefault => false;
 
         protected override void ConfigureParameters(Rule<IWorkflowModel> rule)
         {
-            rule.DefaultIsEnabled = false;
             rule.Parameters.Add(LogFileKey, new Parameter
             {
                 Key = LogFileKey,
                 DefaultValue = DefaultLogFile,
                 Value = DefaultLogFile,
-                LocalizedDisplayName = "Log file path"
+                LocalizedDisplayName = "Log file path",
             });
         }
 
@@ -45,7 +51,7 @@ namespace WatchfulAnvil.Sdk.Diagnostics
                 $"Args={workflow?.Arguments?.Count ?? -1}, " +
                 $"ImportedNamespaces={workflow?.ImportedNamespaces?.Count ?? -1}, " +
                 $"Assemblies={workflow?.Assemblies?.Count ?? -1}, " +
-                $"HasRoot={(workflow?.Root != null)}, " +
+                $"HasRoot={workflow?.Root != null}, " +
                 $"RootType={workflow?.Root?.GetType().Name ?? "<null>"}",
                 logFile);
 
@@ -75,18 +81,24 @@ namespace WatchfulAnvil.Sdk.Diagnostics
                 var last = children.LastOrDefault();
 
                 if (first != null)
+                {
                     RuleLogger.Log("RootFirstChild",
                         $"DisplayName={first.DisplayName}, ToolboxName={first.ToolboxName}, Type={first.Type}, Id={first.Id}",
                         logFile);
+                }
 
                 if (last != null && !ReferenceEquals(last, first))
+                {
                     RuleLogger.Log("RootLastChild",
                         $"DisplayName={last.DisplayName}, ToolboxName={last.ToolboxName}, Type={last.Type}, Id={last.Id}",
                         logFile);
+                }
             }
 
             if (workflow?.Root is IActivityModel rootForInvoke)
+            {
                 LogInvokeWorkflowCalls(rootForInvoke, logFile);
+            }
 
             return new InspectionResult { HasErrors = false };
         }
@@ -102,7 +114,9 @@ namespace WatchfulAnvil.Sdk.Diagnostics
             }
 
             foreach (var child in node.Children ?? Enumerable.Empty<IActivityModel>())
+            {
                 LogInvokeWorkflowCalls(child, logFile);
+            }
         }
     }
 }

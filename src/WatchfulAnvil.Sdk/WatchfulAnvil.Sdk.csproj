@@ -26,6 +26,10 @@
     <Compile Remove="Core\CounterBase.cs" />
     <Compile Remove="Core\RuleCategory.cs" />
     <Compile Remove="Core\ScopedRule.cs" />
+    <Compile Remove="Core\ActivityRule.cs" />
+    <Compile Remove="Core\WorkflowRule.cs" />
+    <Compile Remove="Core\ProjectRule.cs" />
+    <Compile Remove="Core\SummaryRule.cs" />
     <Compile Remove="Common\AnnotationReader.cs" />
     <Compile Remove="Diagnostics\TapActivityRule.cs" />
     <Compile Remove="Diagnostics\TapWorkflowRule.cs" />
@@ -34,9 +38,10 @@
     <Compile Remove="Diagnostics\TapSdkBypassRule.cs" />
   </ItemGroup>
 
-  <!-- net6.0 / net8.0: exclude StubRule (net461-only) -->
+  <!-- net6.0 / net8.0: exclude StubRule and StubRegistration (net461-only) -->
   <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
     <Compile Remove="Core\StubRule.cs" />
+    <Compile Remove="Core\StubRegistration.cs" />
   </ItemGroup>
 
   <!-- Package references per target -->
