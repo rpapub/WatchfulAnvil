@@ -8,13 +8,13 @@ namespace Cpmf.Rules.Workflow
     {
         private const string SpecificContentPattern = ".SpecificContent(";
 
-        protected override string Id => "CPMF-WFL-006";
+        protected override string Id => "CPMF-F001";
         protected override string Name => "SpecificContent Assignment Must Use MultipleAssign";
         protected override string Recommendation =>
             "Assignments to TransactionItem.SpecificContent(...) must always be inside a Multiple Assign activity. " +
             "Group all SpecificContent writes into a single Multiple Assign.";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-006";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-F001";
 
         protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {

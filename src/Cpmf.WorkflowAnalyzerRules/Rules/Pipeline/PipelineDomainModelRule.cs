@@ -11,14 +11,14 @@ namespace Cpmf.Rules.Pipeline
     {
         private const string DomainModelKey = "@domain-model";
 
-        protected override string Id => "CPMF-PLN-002";
+        protected override string Id => "CPMF-F003";
         protected override string Name => "Pipeline Domain Model";
         protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
         protected override string Recommendation =>
             "Workflows annotated @pipeline must declare their domain model on a second annotation line: " +
             "@domain-model:FullyQualifiedTypeName";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-002";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-F003";
         protected override string[] RequiresAnyTag => new[] { "@pipeline" };
 
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)

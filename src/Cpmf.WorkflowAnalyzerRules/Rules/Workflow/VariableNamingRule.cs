@@ -8,7 +8,7 @@ namespace Cpmf.Rules.Workflow
 {
     public class VariableNamingRule : ActivityRule
     {
-        protected override string Id => "CPMF-WFL-005";
+        protected override string Id => "CPMF-N001";
         protected override string Name => "Variable Naming Convention";
         protected override TraceLevel DefaultSeverity => TraceLevel.Warning;
         protected override string Recommendation =>
@@ -16,7 +16,7 @@ namespace Cpmf.Rules.Workflow
             "start with a lowercase letter and contain no underscores. " +
             "Avoid Hungarian notation prefixes (str_, int_, bool_, dt_, etc.).";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-005";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-N001";
 
         protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {

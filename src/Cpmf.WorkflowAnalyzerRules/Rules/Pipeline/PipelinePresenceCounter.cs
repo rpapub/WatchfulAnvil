@@ -10,13 +10,13 @@ namespace Cpmf.Rules.Pipeline
 {
     public class PipelinePresenceCounter : ProjectRule
     {
-        protected override string Id => "CPMF-PLN-C001";
+        protected override string Id => "CPMF-FC001";
         protected override string Name => "Pipeline Presence";
         protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
         protected override string Recommendation =>
             "A CPMF project must contain at least one workflow annotated @pipeline.";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-C001";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-FC001";
 
         protected override InspectionResult Inspect(IProjectModel project, Rule rule)
         {

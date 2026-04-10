@@ -5,18 +5,43 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Version>0.1.2-alpha</Version>
-		<FileVersion>0.1.2.0</FileVersion>
-		<AssemblyVersion>0.1.2.0</AssemblyVersion>
-		<InformationalVersion>0.1.2-alpha</InformationalVersion>
+		<Version>0.1.3-alpha</Version>
+		<FileVersion>0.1.3.0</FileVersion>
+		<AssemblyVersion>0.1.3.0</AssemblyVersion>
+		<InformationalVersion>0.1.3-alpha</InformationalVersion>
 		<Authors>Cpmf</Authors>
 		<Company>Cpmf</Company>
 		<PackageDescription>Custom UiPath Workflow Analyzer rules by Cpmf.</PackageDescription>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj" />
+		<ProjectReference Include="..\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
 	</ItemGroup>
+
+	<!-- ILRepack: merge WatchfulAnvil.Sdk.dll into Cpmf.WorkflowAnalyzerRules.dll (single self-contained assembly) -->
+	<ItemGroup>
+		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.34.2">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<Target Name="ILRepack" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
+		<ItemGroup>
+			<InputAssemblies Include="$(TargetDir)WatchfulAnvil.Sdk.dll" />
+		</ItemGroup>
+		<ILRepack
+			Parallel="true"
+			Internalize="true"
+			InputAssemblies="@(InputAssemblies)"
+			MainAssembly="$(TargetDir)$(AssemblyName).dll"
+			OutputFile="$(TargetDir)$(AssemblyName).dll"
+			TargetKind="Dll"
+			LibraryPath="$(TargetDir)"
+		/>
+	</Target>
 
 	<!-- net6.0: targets Studio Windows < 2024.10 (API 23.10.3) -->
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">

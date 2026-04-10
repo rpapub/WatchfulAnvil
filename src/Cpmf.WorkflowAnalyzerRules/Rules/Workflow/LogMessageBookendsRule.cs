@@ -15,7 +15,7 @@ namespace Cpmf.Rules.Workflow
         private const string DefaultStartPrefix = "Going to";
         private const string DefaultEndPrefix = "Finished";
 
-        protected override string Id => "CPMF-WFL-001";
+        protected override string Id => "CPMF-L001";
         protected override string Name => "Log Message Bookends";
         protected override TraceLevel DefaultSeverity => TraceLevel.Warning;
         protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
@@ -24,7 +24,7 @@ namespace Cpmf.Rules.Workflow
             "Message starts with the configured StartPrefix (default: \"Going to\") and " +
             "end with a Log Message whose Message starts with the configured EndPrefix (default: \"Finished\").";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-001";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-L001";
         protected override string[] RequiresAnyTag => new[] { "@module", "@unit" };
 
         protected override void ConfigureParameters(Rule<IWorkflowModel> rule)

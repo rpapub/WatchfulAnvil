@@ -9,13 +9,13 @@ namespace Cpmf.Rules.Workflow
     {
         private const string ArgumentName = "out_Status";
 
-        protected override string Id => "CPMF-WFL-002";
+        protected override string Id => "CPMF-U001";
         protected override string Name => "Unit Out Status Argument";
         protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
         protected override string Recommendation =>
             "Workflows annotated @unit must declare an Out argument named 'out_Status'.";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-002";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-U001";
         protected override string[] RequiresAnyTag => new[] { "@unit" };
 
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)

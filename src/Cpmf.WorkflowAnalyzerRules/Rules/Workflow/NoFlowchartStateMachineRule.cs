@@ -6,12 +6,12 @@ namespace Cpmf.Rules.Workflow
 {
     public class NoFlowchartStateMachineRule : ActivityRule
     {
-        protected override string Id => "CPMF-WFL-004";
+        protected override string Id => "CPMF-U003";
         protected override string Name => "No Flowchart or State Machine";
         protected override string Recommendation =>
             "Flowchart and State Machine activities are not permitted. Use Sequence instead.";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-004";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-U003";
 
         protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {

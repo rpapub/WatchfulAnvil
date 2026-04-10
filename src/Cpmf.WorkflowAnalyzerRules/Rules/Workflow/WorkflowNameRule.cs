@@ -7,7 +7,7 @@ namespace Cpmf.Rules.Workflow
 {
     public class WorkflowNameRule : WorkflowRule
     {
-        protected override string Id => "CPMF-WFL-007";
+        protected override string Id => "CPMF-N002";
         protected override string Name => "Workflow Filename Is Valid .NET Identifier";
         protected override string Recommendation =>
             "The workflow filename (without extension) must be a valid .NET PascalCase identifier: " +
@@ -15,7 +15,7 @@ namespace Cpmf.Rules.Workflow
             "and not start with a digit. " +
             "UiPath Coded Workflows generate a partial base class named after the filename.";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-007";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-N002";
 
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {

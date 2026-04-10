@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <IsPackable>false</IsPackable>
     <Version>0.1.2-alpha</Version>
     <Authors>WatchfulAnvil</Authors>
     <Company>WatchfulAnvil</Company>

@@ -17,7 +17,7 @@ categories:
     description: Rules for how logic is sequenced and composed, including pipeline-oriented processing style.
 
 rules:
-  - id: CPMF-WFL-001
+  - id: CPMF-L001
     className: LogMessageBookendsRule
     name: Log Message Bookends
     description: "Workflows annotated @module or @unit must have matching bookend Log Messages at start and end."
@@ -28,7 +28,7 @@ rules:
     defaultSeverity: Warning
     defaultIsEnabled: true
     requiredFeature: WorkflowAnalyzerV9
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-001"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-L001"
     parameters:
       - key: StartPrefix
         displayName: Start log message prefix
@@ -37,7 +37,7 @@ rules:
         displayName: End log message prefix
         defaultValue: Finished
 
-  - id: CPMF-WFL-002
+  - id: CPMF-U001
     className: UnitOutStatusRule
     name: Unit Out Status Argument
     description: "Workflows annotated @unit must declare an Out argument named out_Status."
@@ -48,10 +48,10 @@ rules:
     defaultSeverity: Error
     defaultIsEnabled: true
     requiredFeature: WorkflowAnalyzerV9
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-002"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-U001"
     parameters: []
 
-  - id: CPMF-WFL-003
+  - id: CPMF-U002
     className: ModuleCodedConfigRule
     name: CodedConfig Argument
     description: "Workflows annotated @module or @pipeline must declare an In argument of type CodedConfig."
@@ -62,10 +62,10 @@ rules:
     defaultSeverity: Error
     defaultIsEnabled: true
     requiredFeature: WorkflowAnalyzerV9
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-003"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-U002"
     parameters: []
 
-  - id: CPMF-WFL-004
+  - id: CPMF-U003
     className: NoFlowchartStateMachineRule
     name: No Flowchart or State Machine
     description: "Flowchart and State Machine activities are not permitted in any workflow."
@@ -76,10 +76,10 @@ rules:
     defaultSeverity: Error
     defaultIsEnabled: true
     requiredFeature: null
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-004"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-U003"
     parameters: []
 
-  - id: CPMF-WFL-005
+  - id: CPMF-N001
     className: VariableNamingRule
     name: Variable Naming Convention
     description: "Variable names must follow .NET camelCase conventions without underscores."
@@ -90,10 +90,10 @@ rules:
     defaultSeverity: Warning
     defaultIsEnabled: true
     requiredFeature: null
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-005"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-N001"
     parameters: []
 
-  - id: CPMF-WFL-006
+  - id: CPMF-F001
     className: SpecificContentAssignRule
     name: SpecificContent Assignment Must Use MultipleAssign
     description: "Assignments to TransactionItem.SpecificContent must be inside a Multiple Assign activity."
@@ -104,10 +104,10 @@ rules:
     defaultSeverity: Error
     defaultIsEnabled: true
     requiredFeature: null
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-006"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-F001"
     parameters: []
 
-  - id: CPMF-WFL-007
+  - id: CPMF-N002
     className: WorkflowNameRule
     name: Workflow Filename Is Valid .NET Identifier
     description: "The workflow filename must be a valid .NET PascalCase identifier."
@@ -118,10 +118,10 @@ rules:
     defaultSeverity: Error
     defaultIsEnabled: true
     requiredFeature: null
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-007"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-N002"
     parameters: []
 
-  - id: CPMF-WFL-008
+  - id: CPMF-U004
     className: StaleInvokeArgumentsRule
     name: InvokeWorkflowFile Argument Count Mismatch
     description: "The argument count on an InvokeWorkflowFile must match the target workflow."
@@ -132,10 +132,10 @@ rules:
     defaultSeverity: Error
     defaultIsEnabled: true
     requiredFeature: WorkflowAnalyzerV9
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-008"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-U004"
     parameters: []
 
-  - id: CPMF-PLN-001
+  - id: CPMF-F002
     className: PipelineSequenceOrderRule
     name: Pipeline Structure
     description: "Workflows annotated @pipeline must have the required argument, structure, and stage sequence."
@@ -146,13 +146,13 @@ rules:
     defaultSeverity: Error
     defaultIsEnabled: true
     requiredFeature: WorkflowAnalyzerV9
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-001"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-F002"
     parameters:
       - key: Stages
         displayName: Pipeline Stages (ordered, comma-separated)
         defaultValue: "Initialize,Ingest,Enrich,Decide,Execute,Complete,Finalize"
 
-  - id: CPMF-PLN-002
+  - id: CPMF-F003
     className: PipelineDomainModelRule
     name: Pipeline Domain Model
     description: "Workflows annotated @pipeline must declare their domain model type in the annotation."
@@ -163,10 +163,10 @@ rules:
     defaultSeverity: Error
     defaultIsEnabled: true
     requiredFeature: WorkflowAnalyzerV9
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-002"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-F003"
     parameters: []
 
-  - id: CPMF-PLN-003
+  - id: CPMF-N003
     className: ProjectNameRule
     name: Project Name Is Valid .NET Identifier
     description: "The project name must be a valid .NET PascalCase identifier."
@@ -177,10 +177,10 @@ rules:
     defaultSeverity: Error
     defaultIsEnabled: true
     requiredFeature: null
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-003"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-N003"
     parameters: []
 
-  - id: CPMF-PLN-C001
+  - id: CPMF-FC001
     className: PipelinePresenceCounter
     name: Pipeline Presence
     description: "The project must contain at least one workflow annotated @pipeline."
@@ -191,5 +191,5 @@ rules:
     defaultSeverity: Error
     defaultIsEnabled: true
     requiredFeature: WorkflowAnalyzerV9
-    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-C001"
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-FC001"
     parameters: []

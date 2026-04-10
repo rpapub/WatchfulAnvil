@@ -9,14 +9,14 @@ namespace Cpmf.Rules.Workflow
     {
         private const string TypeSimpleName = "CodedConfig";
 
-        protected override string Id => "CPMF-WFL-003";
+        protected override string Id => "CPMF-U002";
         protected override string Name => "CodedConfig Argument";
         protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
         protected override string Recommendation =>
             "Workflows annotated @module or @pipeline must declare an In argument of type CodedConfig " +
             "(namespace may vary, e.g. MyProject.Config.CodedConfig).";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-003";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-U002";
         protected override string[] RequiresAnyTag => new[] { "@module", "@pipeline" };
 
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)

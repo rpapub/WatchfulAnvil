@@ -73,7 +73,7 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Pipeline
             _rule.Initialize(api.Object);
             api.Verify(s => s.AddRule(
                 It.Is<Rule<IWorkflowModel>>(r =>
-                    r.Id == "CPMF-PLN-001" &&
+                    r.Id == "CPMF-F002" &&
                     r.DefaultErrorLevel == TraceLevel.Error)));
         }
 

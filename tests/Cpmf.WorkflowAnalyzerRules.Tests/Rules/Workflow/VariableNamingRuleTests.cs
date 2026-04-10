@@ -40,7 +40,7 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Workflow
             _rule.Initialize(api.Object);
             api.Verify(s => s.AddRule(
                 It.Is<Rule<IActivityModel>>(r =>
-                    r.Id == "CPMF-WFL-005" &&
+                    r.Id == "CPMF-N001" &&
                     r.DefaultErrorLevel == TraceLevel.Warning)));
         }
 

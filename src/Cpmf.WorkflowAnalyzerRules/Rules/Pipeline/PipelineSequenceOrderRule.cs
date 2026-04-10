@@ -13,7 +13,7 @@ namespace Cpmf.Rules.Pipeline
         private const string StagesKey = "Stages";
         private const string DefaultStages = "Initialize,Ingest,Enrich,Decide,Execute,Complete,Finalize";
 
-        protected override string Id => "CPMF-PLN-001";
+        protected override string Id => "CPMF-F002";
         protected override string Name => "Pipeline Structure";
         protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
         protected override string Recommendation =>
@@ -21,7 +21,7 @@ namespace Cpmf.Rules.Pipeline
             "(1) declare an In argument 'in_TransactionItem' of type UiPath.Core.QueueItem; " +
             "(2) contain the configured pipeline stages as direct children of the root, in that order.";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-001";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-F002";
         protected override string[] RequiresAnyTag => new[] { "@pipeline" };
 
         protected override void ConfigureParameters(Rule<IWorkflowModel> rule)

@@ -68,7 +68,7 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests
         [Fact]
         public void PipelineStructureRule_HasCorrectMetadata()
         {
-            var rule = CaptureActual().Single(r => r.Id == "CPMF-PLN-001");
+            var rule = CaptureActual().Single(r => r.Id == "CPMF-F002");
             Assert.Equal(TraceLevel.Error, rule.DefaultErrorLevel);
             Assert.Equal("Pipeline Structure", rule.Name);
         }
@@ -76,7 +76,7 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests
         [Fact]
         public void PipelinePresenceCounter_HasCorrectMetadata()
         {
-            var rule = CaptureActual().Single(r => r.Id == "CPMF-PLN-C001");
+            var rule = CaptureActual().Single(r => r.Id == "CPMF-FC001");
             Assert.Equal(TraceLevel.Error, rule.DefaultErrorLevel);
             Assert.Equal("Pipeline Presence", rule.Name);
         }

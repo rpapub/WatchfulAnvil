@@ -6,14 +6,14 @@ namespace Cpmf.Rules.Pipeline
 {
     public class ProjectNameRule : ProjectRule
     {
-        protected override string Id => "CPMF-PLN-003";
+        protected override string Id => "CPMF-N003";
         protected override string Name => "Project Name Is Valid .NET Identifier";
         protected override string Recommendation =>
             "The project name must be a valid .NET PascalCase identifier: " +
             "start with an uppercase letter, contain only letters, digits, and underscores, " +
             "and not start with a digit. The project name is used as the root namespace.";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-PLN-003";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-N003";
 
         protected override InspectionResult Inspect(IProjectModel project, Rule rule)
         {

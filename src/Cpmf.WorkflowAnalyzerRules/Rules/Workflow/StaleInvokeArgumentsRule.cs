@@ -16,14 +16,14 @@ namespace Cpmf.Rules.Workflow
         private static readonly XNamespace Sap2010Ns =
             XNamespace.Get("http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation");
 
-        protected override string Id => "CPMF-WFL-008";
+        protected override string Id => "CPMF-U004";
         protected override string Name => "InvokeWorkflowFile Argument Count Mismatch";
         protected override string? RequiredFeature => DesignFeatureKeys.WorkflowAnalyzerV9;
         protected override string Recommendation =>
             "The number of arguments bound on an Invoke Workflow File activity does not match " +
             "the number declared in the target workflow. Update the argument mappings.";
         protected override string? DocumentationLink =>
-            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-WFL-008";
+            "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-U004";
 
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {

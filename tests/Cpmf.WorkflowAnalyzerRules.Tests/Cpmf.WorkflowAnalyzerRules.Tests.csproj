@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Cpmf.WorkflowAnalyzerRules\Cpmf.WorkflowAnalyzerRules.csproj" />
+    <ProjectReference Include="..\..\src\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj" />
   </ItemGroup>
 
 </Project>
