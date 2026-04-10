@@ -1,29 +1,21 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using UiPath.Studio.Activities.Api;
-using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
-using System.Collections.Generic;
 using CPRIMA.WorkflowAnalyzerRules.Common;
+using WatchfulAnvil.Sdk.Core;
 
 namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
 {
-    public class TapSelectorsRule : IRegisterAnalyzerConfiguration
+    public class TapSelectorsRule : ActivityRule
     {
-        private const string RuleId = "CPRIMA-TAP-SELECTORS-001";
+        protected override string Id => "CPRIMA-TAP-SELECTORS-001";
+        protected override string Name => "Tap Selectors Rule";
+        protected override string Recommendation => "Logs all structured selector data under 'Target' for diagnostic analysis.";
+        protected override TraceLevel DefaultSeverity => TraceLevel.Info;
 
-        public void Initialize(IAnalyzerConfigurationService config) =>
-            config.AddRule<IActivityModel>(Get());
-
-        public Rule<IActivityModel> Get() =>
-            new Rule<IActivityModel>("Tap Selectors Rule", RuleId, InspectActivity)
-            {
-                RecommendationMessage = "Logs all structured selector data under 'Target' for diagnostic analysis.",
-                DefaultErrorLevel = TraceLevel.Info
-            };
-
-        private InspectionResult InspectActivity(IActivityModel activity, Rule rule)
+        protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {
             var targetProp = activity.Properties.FirstOrDefault(p => p.DisplayName == "Target");
             if (targetProp != null)
@@ -54,7 +46,6 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
                 string path = $"{prefix}{prop.DisplayName}";
                 RuleLogger.LogAndReturn($"{label}", $"{path} => {prop.DefinedExpression ?? "<null>"}");
 
-                // Dive deeper into nested structures
                 LogProperties(label, prop.Properties, path + ".");
                 LogProperties(label, prop.InternalProperties, path + ".");
 
@@ -69,6 +60,5 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
                 }
             }
         }
-
     }
 }

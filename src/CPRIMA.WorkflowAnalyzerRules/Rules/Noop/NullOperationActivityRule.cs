@@ -1,32 +1,20 @@
 using System.Diagnostics;
-using UiPath.Studio.Activities.Api;
-using UiPath.Studio.Activities.Api.Analyzer;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
 using CPRIMA.WorkflowAnalyzerRules.LocalizationResources;
+using WatchfulAnvil.Sdk.Core;
 
 namespace CPRIMA.WorkflowAnalyzerRules.Rules.Noop
 {
-    public class NullOperationActivityRule : IRegisterAnalyzerConfiguration
+    public class NullOperationActivityRule : ActivityRule
     {
-        private const string RuleId = "CPRIMA-NOOP-003";
+        protected override string Id => "CPRIMA-NOOP-003";
+        protected override string Name => Strings.CPRIMA_NOOP_003_Name;
+        protected override string Recommendation => Strings.CPRIMA_NOOP_003_Recommendation;
+        protected override TraceLevel DefaultSeverity => TraceLevel.Info;
+        protected override string? DocumentationLink => "https://github.com/rpapub/WatchfulAnvil";
 
-        public Rule<IActivityModel> Get()
-        {
-            return new Rule<IActivityModel>(Strings.CPRIMA_NOOP_003_Name, RuleId, InspectActivity)
-            {
-                RecommendationMessage = Strings.CPRIMA_NOOP_003_Recommendation,
-                DefaultErrorLevel = TraceLevel.Info,
-                DocumentationLink = "https://github.com/rpapub/WatchfulAnvil"
-            };
-        }
-
-        public void Initialize(IAnalyzerConfigurationService workflowAnalyzerConfigService)
-        {
-            workflowAnalyzerConfigService.AddRule<IActivityModel>(Get());
-        }
-
-        private InspectionResult InspectActivity(IActivityModel activity, Rule configuredRule)
+        protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {
             return new InspectionResult { HasErrors = false };
         }

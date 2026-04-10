@@ -1,13 +1,11 @@
 using System.Diagnostics;
-using UiPath.Studio.Activities.Api;
-using UiPath.Studio.Activities.Api.Analyzer;
-using UiPath.Studio.Activities.Api.Analyzer.Rules;
-using UiPath.Studio.Analyzer.Models;
-using CPRIMA.WorkflowAnalyzerRules.LocalizationResources;
-using CPRIMA.WorkflowAnalyzerRules.Common;
 using System.Linq;
 using System;
+using UiPath.Studio.Activities.Api.Analyzer.Rules;
+using UiPath.Studio.Analyzer.Models;
 using UiPath.Studio.Activities.Api.PackageBindings;
+using CPRIMA.WorkflowAnalyzerRules.Common;
+using WatchfulAnvil.Sdk.Core;
 
 namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
 {
@@ -18,28 +16,17 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
     /// <remarks>
     /// Useful for understanding the structure of UiPath activities and for generating activity-level reports.
     /// </remarks>
-    public class TapActivityRule : IRegisterAnalyzerConfiguration
+    public class TapActivityRule : ActivityRule
     {
-        private const string RuleId = "CPRIMA-TAP-005";
-
-        public void Initialize(IAnalyzerConfigurationService config) =>
-            config.AddRule<IActivityModel>(Get());
-
-        public Rule<IActivityModel> Get() =>
-            new Rule<IActivityModel>("Tap Activity Rule", RuleId, InspectActivity)
-            {
-                // TODO: Move this recommendation message to localization resources.
-                RecommendationMessage = "You are in Activity mode.",
-                DefaultErrorLevel = TraceLevel.Info
-            };
+        protected override string Id => "CPRIMA-TAP-005";
+        protected override string Name => "Tap Activity Rule";
+        protected override string Recommendation => "You are in Activity mode.";
+        protected override TraceLevel DefaultSeverity => TraceLevel.Info;
 
         /// <summary>
         /// Logs activity metadata, arguments, properties, internal elements, package bindings, and parent info.
         /// </summary>
-        /// <param name="activity">The activity model.</param>
-        /// <param name="_">The rule metadata (unused).</param>
-        /// <returns>InspectionResult indicating if any errors were found (always false for this probing rule).</returns>
-        private InspectionResult InspectActivity(IActivityModel activity, Rule _)
+        protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {
             LogBasicInfo(activity);
             LogArguments(activity);
@@ -69,24 +56,14 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
                 {
                     RuleLogger.LogAndReturn("SelectorTargetMatch", $"{prop.DisplayName} = {prop.DefinedExpression}");
                 }
-
             }
-
 
             return new InspectionResult { HasErrors = false };
         }
 
         /// <summary>
         /// Traverses the activity tree to find the top-level (root) container.
-        /// Assumes <paramref name="activity"/> is non-null; throws if not.
         /// </summary>
-        /// <param name="activity">The activity to start from.</param>
-        /// <returns>The root activity in the hierarchy.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="activity"/> is null.</exception>
-        /// <remarks>
-        /// TODO: Evaluate whether this method should support nullable input for broader compatibility scenarios,
-        /// especially if invoked in contexts where null activities are legitimate (e.g., defensive logging).
-        /// </remarks>
         private IActivityModel FindRootContainer(IActivityModel activity)
         {
             if (activity == null)
@@ -103,14 +80,8 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
             return current;
         }
 
-
-
-        /// <summary>
-        /// Logs basic information about the activity.
-        /// </summary>
         private void LogBasicInfo(IActivityModel activity)
         {
-            // TODO: Move all user-facing log messages to localization resources.
             RuleLogger.LogAndReturn("ActivityRule", activity?.DisplayName ?? "<null>");
             RuleLogger.LogAndReturn("ActivityTap",
                 $"DisplayName={activity?.DisplayName ?? "<null>"}, " +
@@ -126,9 +97,6 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
                 $"UiPathActivityTypeId={activity?.UiPathActivityTypeId ?? "<null>"}");
         }
 
-        /// <summary>
-        /// Logs all arguments, internal arguments, and delegate arguments of the activity.
-        /// </summary>
         private void LogArguments(IActivityModel activity)
         {
             RuleLogger.LogAndReturn("ActivityArguments", RuleLogger.FormatArguments(activity?.Arguments ?? Enumerable.Empty<IArgumentModel>()));
@@ -148,9 +116,6 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
             }
         }
 
-        /// <summary>
-        /// Logs all properties of the activity.
-        /// </summary>
         private void LogProperties(IActivityModel activity)
         {
             foreach (var prop in activity?.Properties ?? Enumerable.Empty<IPropertyModel>())
@@ -160,9 +125,6 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
             }
         }
 
-        /// <summary>
-        /// Logs all internal properties and object references of the activity.
-        /// </summary>
         private void LogInternalElements(IActivityModel activity)
         {
             foreach (var prop in activity?.InternalProperties ?? Enumerable.Empty<IPropertyModel>())
@@ -177,9 +139,6 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
             }
         }
 
-        /// <summary>
-        /// Logs all package bindings of the activity.
-        /// </summary>
         private void LogPackageBindings(IActivityModel activity)
         {
             foreach (var binding in activity?.PackageBindings ?? Enumerable.Empty<IPackageBindingModel>())
@@ -188,16 +147,9 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
             }
         }
 
-        /// <summary>
-        /// Logs the parent activity, if any.
-        /// </summary>
         private void LogParent(IActivityModel activity)
         {
             RuleLogger.LogAndReturn("ParentActivity", activity?.Parent?.DisplayName ?? "<null>");
         }
-
-        // TODO: Move all user-facing log messages to localization resources.
-        // TODO: Write and publish documentation for this rule at a public URL.
-        //       Add the documentation URL to the rule metadata or as a comment here.
     }
 }

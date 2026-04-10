@@ -1,11 +1,9 @@
 using System.Diagnostics;
-using UiPath.Studio.Activities.Api;
-using UiPath.Studio.Activities.Api.Analyzer;
+using System.Linq;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
-using CPRIMA.WorkflowAnalyzerRules.LocalizationResources;
 using CPRIMA.WorkflowAnalyzerRules.Common;
-using System.Linq;
+using WatchfulAnvil.Sdk.Core;
 
 namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
 {
@@ -16,30 +14,18 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
     /// <remarks>
     /// Useful for understanding the structure of UiPath workflows and for generating workflow-level reports.
     /// </remarks>
-    public class TapWorkflowRule : IRegisterAnalyzerConfiguration
+    public class TapWorkflowRule : WorkflowRule
     {
-        private const string RuleId = "CPRIMA-TAP-001";
-
-        public void Initialize(IAnalyzerConfigurationService config) =>
-            config.AddRule<IWorkflowModel>(Get());
-
-        public Rule<IWorkflowModel> Get() =>
-            new Rule<IWorkflowModel>("Tap Workflow Rule", RuleId, InspectWorkflow)
-            {
-                // TODO: Move this recommendation message to localization resources.
-                RecommendationMessage = "You are in Workflow mode.",
-                DefaultErrorLevel = TraceLevel.Info
-            };
+        protected override string Id => "CPRIMA-TAP-001";
+        protected override string Name => "Tap Workflow Rule";
+        protected override string Recommendation => "You are in Workflow mode.";
+        protected override TraceLevel DefaultSeverity => TraceLevel.Info;
 
         /// <summary>
         /// Logs workflow metadata, root activity details, and information about invoked workflows.
         /// </summary>
-        /// <param name="workflow">The workflow model.</param>
-        /// <param name="_">The rule metadata (unused).</param>
-        /// <returns>InspectionResult indicating if any errors were found (always false for this probing rule).</returns>
-        private InspectionResult InspectWorkflow(IWorkflowModel workflow, Rule _)
+        protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
-            // Log basic workflow information
             RuleLogger.LogAndReturn("WorkflowRule", workflow?.DisplayName ?? "<null>");
             RuleLogger.LogAndReturn("WorkflowArguments", RuleLogger.FormatArguments(workflow?.Arguments ?? Enumerable.Empty<IArgumentModel>()));
             RuleLogger.LogAndReturn("WorkflowTap",
@@ -52,7 +38,6 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
                 $"RootType={workflow?.Root?.GetType().Name ?? "<null>"}"
             );
 
-            // Log root activity details if present
             if (workflow?.Root is IActivityModel root)
             {
                 RuleLogger.LogAndReturn("RootActivity",
@@ -72,7 +57,6 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
                 );
             }
 
-            // Log first and last child of the root activity, if any
             if (workflow?.Root?.Children != null && workflow.Root.Children.Any())
             {
                 var children = workflow.Root.Children.ToList();
@@ -89,15 +73,12 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
                         $"DisplayName={last.DisplayName}, ToolboxName={last.ToolboxName}, Type={last.Type}, Id={last.Id}");
             }
 
-            // Recursively log all InvokeWorkflowFile calls in the activity tree
             void LogInvokeWorkflowCalls(IActivityModel node)
             {
                 if (node.Type?.Contains("InvokeWorkflowFile") == true)
                 {
                     var wfFileProp = node.Properties.FirstOrDefault(p => p.DisplayName == "WorkflowFileName");
                     var wfFileName = wfFileProp?.DefinedExpression ?? "<not set>";
-
-                    var argSummary = RuleLogger.FormatArguments(node.Arguments ?? Enumerable.Empty<IArgumentModel>());
 
                     RuleLogger.LogAndReturn("InvokeWorkflowCall",
                         $"DisplayName={node.DisplayName}, WorkflowFileName={wfFileName}, Id={node.Id}");
@@ -116,9 +97,5 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
 
             return new InspectionResult { HasErrors = false };
         }
-
-        // TODO: Move all user-facing log messages to localization resources.
-        // TODO: Write and publish documentation for this rule at a public URL.
-        //       Add the documentation URL to the rule metadata or as a comment here.
     }
 }
