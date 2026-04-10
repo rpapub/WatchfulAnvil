@@ -85,9 +85,18 @@ public abstract class ScopedRule<T> : RuleBase<T>
 
     private InspectionResult FilteredInspect(T model, Rule rule)
     {
+        var annotation = GetAnnotation(model);
+
+        // @nocheck suppresses all rules on this model.
+        if (AnnotationReader.IsNoCheck(annotation))
+            return Pass();
+
+        // @suppress:RULE-ID suppresses this specific rule on this model.
+        if (AnnotationReader.IsSuppressed(annotation, Id))
+            return Pass();
+
         if (RequiresAllTags != null || RequiresAnyTag != null)
         {
-            var annotation = GetAnnotation(model);
             if (RequiresAllTags != null && !RequiresAllTags.All(t => AnnotationReader.HasTag(annotation, t)))
             {
                 return Pass();

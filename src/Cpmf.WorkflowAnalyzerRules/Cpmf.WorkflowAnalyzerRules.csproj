@@ -5,10 +5,10 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Version>0.1.9-alpha</Version>
-		<FileVersion>0.1.9.0</FileVersion>
-		<AssemblyVersion>0.1.9.0</AssemblyVersion>
-		<InformationalVersion>0.1.9-alpha</InformationalVersion>
+		<Version>0.1.10-alpha</Version>
+		<FileVersion>0.1.10.0</FileVersion>
+		<AssemblyVersion>0.1.10.0</AssemblyVersion>
+		<InformationalVersion>0.1.10-alpha</InformationalVersion>
 		<Authors>Cpmf</Authors>
 		<Company>Cpmf</Company>
 		<PackageDescription>Custom UiPath Workflow Analyzer rules by Cpmf.</PackageDescription>
