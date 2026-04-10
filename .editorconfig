@@ -59,7 +59,7 @@ dotnet_naming_style.camel_case_underscore_style.required_prefix = _
 dotnet_diagnostic.SA1101.severity = none        # no this. prefix required
 dotnet_diagnostic.SA1200.severity = none        # using directives outside namespace
 dotnet_diagnostic.SA1309.severity = none        # allow _camelCase private fields
-dotnet_diagnostic.SA1633.severity = suggestion  # copyright header — planned, not yet enforced
+dotnet_diagnostic.SA1633.severity = warning     # copyright header required (Apache 2.0)
 
 ##################################################
 # PowerShell Scripts

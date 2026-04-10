@@ -8,13 +8,5 @@
     <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
   </PropertyGroup>
 
-  <!-- StyleCop.Analyzers: dev-only, does not flow to consumers of NuGet packages -->
-  <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
-  </ItemGroup>
 
 </Project>
