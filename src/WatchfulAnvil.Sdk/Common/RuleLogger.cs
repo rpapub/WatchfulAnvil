@@ -9,18 +9,31 @@ namespace WatchfulAnvil.Sdk.Common
 {
     public static class RuleLogger
     {
-        public static InspectionResult LogAndReturn(string label, object data)
-        {
-            var safeData = data?.ToString() ?? "<null>";
-            var message = $"{DateTime.Now:HH:mm:ss} | {label}: {safeData}{Environment.NewLine}";
-            var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "analyzer_log.txt");
+        private static readonly string DefaultLogFile =
+            Path.Combine(Path.GetTempPath(), "analyzer_log.txt");
 
-            using (var stream = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+        /// <summary>
+        /// Appends a timestamped entry to the specified file.
+        /// The path may contain environment variable references (e.g. %TEMP%) which are expanded at runtime.
+        /// </summary>
+        public static void Log(string label, object data, string filePath)
+        {
+            var resolved = Environment.ExpandEnvironmentVariables(filePath ?? DefaultLogFile);
+            var message = $"{DateTime.Now:HH:mm:ss} | {label}: {data?.ToString() ?? "<null>"}{Environment.NewLine}";
+
+            using (var stream = new FileStream(resolved, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
             using (var writer = new StreamWriter(stream))
             {
                 writer.Write(message);
             }
+        }
 
+        /// <summary>
+        /// Convenience overload that writes to the default log file and returns an empty InspectionResult.
+        /// </summary>
+        public static InspectionResult LogAndReturn(string label, object data)
+        {
+            Log(label, data, DefaultLogFile);
             return new InspectionResult { HasErrors = false };
         }
 

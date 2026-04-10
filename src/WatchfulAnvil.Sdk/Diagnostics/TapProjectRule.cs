@@ -7,30 +7,41 @@ using UiPath.Studio.Analyzer.Models;
 using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
-namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
+namespace WatchfulAnvil.Sdk.Diagnostics
 {
     /// <summary>
-    /// Probing rule that logs detailed project-level metadata for diagnostics and reverse engineering.
-    /// This rule does not enforce constraints, but provides a snapshot of the project structure and configuration.
+    /// Diagnostic tap rule that logs detailed project-level metadata to a configurable log file.
+    /// Disabled by default. Enable per-project in Workflow Analyzer settings.
     /// </summary>
-    /// <remarks>
-    /// Useful for understanding the structure of UiPath projects and for generating project-level reports.
-    /// </remarks>
     public class TapProjectRule : ProjectRule
     {
-        protected override string Id => "CPRIMA-TAP-003";
-        protected override string Name => "Tap Project Rule";
-        protected override string Recommendation => "You are in Project mode.";
+        private const string LogFileKey = "LogFile";
+        private const string DefaultLogFile = @"%TEMP%\wa-tap-project.log";
+
+        protected override string Id => "WA-TAP-PRJ-001";
+        protected override string Name => "Tap Project (Diagnostics)";
+        protected override string Recommendation => "Diagnostic tap — logs project metadata to the configured log file.";
         protected override TraceLevel DefaultSeverity => TraceLevel.Info;
 
-        /// <summary>
-        /// Logs project metadata and attempts to create or clear a Todo.md file in the project root.
-        /// </summary>
+        protected override void ConfigureParameters(Rule<IProjectModel> rule)
+        {
+            rule.DefaultIsEnabled = false;
+            rule.Parameters.Add(LogFileKey, new Parameter
+            {
+                Key = LogFileKey,
+                DefaultValue = DefaultLogFile,
+                Value = DefaultLogFile,
+                LocalizedDisplayName = "Log file path"
+            });
+        }
+
         protected override InspectionResult Inspect(IProjectModel project, Rule rule)
         {
-            RuleLogger.LogAndReturn("ProjectRule triggered", project?.DisplayName ?? "<null>");
-            RuleLogger.LogAndReturn("ProjectRule Count", project?.Workflows?.Count.ToString() ?? "<null>");
-            RuleLogger.LogAndReturn("ProjectTap",
+            var logFile = rule.Parameters[LogFileKey]?.Value ?? DefaultLogFile;
+
+            RuleLogger.Log("ProjectRule triggered", project?.DisplayName ?? "<null>", logFile);
+            RuleLogger.Log("ProjectRule Count", project?.Workflows?.Count.ToString() ?? "<null>", logFile);
+            RuleLogger.Log("ProjectTap",
                 $"Name={project?.DisplayName ?? "<null>"}, " +
                 $"Path={project?.ProjectFilePath ?? "<null>"}, " +
                 $"Directory={project?.Directory ?? "<null>"}, " +
@@ -50,27 +61,26 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
                 $"Templates=[{string.Join(";", project?.Templates?.Select(t => t.ToString()) ?? new[] { "<none>" })}], " +
                 $"AutomationHubIdeaUrl={project?.AutomationHubIdeaUrl ?? "<null>"}, " +
                 $"ObjectBrowserSummary={(project?.ObjectBrowserSummary != null ? "present" : "null")}, " +
-                $"Workflows={project?.Workflows?.Count ?? -1}"
-            );
+                $"Workflows={project?.Workflows?.Count ?? -1}",
+                logFile);
 
             try
             {
                 var projectRoot = project?.Directory;
-
                 if (!string.IsNullOrWhiteSpace(projectRoot) && Directory.Exists(projectRoot))
                 {
                     var todoPath = Path.Combine(projectRoot, "Todo.md");
                     File.WriteAllText(todoPath, $"# TODO Report\n\nGenerated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\n\n");
-                    RuleLogger.LogAndReturn("TodoFile", $"Created or cleared: {todoPath}");
+                    RuleLogger.Log("TodoFile", $"Created or cleared: {todoPath}", logFile);
                 }
                 else
                 {
-                    RuleLogger.LogAndReturn("TodoFile", "Project root could not be determined.");
+                    RuleLogger.Log("TodoFile", "Project root could not be determined.", logFile);
                 }
             }
             catch (Exception ex)
             {
-                RuleLogger.LogAndReturn("TodoFileError", ex.Message);
+                RuleLogger.Log("TodoFileError", ex.Message, logFile);
             }
 
             return new InspectionResult { HasErrors = false };

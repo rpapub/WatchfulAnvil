@@ -12,20 +12,25 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.1.1-alpha</Version>
     <Authors>WatchfulAnvil</Authors>
     <Company>WatchfulAnvil</Company>
     <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
     <PackageDescription>Base classes and utilities for building UiPath Workflow Analyzer rules.</PackageDescription>
   </PropertyGroup>
 
-  <!-- net461: only StubRule; exclude all modern Core files -->
+  <!-- net461: only StubRule; exclude all modern Core and Diagnostics files -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <Compile Remove="Core\AnalyzerBase.cs" />
     <Compile Remove="Core\RuleBase.cs" />
     <Compile Remove="Core\CounterBase.cs" />
     <Compile Remove="Core\RuleCategory.cs" />
     <Compile Remove="Core\ScopedRule.cs" />
+    <Compile Remove="Diagnostics\TapActivityRule.cs" />
+    <Compile Remove="Diagnostics\TapWorkflowRule.cs" />
+    <Compile Remove="Diagnostics\TapProjectRule.cs" />
+    <Compile Remove="Diagnostics\TapSelectorsRule.cs" />
+    <Compile Remove="Diagnostics\TapSdkBypassRule.cs" />
   </ItemGroup>
 
   <!-- net6.0 / net8.0: exclude StubRule (net461-only) -->
