@@ -126,6 +126,19 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Pipeline
         }
 
         [Fact]
+        public void Pass_WhenTransactionItemTypeIsAssemblyQualified()
+        {
+            // Real UiPath runtime returns assembly-qualified type names
+            var args = new List<IArgumentModel>
+            {
+                Arg("in_TransactionItem", ArgumentDirection.In,
+                    "UiPath.Core.QueueItem, UiPath.System.Activities, Version=26.2.4.0, Culture=neutral, PublicKeyToken=null").Object
+            } as IReadOnlyCollection<IArgumentModel>;
+            var wf = Workflow("@pipeline", AllStageChildren(), args);
+            Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
+        }
+
+        [Fact]
         public void Fail_WhenTransactionItemHasWrongDirection()
         {
             var args = new List<IArgumentModel>

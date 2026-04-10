@@ -47,7 +47,7 @@ namespace Cpmf.Rules.Pipeline
                 System.Linq.Enumerable.FirstOrDefault(workflow.Arguments, a =>
                     a.DisplayName == "in_TransactionItem" &&
                     a.Direction == ArgumentDirection.In &&
-                    a.Type == "UiPath.Core.QueueItem");
+                    IsQueueItemType(a.Type));
 
             var messages = new List<string>();
 
@@ -95,6 +95,17 @@ namespace Cpmf.Rules.Pipeline
                       .Select(s => s.Trim())
                       .Where(s => s.Length > 0)
                       .ToArray();
+        }
+
+        private static bool IsQueueItemType(string type)
+        {
+            if (string.IsNullOrWhiteSpace(type))
+                return false;
+            // IArgumentModel.Type may be assembly-qualified: "Ns.Type, Assembly, Version=..."
+            var typeName = type.Split(',')[0].Trim();
+            var dot = typeName.LastIndexOf('.');
+            var simpleName = dot >= 0 ? typeName.Substring(dot + 1) : typeName;
+            return simpleName == "QueueItem";
         }
     }
 }

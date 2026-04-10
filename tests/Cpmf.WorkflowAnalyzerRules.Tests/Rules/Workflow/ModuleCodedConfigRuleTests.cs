@@ -108,6 +108,15 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Workflow
         }
 
         [Fact]
+        public void Pass_WhenModuleHasCodedConfigAssemblyQualified()
+        {
+            // Real UiPath runtime returns assembly-qualified type names
+            var wf = Workflow("@module", WithCodedConfig(
+                "MyProject.Config.CodedConfig, MyProject.Core, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"));
+            Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
+        }
+
+        [Fact]
         public void Fail_WhenModuleMissingCodedConfig()
         {
             var args = new List<IArgumentModel>

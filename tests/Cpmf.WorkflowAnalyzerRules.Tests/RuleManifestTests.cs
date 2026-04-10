@@ -45,7 +45,8 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests
                 .Where(t =>
                     !t.IsAbstract &&
                     typeof(IRegisterAnalyzerConfiguration).IsAssignableFrom(t) &&
-                    t != typeof(RegisterAnalyzerConfiguration));
+                    t != typeof(RegisterAnalyzerConfiguration) &&
+                    t.Namespace != null && t.Namespace.StartsWith("Cpmf.Rules"));
 
             foreach (var type in individualTypes)
             {

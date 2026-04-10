@@ -50,8 +50,10 @@ namespace Cpmf.Rules.Workflow
         {
             if (string.IsNullOrWhiteSpace(type))
                 return false;
-            var dot = type.LastIndexOf('.');
-            var simpleName = dot >= 0 ? type.Substring(dot + 1) : type;
+            // IArgumentModel.Type may be assembly-qualified: "Ns.Type, Assembly, Version=..."
+            var typeName = type.Split(',')[0].Trim();
+            var dot = typeName.LastIndexOf('.');
+            var simpleName = dot >= 0 ? typeName.Substring(dot + 1) : typeName;
             return simpleName == TypeSimpleName;
         }
     }
