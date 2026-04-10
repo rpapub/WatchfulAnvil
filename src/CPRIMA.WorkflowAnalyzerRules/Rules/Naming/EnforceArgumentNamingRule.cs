@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
-using CPRIMA.WorkflowAnalyzerRules.Common;
+using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
 namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming

@@ -4,7 +4,7 @@ using System;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
 using UiPath.Studio.Activities.Api.PackageBindings;
-using CPRIMA.WorkflowAnalyzerRules.Common;
+using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
 namespace CPRIMA.WorkflowAnalyzerRules.Rules.Tap
