@@ -9,6 +9,7 @@ namespace ACME.HelloWorld.WorkflowAnalyzerRules
         public void Initialize(IAnalyzerConfigurationService workflowAnalyzerConfigService)
         {
             new SampleRule().Initialize(workflowAnalyzerConfigService);
+            new VariableNamingConventionRule().Initialize(workflowAnalyzerConfigService);
         }
     }
 }
