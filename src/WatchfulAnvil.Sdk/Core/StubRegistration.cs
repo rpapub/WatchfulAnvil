@@ -1,3 +1,7 @@
+// <copyright file="StubRegistration.cs" company="Christian Prior-Mamulyan">
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+// </copyright>
+
 // Compiled for net461 only — see WatchfulAnvil.Sdk.csproj.
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer;

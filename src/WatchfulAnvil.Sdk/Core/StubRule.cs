@@ -1,3 +1,7 @@
+// <copyright file="StubRule.cs" company="Christian Prior-Mamulyan">
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+// </copyright>
+
 // Compiled for net461 only — see WatchfulAnvil.Sdk.csproj.
 // Provides stub rule registrations for Studio Windows-Legacy (net461).
 // Rule source files are not compiled for net461; rules appear in Studio but always pass.
