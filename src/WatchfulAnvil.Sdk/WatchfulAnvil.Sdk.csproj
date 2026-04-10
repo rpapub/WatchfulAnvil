@@ -11,12 +11,6 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
-  <!-- net6.0 / net8.0: full SDK with modern C# -->
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
   <PropertyGroup>
     <Version>0.1.0-alpha</Version>
     <Authors>WatchfulAnvil</Authors>

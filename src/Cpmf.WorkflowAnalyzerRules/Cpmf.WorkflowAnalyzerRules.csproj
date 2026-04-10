@@ -2,8 +2,6 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net6.0;net8.0</TargetFrameworks>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -13,7 +11,6 @@
 		<InformationalVersion>0.1.2-alpha</InformationalVersion>
 		<Authors>Cpmf</Authors>
 		<Company>Cpmf</Company>
-		<PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
 		<PackageDescription>Custom UiPath Workflow Analyzer rules by Cpmf.</PackageDescription>
 	</PropertyGroup>
 

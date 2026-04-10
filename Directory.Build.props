@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- Properties shared across all rule packs and the SDK.
+       Per-project overrides in individual .csproj files take precedence. -->
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
+  </PropertyGroup>
+
+</Project>

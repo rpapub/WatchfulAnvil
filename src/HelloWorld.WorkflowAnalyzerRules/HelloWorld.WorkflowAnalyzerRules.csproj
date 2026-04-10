@@ -15,11 +15,6 @@
 		<PackageDescription>Custom UiPath Workflow Analyzer rules by ACME.</PackageDescription>
 	</PropertyGroup>
 
-	<PropertyGroup>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<ProjectReference Include="..\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj" />
 	</ItemGroup>
@@ -39,4 +34,5 @@
 	</ItemGroup>
 
 </Project>
+
 
