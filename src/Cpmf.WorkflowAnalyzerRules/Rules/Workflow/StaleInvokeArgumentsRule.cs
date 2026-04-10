@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,8 +14,8 @@ namespace Cpmf.Rules.Workflow
     {
         private static readonly XNamespace UiNs =
             XNamespace.Get("http://schemas.uipath.com/workflow/activities");
-        private static readonly XNamespace Sap2010Ns =
-            XNamespace.Get("http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation");
+        private static readonly XNamespace XNs =
+            XNamespace.Get("http://schemas.microsoft.com/winfx/2006/xaml");
 
         protected override string Id => "CPMF-U004";
         protected override string Name => "InvokeWorkflowFile Argument Count Mismatch";
@@ -40,38 +41,31 @@ namespace Cpmf.Rules.Workflow
             catch { return new InspectionResult { HasErrors = false }; }
 
             var messages = new List<string>();
-            WalkActivities(workflow.Root, invoke =>
+
+            foreach (var invokeEl in doc.Descendants(UiNs + "InvokeWorkflowFile"))
             {
-                var fileNameArg = invoke.Arguments == null ? null :
-                    System.Linq.Enumerable.FirstOrDefault(invoke.Arguments,
-                        a => a.DisplayName == "Workflow file name");
-
-                if (fileNameArg == null || !(fileNameArg.HasLiteralExpression ?? false))
-                    return;
-
-                var targetRelPath = fileNameArg.DefinedExpression?.Trim('"');
+                var targetRelPath = invokeEl.Attribute("WorkflowFileName")?.Value;
                 if (string.IsNullOrWhiteSpace(targetRelPath))
-                    return;
+                    continue;
 
-                var projectModel = workflow.Project as IProjectModel;
-                var target = projectModel?.Workflows == null ? null :
-                    System.Linq.Enumerable.FirstOrDefault(projectModel.Workflows,
-                        w => string.Equals(w.RelativePath, targetRelPath,
-                            StringComparison.OrdinalIgnoreCase));
+                // Normalize: "Module.xaml" or "subfolder/Module.xaml" relative to project root.
+                var targetAbsPath = Path.GetFullPath(Path.Combine(projectDir, targetRelPath));
+                if (!File.Exists(targetAbsPath))
+                    continue;
 
-                if (target == null)
-                    return;
+                XDocument targetDoc;
+                try { targetDoc = XDocument.Load(targetAbsPath); }
+                catch { continue; }
 
-                var expectedCount = target.Arguments?.Count ?? 0;
-                var actualCount = CountBoundArguments(doc, invoke.Id);
-                if (actualCount < 0)
-                    return;
+                var displayName = invokeEl.Attribute("DisplayName")?.Value ?? "InvokeWorkflowFile";
+                var expectedCount = CountDeclaredArguments(targetDoc);
+                var actualCount = CountBoundArguments(invokeEl);
 
                 if (actualCount != expectedCount)
                     messages.Add(
-                        $"'{invoke.DisplayName}' invokes '{targetRelPath}' which declares " +
+                        $"'{displayName}' invokes '{targetRelPath}' which declares " +
                         $"{expectedCount} argument(s), but {actualCount} are bound here.");
-            });
+            }
 
             if (messages.Count == 0)
                 return new InspectionResult { HasErrors = false };
@@ -85,30 +79,19 @@ namespace Cpmf.Rules.Workflow
             };
         }
 
-        private static void WalkActivities(IActivityModel node, Action<IActivityModel> onInvoke)
+        /// <summary>Counts arguments declared in x:Members of the target XAML file.</summary>
+        private static int CountDeclaredArguments(XDocument doc)
         {
-            if (node == null) return;
-
-            if (node.ToolboxName == "InvokeWorkflowFile" ||
-                (node.Type != null && node.Type.Contains("InvokeWorkflowFile")))
-                onInvoke(node);
-
-            foreach (var child in node.Children ?? (IEnumerable<IActivityModel>)new IActivityModel[0])
-                WalkActivities(child, onInvoke);
+            // UiPath workflow arguments are declared as <x:Property> inside <x:Members>.
+            var members = doc.Root?.Element(XNs + "Members");
+            if (members == null)
+                return 0;
+            return System.Linq.Enumerable.Count(
+                members.Elements(XNs + "Property"));
         }
 
-        private static int CountBoundArguments(XDocument doc, string activityId)
+        private static int CountBoundArguments(XElement invokeEl)
         {
-            if (string.IsNullOrWhiteSpace(activityId))
-                return -1;
-
-            var invokeEl = System.Linq.Enumerable.FirstOrDefault(
-                doc.Descendants(UiNs + "InvokeWorkflowFile"),
-                el => el.Attribute(Sap2010Ns + "WorkflowViewState.IdRef")?.Value == activityId);
-
-            if (invokeEl == null)
-                return -1;
-
             var argsEl = invokeEl.Element(UiNs + "InvokeWorkflowFile.Arguments");
             if (argsEl == null)
                 return 0;

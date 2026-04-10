@@ -44,13 +44,23 @@ namespace Cpmf.Rules.Workflow
             if (toolbox == "Assign")
                 return true;
 
-            var type = activity.Type ?? string.Empty;
+            // Type may be assembly-qualified — strip after first comma.
+            var type = (activity.Type ?? string.Empty).Split(',')[0].Trim();
             return type == "System.Activities.Statements.Assign" ||
                    type.StartsWith("System.Activities.Statements.Assign`");
         }
 
         private static string? GetToExpression(IActivityModel activity)
         {
+            // "To" is an OutArgument on Assign — check Arguments first, fall back to Properties.
+            if (activity.Arguments != null)
+            {
+                var arg = System.Linq.Enumerable.FirstOrDefault(
+                    activity.Arguments, a => a.DisplayName == "To");
+                if (arg != null)
+                    return arg.DefinedExpression;
+            }
+
             if (activity.Properties == null)
                 return null;
             var toProp = System.Linq.Enumerable.FirstOrDefault(

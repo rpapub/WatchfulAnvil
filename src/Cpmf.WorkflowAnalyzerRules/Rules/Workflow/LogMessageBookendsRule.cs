@@ -115,10 +115,28 @@ namespace Cpmf.Rules.Workflow
         }
 
         private static bool IsLogMessage(IActivityModel activity)
-            => activity.ToolboxName == "Log Message";
+        {
+            var toolbox = activity.ToolboxName ?? string.Empty;
+            // Type may be assembly-qualified ("TypeName, Assembly, Version=...") — strip after first comma.
+            var type = (activity.Type ?? string.Empty).Split(',')[0].Trim();
+            return toolbox == "Log Message" ||
+                   type.EndsWith(".LogMessage") ||
+                   type.EndsWith(".LogMessageActivity") ||
+                   type == "LogMessage" ||
+                   type == "LogMessageActivity";
+        }
 
         private static string? GetMessageExpression(IActivityModel activity)
         {
+            // Message is an InArgument<string> — check Arguments first, fall back to Properties.
+            if (activity.Arguments != null)
+            {
+                var arg = System.Linq.Enumerable.FirstOrDefault(
+                    activity.Arguments, a => a.DisplayName == "Message");
+                if (arg != null)
+                    return arg.DefinedExpression;
+            }
+
             if (activity.Properties == null)
                 return null;
             var messageProp = System.Linq.Enumerable.FirstOrDefault(
