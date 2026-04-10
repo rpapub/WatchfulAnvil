@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
@@ -21,7 +22,9 @@ namespace Cpmf.Rules.Workflow
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             var hasOutStatus = workflow.Arguments != null &&
                 System.Linq.Enumerable.Any(workflow.Arguments, a =>
@@ -29,7 +32,9 @@ namespace Cpmf.Rules.Workflow
                     a.Direction == ArgumentDirection.Out);
 
             if (hasOutStatus)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             return new InspectionResult
             {
@@ -37,9 +42,9 @@ namespace Cpmf.Rules.Workflow
                 RecommendationMessage = rule.RecommendationMessage,
                 Messages = new System.Collections.Generic.List<string>
                 {
-                    $"Workflow annotated @unit is missing required Out argument '{ArgumentName}'."
+                    $"Workflow annotated @unit is missing required Out argument '{ArgumentName}'.",
                 },
-                ErrorLevel = rule.DefaultErrorLevel
+                ErrorLevel = rule.DefaultErrorLevel,
             };
         }
     }

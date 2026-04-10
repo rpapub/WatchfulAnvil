@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using System.Collections.Generic;
 using System.Linq;
 using UiPath.Studio.Activities.Api;
@@ -31,14 +32,16 @@ namespace Cpmf.Rules.Pipeline
                 Key = StagesKey,
                 DefaultValue = DefaultStages,
                 Value = DefaultStages,
-                LocalizedDisplayName = "Pipeline Stages (ordered, comma-separated)"
+                LocalizedDisplayName = "Pipeline Stages (ordered, comma-separated)",
             });
         }
 
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             var expectedOrder = ParseStages(rule);
             var expectedSet = new HashSet<string>(expectedOrder);
@@ -52,7 +55,9 @@ namespace Cpmf.Rules.Pipeline
             var messages = new List<string>();
 
             if (transactionArg == null)
+            {
                 messages.Add("Missing required In argument 'in_TransactionItem' of type UiPath.Core.QueueItem.");
+            }
 
             var pipelineChildren = (workflow.Root.Children ?? (IEnumerable<IActivityModel>)new IActivityModel[0])
                 .Where(c => expectedSet.Contains(c.DisplayName))
@@ -62,7 +67,9 @@ namespace Cpmf.Rules.Pipeline
             foreach (var stage in expectedOrder)
             {
                 if (!pipelineChildren.Contains(stage))
+                {
                     messages.Add($"Missing required pipeline stage: '{stage}'.");
+                }
             }
 
             var expectedPresent = expectedOrder.Where(e => pipelineChildren.Contains(e)).ToList();
@@ -75,13 +82,15 @@ namespace Cpmf.Rules.Pipeline
             }
 
             if (messages.Count > 0)
+            {
                 return new InspectionResult
                 {
                     HasErrors = true,
                     RecommendationMessage = rule.RecommendationMessage,
                     Messages = messages,
-                    ErrorLevel = rule.DefaultErrorLevel
+                    ErrorLevel = rule.DefaultErrorLevel,
                 };
+            }
 
             return new InspectionResult { HasErrors = false };
         }
@@ -90,7 +99,10 @@ namespace Cpmf.Rules.Pipeline
         {
             var raw = rule.Parameters[StagesKey]?.Value;
             if (string.IsNullOrWhiteSpace(raw))
+            {
                 raw = DefaultStages;
+            }
+
             return raw.Split(new[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries)
                       .Select(s => s.Trim())
                       .Where(s => s.Length > 0)
@@ -100,7 +112,10 @@ namespace Cpmf.Rules.Pipeline
         private static bool IsQueueItemType(string type)
         {
             if (string.IsNullOrWhiteSpace(type))
+            {
                 return false;
+            }
+
             // IArgumentModel.Type may be assembly-qualified: "Ns.Type, Assembly, Version=..."
             var typeName = type.Split(',')[0].Trim();
             var dot = typeName.LastIndexOf('.');

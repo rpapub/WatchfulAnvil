@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using System.Collections.Generic;
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
@@ -24,7 +25,9 @@ namespace Cpmf.Rules.Pipeline
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             var annotation = workflow.Root.AnnotationText;
             var typeName = AnnotationReader.GetTagValue(annotation, DomainModelKey);
@@ -45,13 +48,15 @@ namespace Cpmf.Rules.Pipeline
             }
 
             if (messages.Count > 0)
+            {
                 return new InspectionResult
                 {
                     HasErrors = true,
                     RecommendationMessage = rule.RecommendationMessage,
                     Messages = messages,
-                    ErrorLevel = rule.DefaultErrorLevel
+                    ErrorLevel = rule.DefaultErrorLevel,
                 };
+            }
 
             return new InspectionResult { HasErrors = false };
         }

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using System.Collections.Generic;
 using System.Linq;
 using UiPath.Studio.Activities.Api;
@@ -22,13 +23,16 @@ namespace Cpmf.Rules.Pipeline
         {
             var workflows = project.Workflows;
             if (workflows == null)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             var pipelineCount = workflows.Count(w =>
                 w.Root != null &&
                 AnnotationReader.HasTag(w.Root.AnnotationText, "@pipeline"));
 
             if (pipelineCount == 0)
+            {
                 return new InspectionResult
                 {
                     HasErrors = true,
@@ -36,10 +40,11 @@ namespace Cpmf.Rules.Pipeline
                     Messages = new List<string>
                     {
                         "No workflow annotated @pipeline was found in this project. " +
-                        "At least one pipeline workflow is required."
+                        "At least one pipeline workflow is required.",
                     },
-                    ErrorLevel = rule.DefaultErrorLevel
+                    ErrorLevel = rule.DefaultErrorLevel,
                 };
+            }
 
             return new InspectionResult { HasErrors = false };
         }

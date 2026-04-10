@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using System.IO;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
@@ -21,13 +22,17 @@ namespace Cpmf.Rules.Workflow
         {
             var relativePath = workflow.RelativePath;
             if (string.IsNullOrWhiteSpace(relativePath))
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             var stem = Path.GetFileNameWithoutExtension(relativePath);
             var error = DotNetIdentifierValidator.Validate(stem);
 
             if (error == null)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             return new InspectionResult
             {
@@ -35,9 +40,9 @@ namespace Cpmf.Rules.Workflow
                 RecommendationMessage = rule.RecommendationMessage,
                 Messages = new System.Collections.Generic.List<string>
                 {
-                    $"Workflow filename validation failed for '{relativePath}': {error}"
+                    $"Workflow filename validation failed for '{relativePath}': {error}",
                 },
-                ErrorLevel = rule.DefaultErrorLevel
+                ErrorLevel = rule.DefaultErrorLevel,
             };
         }
     }

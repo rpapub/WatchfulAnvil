@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
 using WatchfulAnvil.Sdk.Core;
@@ -16,6 +17,7 @@ namespace Cpmf.Rules.Workflow
         protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {
             if (IsFlowchartOrStateMachine(activity))
+            {
                 return new InspectionResult
                 {
                     HasErrors = true,
@@ -23,10 +25,11 @@ namespace Cpmf.Rules.Workflow
                     Messages = new System.Collections.Generic.List<string>
                     {
                         $"Activity '{activity.DisplayName}' is a {FriendlyName(activity)}, which is not permitted. " +
-                        "Use Sequence instead."
+                        "Use Sequence instead.",
                     },
-                    ErrorLevel = rule.DefaultErrorLevel
+                    ErrorLevel = rule.DefaultErrorLevel,
                 };
+            }
 
             return new InspectionResult { HasErrors = false };
         }

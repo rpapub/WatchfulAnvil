@@ -30,15 +30,25 @@ namespace Cpmf.Rules.Workflow
         {
             var projectDir = workflow.Project?.Directory;
             if (string.IsNullOrWhiteSpace(projectDir))
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             var callingPath = Path.Combine(projectDir, workflow.RelativePath);
             if (!File.Exists(callingPath))
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             XDocument doc;
-            try { doc = XDocument.Load(callingPath); }
-            catch { return new InspectionResult { HasErrors = false }; }
+            try
+            {
+                doc = XDocument.Load(callingPath);
+            }
+            catch
+            {
+                return new InspectionResult { HasErrors = false };
+            }
 
             var messages = new List<string>();
 
@@ -46,36 +56,50 @@ namespace Cpmf.Rules.Workflow
             {
                 var targetRelPath = invokeEl.Attribute("WorkflowFileName")?.Value;
                 if (string.IsNullOrWhiteSpace(targetRelPath))
+                {
                     continue;
+                }
 
                 // Normalize: "Module.xaml" or "subfolder/Module.xaml" relative to project root.
                 var targetAbsPath = Path.GetFullPath(Path.Combine(projectDir, targetRelPath));
                 if (!File.Exists(targetAbsPath))
+                {
                     continue;
+                }
 
                 XDocument targetDoc;
-                try { targetDoc = XDocument.Load(targetAbsPath); }
-                catch { continue; }
+                try
+                {
+                    targetDoc = XDocument.Load(targetAbsPath);
+                }
+                catch
+                {
+                    continue;
+                }
 
                 var displayName = invokeEl.Attribute("DisplayName")?.Value ?? "InvokeWorkflowFile";
                 var expectedCount = CountDeclaredArguments(targetDoc);
                 var actualCount = CountBoundArguments(invokeEl);
 
                 if (actualCount != expectedCount)
+                {
                     messages.Add(
                         $"'{displayName}' invokes '{targetRelPath}' which declares " +
                         $"{expectedCount} argument(s), but {actualCount} are bound here.");
+                }
             }
 
             if (messages.Count == 0)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             return new InspectionResult
             {
                 HasErrors = true,
                 RecommendationMessage = rule.RecommendationMessage,
                 Messages = messages,
-                ErrorLevel = rule.DefaultErrorLevel
+                ErrorLevel = rule.DefaultErrorLevel,
             };
         }
 
@@ -85,7 +109,10 @@ namespace Cpmf.Rules.Workflow
             // UiPath workflow arguments are declared as <x:Property> inside <x:Members>.
             var members = doc.Root?.Element(XNs + "Members");
             if (members == null)
+            {
                 return 0;
+            }
+
             return System.Linq.Enumerable.Count(
                 members.Elements(XNs + "Property"));
         }
@@ -94,7 +121,9 @@ namespace Cpmf.Rules.Workflow
         {
             var argsEl = invokeEl.Element(UiNs + "InvokeWorkflowFile.Arguments");
             if (argsEl == null)
+            {
                 return 0;
+            }
 
             return System.Linq.Enumerable.Count(argsEl.Elements(), e =>
                 e.Name.LocalName == "InArgument" ||

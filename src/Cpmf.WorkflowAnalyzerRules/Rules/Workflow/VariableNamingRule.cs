@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using System.Collections.Generic;
 using System.Diagnostics;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
@@ -21,7 +22,9 @@ namespace Cpmf.Rules.Workflow
         protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {
             if (activity.Variables == null)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             var violations = new List<string>();
 
@@ -29,7 +32,9 @@ namespace Cpmf.Rules.Workflow
             {
                 var name = variable.DisplayName;
                 if (string.IsNullOrWhiteSpace(name))
+                {
                     continue;
+                }
 
                 if (name.Contains('_'))
                 {
@@ -46,14 +51,16 @@ namespace Cpmf.Rules.Workflow
             }
 
             if (violations.Count == 0)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             return new InspectionResult
             {
                 HasErrors = true,
                 RecommendationMessage = rule.RecommendationMessage,
                 Messages = violations,
-                ErrorLevel = rule.DefaultErrorLevel
+                ErrorLevel = rule.DefaultErrorLevel,
             };
         }
     }

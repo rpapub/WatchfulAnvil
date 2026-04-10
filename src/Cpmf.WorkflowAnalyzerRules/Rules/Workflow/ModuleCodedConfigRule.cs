@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
@@ -22,7 +23,9 @@ namespace Cpmf.Rules.Workflow
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             var hasCodedConfig = workflow.Arguments != null &&
                 System.Linq.Enumerable.Any(workflow.Arguments, a =>
@@ -31,7 +34,9 @@ namespace Cpmf.Rules.Workflow
                     IsCodedConfigType(a.Type));
 
             if (hasCodedConfig)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             return new InspectionResult
             {
@@ -40,16 +45,19 @@ namespace Cpmf.Rules.Workflow
                 Messages = new System.Collections.Generic.List<string>
                 {
                     $"Workflow annotated @module is missing a required In argument of type '{TypeSimpleName}'. " +
-                    $"The namespace may vary (e.g. MyProject.Config.{TypeSimpleName})."
+                    $"The namespace may vary (e.g. MyProject.Config.{TypeSimpleName}).",
                 },
-                ErrorLevel = rule.DefaultErrorLevel
+                ErrorLevel = rule.DefaultErrorLevel,
             };
         }
 
         private static bool IsCodedConfigType(string type)
         {
             if (string.IsNullOrWhiteSpace(type))
+            {
                 return false;
+            }
+
             // IArgumentModel.Type may be assembly-qualified: "Ns.Type, Assembly, Version=..."
             var typeName = type.Split(',')[0].Trim();
             var dot = typeName.LastIndexOf('.');

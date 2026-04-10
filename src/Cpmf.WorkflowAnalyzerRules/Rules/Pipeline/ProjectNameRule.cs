@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
 using WatchfulAnvil.Sdk.Core;
@@ -21,7 +22,9 @@ namespace Cpmf.Rules.Pipeline
             var error = DotNetIdentifierValidator.Validate(name);
 
             if (error == null)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             return new InspectionResult
             {
@@ -29,9 +32,9 @@ namespace Cpmf.Rules.Pipeline
                 RecommendationMessage = rule.RecommendationMessage,
                 Messages = new System.Collections.Generic.List<string>
                 {
-                    $"Project name validation failed: {error}"
+                    $"Project name validation failed: {error}",
                 },
-                ErrorLevel = rule.DefaultErrorLevel
+                ErrorLevel = rule.DefaultErrorLevel,
             };
         }
     }

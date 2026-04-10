@@ -44,28 +44,28 @@ namespace Cpmf.Rules.Pipeline
                 Key = MinModulesPerPipelineKey,
                 DefaultValue = DefaultMinModulesPerPipeline.ToString(),
                 Value = DefaultMinModulesPerPipeline.ToString(),
-                LocalizedDisplayName = "Min modules per pipeline"
+                LocalizedDisplayName = "Min modules per pipeline",
             });
             rule.Parameters.Add(MaxModulesPerPipelineKey, new Parameter
             {
                 Key = MaxModulesPerPipelineKey,
                 DefaultValue = DefaultMaxModulesPerPipeline.ToString(),
                 Value = DefaultMaxModulesPerPipeline.ToString(),
-                LocalizedDisplayName = "Max modules per pipeline"
+                LocalizedDisplayName = "Max modules per pipeline",
             });
             rule.Parameters.Add(MinUnitsPerModuleKey, new Parameter
             {
                 Key = MinUnitsPerModuleKey,
                 DefaultValue = DefaultMinUnitsPerModule.ToString(),
                 Value = DefaultMinUnitsPerModule.ToString(),
-                LocalizedDisplayName = "Min units per module"
+                LocalizedDisplayName = "Min units per module",
             });
             rule.Parameters.Add(MaxUnitsPerModuleKey, new Parameter
             {
                 Key = MaxUnitsPerModuleKey,
                 DefaultValue = DefaultMaxUnitsPerModule.ToString(),
                 Value = DefaultMaxUnitsPerModule.ToString(),
-                LocalizedDisplayName = "Max units per module"
+                LocalizedDisplayName = "Max units per module",
             });
         }
 
@@ -73,7 +73,9 @@ namespace Cpmf.Rules.Pipeline
         {
             var workflows = project.Workflows;
             if (workflows == null)
+            {
                 return Pass();
+            }
 
             var wfList = workflows.ToList();
 
@@ -95,30 +97,42 @@ namespace Cpmf.Rules.Pipeline
             {
                 var ratio = moduleCount / (double)pipelineCount;
                 if (ratio < minModPerPipeline)
+                {
                     messages.Add(
                         $"Project has {pipelineCount} pipeline(s) and {moduleCount} module(s) " +
                         $"(ratio {ratio:F1}). Expected at least {minModPerPipeline} module(s) per pipeline.");
+                }
+
                 if (ratio > maxModPerPipeline)
+                {
                     messages.Add(
                         $"Project has {pipelineCount} pipeline(s) and {moduleCount} module(s) " +
                         $"(ratio {ratio:F1}). Expected at most {maxModPerPipeline} module(s) per pipeline.");
+                }
             }
 
             if (moduleCount > 0)
             {
                 var ratio = unitCount / (double)moduleCount;
                 if (ratio < minUnitsPerModule)
+                {
                     messages.Add(
                         $"Project has {moduleCount} module(s) and {unitCount} unit(s) " +
                         $"(ratio {ratio:F1}). Expected at least {minUnitsPerModule} unit(s) per module.");
+                }
+
                 if (ratio > maxUnitsPerModule)
+                {
                     messages.Add(
                         $"Project has {moduleCount} module(s) and {unitCount} unit(s) " +
                         $"(ratio {ratio:F1}). Expected at most {maxUnitsPerModule} unit(s) per module.");
+                }
             }
 
             if (messages.Count > 0)
+            {
                 return Fail(rule, messages);
+            }
 
             return Pass();
         }
@@ -127,7 +141,10 @@ namespace Cpmf.Rules.Pipeline
         {
             var raw = rule.Parameters[key]?.Value;
             if (string.IsNullOrWhiteSpace(raw))
+            {
                 return fallback;
+            }
+
             return int.TryParse(raw, out var result) ? result : fallback;
         }
     }

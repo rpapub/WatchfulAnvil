@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using System.Collections.Generic;
 using System.Diagnostics;
 using UiPath.Studio.Activities.Api;
@@ -34,21 +35,23 @@ namespace Cpmf.Rules.Workflow
                 Key = StartPrefixKey,
                 DefaultValue = DefaultStartPrefix,
                 Value = DefaultStartPrefix,
-                LocalizedDisplayName = "Start log message prefix"
+                LocalizedDisplayName = "Start log message prefix",
             });
             rule.Parameters.Add(EndPrefixKey, new Parameter
             {
                 Key = EndPrefixKey,
                 DefaultValue = DefaultEndPrefix,
                 Value = DefaultEndPrefix,
-                LocalizedDisplayName = "End log message prefix"
+                LocalizedDisplayName = "End log message prefix",
             });
         }
 
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             if (workflow.Root == null)
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             var startPrefix = GetParameterValue(rule, StartPrefixKey, DefaultStartPrefix);
             var endPrefix = GetParameterValue(rule, EndPrefixKey, DefaultEndPrefix);
@@ -57,13 +60,15 @@ namespace Cpmf.Rules.Workflow
                 workflow.Root.Children ?? (IEnumerable<IActivityModel>)new IActivityModel[0]);
 
             if (children.Count == 0)
+            {
                 return new InspectionResult
                 {
                     HasErrors = true,
                     RecommendationMessage = rule.RecommendationMessage,
                     Messages = new List<string> { "Workflow has no activities." },
-                    ErrorLevel = rule.DefaultErrorLevel
+                    ErrorLevel = rule.DefaultErrorLevel,
                 };
+            }
 
             var messages = new List<string>();
             var first = children[0];
@@ -71,19 +76,25 @@ namespace Cpmf.Rules.Workflow
 
             CheckBookend(first, startPrefix, "first", messages);
             if (children.Count > 1)
+            {
                 CheckBookend(last, endPrefix, "last", messages);
+            }
             else if (!MessageStartsWith(first, startPrefix))
+            {
                 messages.Add(
                     $"The single activity is not a Log Message whose Message starts with \"{startPrefix}\".");
+            }
 
             if (messages.Count > 0)
+            {
                 return new InspectionResult
                 {
                     HasErrors = true,
                     RecommendationMessage = rule.RecommendationMessage,
                     Messages = messages,
-                    ErrorLevel = rule.DefaultErrorLevel
+                    ErrorLevel = rule.DefaultErrorLevel,
                 };
+            }
 
             return new InspectionResult { HasErrors = false };
         }
@@ -134,11 +145,16 @@ namespace Cpmf.Rules.Workflow
                 var arg = System.Linq.Enumerable.FirstOrDefault(
                     activity.Arguments, a => a.DisplayName == "Message");
                 if (arg != null)
+                {
                     return arg.DefinedExpression;
+                }
             }
 
             if (activity.Properties == null)
+            {
                 return null;
+            }
+
             var messageProp = System.Linq.Enumerable.FirstOrDefault(
                 activity.Properties, p => p.DisplayName == "Message");
             return messageProp?.DefinedExpression;
@@ -148,7 +164,10 @@ namespace Cpmf.Rules.Workflow
         {
             var expr = GetMessageExpression(activity);
             if (expr == null)
+            {
                 return false;
+            }
+
             var value = expr.TrimStart('"');
             return value.StartsWith(prefix);
         }

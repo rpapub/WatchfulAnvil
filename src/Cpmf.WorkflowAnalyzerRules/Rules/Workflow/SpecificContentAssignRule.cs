@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Christian Prior-Mamulyan. Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
 using WatchfulAnvil.Sdk.Core;
@@ -19,11 +20,15 @@ namespace Cpmf.Rules.Workflow
         protected override InspectionResult Inspect(IActivityModel activity, Rule rule)
         {
             if (!IsStandaloneAssign(activity))
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             var toExpr = GetToExpression(activity);
             if (toExpr == null || !toExpr.Contains(SpecificContentPattern))
+            {
                 return new InspectionResult { HasErrors = false };
+            }
 
             return new InspectionResult
             {
@@ -32,9 +37,9 @@ namespace Cpmf.Rules.Workflow
                 Messages = new System.Collections.Generic.List<string>
                 {
                     $"Assign '{activity.DisplayName}' assigns to '{toExpr.Trim('[', ']')}' which uses SpecificContent. " +
-                    "Move this assignment into a Multiple Assign activity together with all other SpecificContent writes."
+                    "Move this assignment into a Multiple Assign activity together with all other SpecificContent writes.",
                 },
-                ErrorLevel = rule.DefaultErrorLevel
+                ErrorLevel = rule.DefaultErrorLevel,
             };
         }
 
@@ -42,7 +47,9 @@ namespace Cpmf.Rules.Workflow
         {
             var toolbox = activity.ToolboxName ?? string.Empty;
             if (toolbox == "Assign")
+            {
                 return true;
+            }
 
             // Type may be assembly-qualified — strip after first comma.
             var type = (activity.Type ?? string.Empty).Split(',')[0].Trim();
@@ -58,11 +65,16 @@ namespace Cpmf.Rules.Workflow
                 var arg = System.Linq.Enumerable.FirstOrDefault(
                     activity.Arguments, a => a.DisplayName == "To");
                 if (arg != null)
+                {
                     return arg.DefinedExpression;
+                }
             }
 
             if (activity.Properties == null)
+            {
                 return null;
+            }
+
             var toProp = System.Linq.Enumerable.FirstOrDefault(
                 activity.Properties, p => p.DisplayName == "To");
             return toProp?.DefinedExpression;
