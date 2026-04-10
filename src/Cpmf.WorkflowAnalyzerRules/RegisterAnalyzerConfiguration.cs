@@ -21,6 +21,7 @@ namespace Cpmf
             new UnitOutStatusRule().Initialize(api);
             new ModuleCodedConfigRule().Initialize(api);
             new PipelinePresenceCounter().Initialize(api);
+            new WorkflowTypeRatioRule().Initialize(api);
         }
     }
 }
