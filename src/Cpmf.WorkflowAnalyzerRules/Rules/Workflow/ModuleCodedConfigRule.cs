@@ -26,6 +26,7 @@ namespace Cpmf.Rules.Workflow
 
             var hasCodedConfig = workflow.Arguments != null &&
                 System.Linq.Enumerable.Any(workflow.Arguments, a =>
+                    a != null &&
                     a.Direction == ArgumentDirection.In &&
                     IsCodedConfigType(a.Type));
 

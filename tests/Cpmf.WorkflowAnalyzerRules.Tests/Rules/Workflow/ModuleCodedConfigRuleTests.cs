@@ -80,6 +80,17 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Workflow
             Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
         }
 
+        [Fact]
+        public void Pass_WhenAnnotationIsNull()
+        {
+            var root = new Mock<IActivityModel>();
+            root.Setup(r => r.AnnotationText).Returns((string)null);
+            var wf = new Mock<IWorkflowModel>();
+            wf.Setup(w => w.Root).Returns(root.Object);
+            wf.Setup(w => w.Arguments).Returns((IReadOnlyCollection<IArgumentModel>)null);
+            Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
+        }
+
         // --- @module ---
 
         [Fact]
@@ -119,6 +130,18 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Workflow
             var wf = Workflow("@module", args);
             var result = _rule.Get().Inspect(wf.Object, _rule.Get());
             Assert.True(result.HasErrors);
+        }
+
+        [Fact]
+        public void Fail_WhenModuleArgumentsContainOnlyNullElement()
+        {
+            // Verifies no NullReferenceException when arguments list contains null entries.
+            // Rule still correctly fires because no valid CodedConfig argument is found.
+            var args = new List<IArgumentModel> { null } as IReadOnlyCollection<IArgumentModel>;
+            var wf = Workflow("@module", args);
+            var result = _rule.Get().Inspect(wf.Object, _rule.Get());
+            Assert.True(result.HasErrors);
+            Assert.Contains(result.Messages, m => m.Contains("CodedConfig"));
         }
 
         // --- @pipeline ---

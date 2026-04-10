@@ -51,11 +51,18 @@ namespace WatchfulAnvil.Sdk.Common
         public static string? GetTagValue(string? annotation, string tag)
         {
             var prefix = tag.TrimEnd(':') + ":";
-            foreach (var token in Tokenize(annotation))
+            var tokens = Tokenize(annotation).ToList();
+            for (var i = 0; i < tokens.Count; i++)
             {
-                if (token.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                if (tokens[i].StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    return token.Substring(prefix.Length);
+                    var value = tokens[i].Substring(prefix.Length);
+                    if (value.Length == 0 && i + 1 < tokens.Count)
+                    {
+                        return tokens[i + 1];
+                    }
+
+                    return value;
                 }
             }
 
