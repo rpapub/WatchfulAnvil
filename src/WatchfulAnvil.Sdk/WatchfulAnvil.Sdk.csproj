@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>0.1.1-alpha</Version>
+    <Version>0.1.2-alpha</Version>
     <Authors>WatchfulAnvil</Authors>
     <Company>WatchfulAnvil</Company>
     <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
@@ -26,6 +26,7 @@
     <Compile Remove="Core\CounterBase.cs" />
     <Compile Remove="Core\RuleCategory.cs" />
     <Compile Remove="Core\ScopedRule.cs" />
+    <Compile Remove="Common\AnnotationReader.cs" />
     <Compile Remove="Diagnostics\TapActivityRule.cs" />
     <Compile Remove="Diagnostics\TapWorkflowRule.cs" />
     <Compile Remove="Diagnostics\TapProjectRule.cs" />

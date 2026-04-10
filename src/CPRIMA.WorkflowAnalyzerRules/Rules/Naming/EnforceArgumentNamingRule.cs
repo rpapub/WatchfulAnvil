@@ -40,15 +40,6 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
         private static readonly string ACTIVE_PATTERN = PATTERN_PASCAL_CASE;
         private static readonly Regex NameSuffixPattern = new Regex(ACTIVE_PATTERN, RegexOptions.Compiled);
 
-        public static bool IsIgnored(string annotation)
-        {
-            if (string.IsNullOrEmpty(annotation)) return false;
-            var parts = annotation.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 0 || !parts[0].Equals("@ignore", StringComparison.OrdinalIgnoreCase)) return false;
-            if (parts.Length == 1) return false;
-            return parts[1].Equals("CPRIMA-NMG-001", StringComparison.OrdinalIgnoreCase);
-        }
-
         protected override InspectionResult Inspect(IWorkflowModel workflow, Rule rule)
         {
             var result = new InspectionResult { ErrorLevel = TraceLevel.Warning };
@@ -64,7 +55,7 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
                 var arguments = XamlArgumentParser.ParseArguments(fullPath);
                 foreach (var arg in arguments)
                 {
-                    if (!string.IsNullOrEmpty(arg.Annotation) && IsIgnored(arg.Annotation))
+                    if (AnnotationReader.IsSuppressed(arg, Id))
                     {
                         RuleLogger.LogAndReturn("IgnoredArgument", $"Name={arg.Name} skipped due to ignore tag.");
                         continue;

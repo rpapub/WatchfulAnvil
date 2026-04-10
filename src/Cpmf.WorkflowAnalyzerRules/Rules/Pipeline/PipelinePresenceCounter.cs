@@ -3,6 +3,7 @@ using System.Linq;
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Pipeline
@@ -25,8 +26,7 @@ namespace Cpmf.Rules.Pipeline
 
             var pipelineCount = workflows.Count(w =>
                 w.Root != null &&
-                !string.IsNullOrWhiteSpace(w.Root.AnnotationText) &&
-                w.Root.AnnotationText.Contains("@pipeline"));
+                AnnotationReader.HasTag(w.Root.AnnotationText, "@pipeline"));
 
             if (pipelineCount == 0)
                 return new InspectionResult

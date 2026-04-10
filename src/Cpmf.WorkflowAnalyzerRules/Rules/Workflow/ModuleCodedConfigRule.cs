@@ -1,6 +1,7 @@
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Workflow
@@ -24,8 +25,8 @@ namespace Cpmf.Rules.Workflow
                 return new InspectionResult { HasErrors = false };
 
             var annotation = workflow.Root.AnnotationText;
-            var isModule = annotation.Contains("@module");
-            var isPipeline = annotation.Contains("@pipeline");
+            var isModule = AnnotationReader.HasTag(annotation, "@module");
+            var isPipeline = AnnotationReader.HasTag(annotation, "@pipeline");
             if (!isModule && !isPipeline)
                 return new InspectionResult { HasErrors = false };
 

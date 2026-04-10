@@ -1,6 +1,7 @@
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Workflow
@@ -22,8 +23,7 @@ namespace Cpmf.Rules.Workflow
             if (workflow.Root == null)
                 return new InspectionResult { HasErrors = false };
 
-            var annotation = workflow.Root.AnnotationText;
-            if (string.IsNullOrWhiteSpace(annotation) || !annotation.Contains("@unit"))
+            if (!AnnotationReader.HasTag(workflow.Root.AnnotationText, "@unit"))
                 return new InspectionResult { HasErrors = false };
 
             var hasOutStatus = workflow.Arguments != null &&

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using System.Linq;
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer.Rules;
 using UiPath.Studio.Analyzer.Models;
+using WatchfulAnvil.Sdk.Common;
 using WatchfulAnvil.Sdk.Core;
 
 namespace Cpmf.Rules.Pipeline
@@ -26,32 +26,24 @@ namespace Cpmf.Rules.Pipeline
                 return new InspectionResult { HasErrors = false };
 
             var annotation = workflow.Root.AnnotationText;
-            if (string.IsNullOrWhiteSpace(annotation) || !annotation.Contains("@pipeline"))
+            if (!AnnotationReader.HasTag(annotation, "@pipeline"))
                 return new InspectionResult { HasErrors = false };
 
-            var lines = annotation.Split(new[] { '\n', '\r' }, System.StringSplitOptions.RemoveEmptyEntries);
-
-            var domainModelLine = System.Linq.Enumerable.FirstOrDefault(lines,
-                l => l.Contains(":") &&
-                     l.Substring(0, l.IndexOf(':')).Trim() == DomainModelKey);
-
+            var typeName = AnnotationReader.GetTagValue(annotation, DomainModelKey);
             var messages = new List<string>();
 
-            if (domainModelLine == null)
+            if (typeName == null)
             {
                 messages.Add(
                     $"Workflow annotated @pipeline is missing the required '@domain-model:TypeName' " +
                     $"annotation line. Add '@domain-model:FullyQualifiedTypeName' as a second line " +
                     $"of the workflow annotation.");
             }
-            else
+            else if (string.IsNullOrWhiteSpace(typeName))
             {
-                var colonIndex = domainModelLine.IndexOf(':');
-                var typeName = domainModelLine.Substring(colonIndex + 1).Trim();
-                if (string.IsNullOrWhiteSpace(typeName))
-                    messages.Add(
-                        $"The '@domain-model:' annotation is present but the TypeName is empty. " +
-                        $"Specify the fully qualified type name, e.g. '@domain-model:MyNamespace.MyDomainModel'.");
+                messages.Add(
+                    $"The '@domain-model:' annotation is present but the TypeName is empty. " +
+                    $"Specify the fully qualified type name, e.g. '@domain-model:MyNamespace.MyDomainModel'.");
             }
 
             if (messages.Count > 0)
