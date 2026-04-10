@@ -47,7 +47,7 @@ namespace WatchfulAnvil.Sdk.Diagnostics
                     return new InspectionResult { HasErrors = false };
                 }
 
-                var arguments = XamlParser.ParseArguments(fullPath);
+                var arguments = XamlArgumentParser.ParseArguments(fullPath);
                 foreach (var arg in arguments)
                     RuleLogger.Log("XamlArgumentAnnotation", $"Name={arg.Name}, Type={arg.Type}, Annotation={arg.Annotation}", logFile);
             }

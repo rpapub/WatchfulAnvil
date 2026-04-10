@@ -5,17 +5,19 @@ using System.Xml.Linq;
 namespace WatchfulAnvil.Sdk.Common
 {
     /// <summary>
-    /// Provides utility methods for parsing XAML files used in UiPath and Workflow Foundation workflows.
+    /// SDK bypass utility for reading argument metadata from the <c>x:Members</c> section of a UiPath XAML file.
+    /// Use this when <c>IArgumentModel</c> is insufficient — it does not expose <c>sap2010:Annotation.AnnotationText</c>.
     /// </summary>
-    public static class XamlParser
+    public static class XamlArgumentParser
     {
         /// <summary>
-        /// Parses the arguments defined in the x:Members section of a XAML file.
+        /// Parses the <c>x:Members</c> section of a UiPath XAML file and returns argument metadata
+        /// including <c>sap2010:Annotation.AnnotationText</c>, which is not exposed by <c>IArgumentModel</c> in the UiPath SDK.
         /// </summary>
         /// <param name="xamlPath">The full file path to the XAML file.</param>
         /// <returns>
         /// An enumerable of <see cref="XamlArgumentInfo"/> containing the name, type, and annotation
-        /// for each argument found in the XAML file.
+        /// for each argument found in the <c>x:Members</c> section.
         /// </returns>
         public static IEnumerable<XamlArgumentInfo> ParseArguments(string xamlPath)
         {
@@ -34,7 +36,8 @@ namespace WatchfulAnvil.Sdk.Common
     }
 
     /// <summary>
-    /// Represents information about an argument defined in a XAML file.
+    /// Represents an argument defined in a XAML <c>x:Members</c> section,
+    /// including its annotation text as stored by UiPath Studio.
     /// </summary>
     public class XamlArgumentInfo
     {

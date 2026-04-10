@@ -61,7 +61,7 @@ namespace CPRIMA.WorkflowAnalyzerRules.Rules.Naming
                     return result;
                 }
 
-                var arguments = XamlParser.ParseArguments(fullPath);
+                var arguments = XamlArgumentParser.ParseArguments(fullPath);
                 foreach (var arg in arguments)
                 {
                     if (!string.IsNullOrEmpty(arg.Annotation) && IsIgnored(arg.Annotation))
