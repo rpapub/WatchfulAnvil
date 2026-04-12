@@ -15,21 +15,38 @@ namespace WatchfulAnvil.Sdk.Common
     public static class RuleLogger
     {
         private static readonly string DefaultLogFile =
-            Path.Combine(Path.GetTempPath(), "analyzer_log.txt");
+            Path.Combine(Path.GetTempPath(), "cpmf", "wa-tap-diagnostics", "analyzer.log");
+
+        private static readonly object _lock = new object();
+
+        private static string Sanitize(string s)
+            => s.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ");
 
         /// <summary>
-        /// Appends a timestamped entry to the specified file.
+        /// Appends a timestamped, thread-tagged entry to the specified file.
         /// The path may contain environment variable references (e.g. %TEMP%) which are expanded at runtime.
+        /// Newlines in label or data are collapsed to spaces. Write failures are swallowed silently.
         /// </summary>
         public static void Log(string label, object data, string filePath)
         {
-            var resolved = Environment.ExpandEnvironmentVariables(filePath ?? DefaultLogFile);
-            var message = $"{DateTime.Now:HH:mm:ss} | {label}: {data?.ToString() ?? "<null>"}{Environment.NewLine}";
-
-            using (var stream = new FileStream(resolved, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
-            using (var writer = new StreamWriter(stream))
+            try
             {
-                writer.Write(message);
+                var resolved = Environment.ExpandEnvironmentVariables(filePath ?? DefaultLogFile);
+                var tid = Environment.CurrentManagedThreadId;
+                var lbl = Sanitize(label ?? "<null>");
+                var val = Sanitize(data?.ToString() ?? "<null>");
+                var message = $"{DateTime.Now:HH:mm:ss.fff} [T{tid:D2}] | {lbl}: {val}{Environment.NewLine}";
+
+                var dir = Path.GetDirectoryName(resolved);
+                if (dir != null) Directory.CreateDirectory(dir);
+                lock (_lock)
+                {
+                    File.AppendAllText(resolved, message);
+                }
+            }
+            catch
+            {
+                // Diagnostic log — never crash the rule host.
             }
         }
 
