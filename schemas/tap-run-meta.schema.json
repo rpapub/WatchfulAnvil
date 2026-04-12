@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/rpapub/WatchfulAnvil/schemas/tap-run-meta.schema.json",
+  "title": "TAP Run Metadata",
+  "description": "Written once per analysis run to run-meta.json before any activity or workflow records are appended. Describes the analysis context that is constant across all records in the run.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "startedAt",
+    "projectFilePath",
+    "tapRuleVersion",
+    "sdkAssemblyVersion",
+    "writeFailures",
+    "packagePathAliases"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semver version of this schema. Additive changes (new nullable fields) increment minor. Breaking changes increment major.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "const": "0.1.0"
+    },
+    "runId": {
+      "type": "string",
+      "description": "Unique identifier for this analysis run. Format: ISO-8601 UTC timestamp + 6-char random hex suffix. Shared by all records in this run.",
+      "examples": ["2026-04-11T10-42-01.347Z+a3f2c8"]
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when RunContext.Initialize() was first called (first activity inspection in this run)."
+    },
+    "completedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "UTC timestamp written by the AppDomain.ProcessExit hook when the analysis child process exits. Null if the process was interrupted before exit."
+    },
+    "projectFilePath": {
+      "type": "string",
+      "description": "Absolute path to project.json. Primary reference point for all relative paths in activity and workflow records."
+    },
+    "projectOutputType": {
+      "type": ["string", "null"],
+      "description": "UiPath project output type as reported by IProjectSummary.ProjectOutputType.",
+      "examples": ["Process", "Library", "Tests", "Framework"]
+    },
+    "projectProfileType": {
+      "type": ["string", "null"],
+      "description": "UiPath project profile type as reported by IProjectSummary.ProjectProfileType.",
+      "examples": ["Attended", "Unattended", "TestAutomation"]
+    },
+    "expressionLanguage": {
+      "type": ["string", "null"],
+      "description": "Expression language used in this project.",
+      "enum": ["VisualBasic", "CSharp", null]
+    },
+    "hasModernBehavior": {
+      "type": ["boolean", "null"],
+      "description": "True for projects targeting the Modern design experience."
+    },
+    "entryPointName": {
+      "type": ["string", "null"],
+      "description": "File name of the primary entry-point workflow (e.g. Main.xaml)."
+    },
+    "tapRuleVersion": {
+      "type": "string",
+      "description": "NuGet package version of Cpmf.WorkflowAnalyzerRules that produced this run."
+    },
+    "sdkAssemblyVersion": {
+      "type": "string",
+      "description": "Version of UiPath.Studio.Activities.Api assembly loaded in the rule host. Proxy for Studio version.",
+      "examples": ["24.10.1.0"]
+    },
+    "writeFailures": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Count of records where at least one file write failed during this run. A non-zero value indicates the main activity.jsonl or a by-package file may be incomplete."
+    },
+    "packagePathAliases": {
+      "type": "object",
+      "description": "Maps sha8 hash prefixes to full package IDs for cases where the by-package path exceeded Windows MAX_PATH and was shortened.",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "examples": [{ "a3f2c8b1": "uipath.uiautomation.activities" }]
+    }
+  }
+}

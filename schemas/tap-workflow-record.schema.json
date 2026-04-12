@@ -1,0 +1,191 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/rpapub/WatchfulAnvil/schemas/tap-workflow-record.schema.json",
+  "title": "TAP Workflow Record",
+  "description": "One JSON Lines record per workflow (.xaml or coded .cs file) per analysis run, written to workflow.jsonl. Captures workflow-level metadata not present in individual activity records: imported namespaces, assembly references, trigger configuration, workflow arguments, and XML prefix declarations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "capturedAt",
+    "threadId",
+    "projectFilePath",
+    "workflowRelativePath",
+    "isCodedWorkflow",
+    "rootDisplayName",
+    "rootAnnotationText",
+    "rootStructuralKind",
+    "arguments",
+    "importedNamespaces",
+    "assemblies",
+    "xmlPrefixes",
+    "triggerModel",
+    "sourceCode",
+    "sourceFilePath",
+    "_errors"
+  ],
+  "properties": {
+
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semver version of this schema. Additive changes increment minor. Breaking changes increment major.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "const": "0.1.0"
+    },
+    "runId": {
+      "type": "string",
+      "description": "Unique run identifier shared by all records in the same analysis run. Matches run-meta.json runId."
+    },
+    "capturedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when this record was written."
+    },
+    "threadId": {
+      "type": "integer",
+      "description": "Managed thread ID of the thread that executed this rule invocation."
+    },
+
+    "projectFilePath": {
+      "type": "string",
+      "description": "Absolute path to project.json. Primary reference point for workflowRelativePath."
+    },
+    "workflowRelativePath": {
+      "type": "string",
+      "description": "Path of this workflow file relative to the project.json directory, using forward slashes (e.g. Workflows/Module.xaml)."
+    },
+    "isCodedWorkflow": {
+      "type": "boolean",
+      "description": "True for coded workflows (.cs source files exposed via ICodeSourceFileModel). False for XAML workflows."
+    },
+
+    "rootDisplayName": {
+      "type": ["string", "null"],
+      "description": "DisplayName of the root activity (IWorkflowModel.Root.DisplayName). Null for coded workflows."
+    },
+    "rootAnnotationText": {
+      "type": ["string", "null"],
+      "description": "Full annotation text on the root activity. Carries workflow-level annotations such as @module, @pipeline, @unit. Multi-line; embedded newlines preserved. Null when no annotation exists or for coded workflows."
+    },
+    "rootStructuralKind": {
+      "type": ["string", "null"],
+      "description": "Structural kind of the root activity. Determines the top-level container type of this workflow.",
+      "enum": ["sequence", "flowchart", "stateMachine", "tryCatch", "switch", "pick", "ifElse", null]
+    },
+
+    "arguments": {
+      "type": "array",
+      "description": "Arguments declared at the workflow level (IWorkflowModel.Arguments / x:Members in XAML). The canonical source for workflow-level argument contracts.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["direction", "name", "type"],
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": ["in", "out", "inout"],
+            "description": "Argument flow direction."
+          },
+          "name": {
+            "type": "string",
+            "description": "Argument name as declared (e.g. in_Config, out_Status)."
+          },
+          "type": {
+            "type": ["string", "null"],
+            "description": "CLR type name. Null when unresolved."
+          }
+        }
+      }
+    },
+
+    "importedNamespaces": {
+      "type": "array",
+      "description": "CLR namespaces imported in this workflow file (TextExpression.NamespacesForImplementation). Determines which type names VB/C# expressions can use without full qualification.",
+      "items": { "type": "string" }
+    },
+
+    "assemblies": {
+      "type": "array",
+      "description": "Assembly references declared in this workflow file (TextExpression.ReferencesForImplementation).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Assembly simple name (e.g. System.Linq)."
+          },
+          "files": {
+            "type": ["array", "null"],
+            "description": "Resolved assembly file names from IDependency.Assemblies. Null when not resolvable.",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "xmlPrefixes": {
+      "type": "array",
+      "description": "XML namespace prefix declarations used in this workflow file (xmlns: attributes on the root element). Each entry maps a prefix to its namespace URI. Required for XAML generation targeting this specific file.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["prefix", "namespace"],
+        "properties": {
+          "prefix": {
+            "type": ["string", "null"],
+            "description": "The xmlns prefix (e.g. ui, cfg, sap). Null for the default namespace (xmlns= without prefix)."
+          },
+          "namespace": {
+            "type": "string",
+            "description": "The XML namespace URI bound to this prefix."
+          }
+        }
+      }
+    },
+
+    "triggerModel": {
+      "description": "Trigger configuration for this workflow. Null when no trigger is configured (most workflows).",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["hasAny", "hasLocal", "hasStart", "hasIntegration"],
+          "properties": {
+            "hasAny":         { "type": "boolean", "description": "True when at least one trigger type is configured. Equivalent to ITriggerModel.HasAny()." },
+            "hasLocal":       { "type": "boolean", "description": "True when a local trigger (time, file, queue) is configured." },
+            "hasStart":       { "type": "boolean", "description": "True when a start trigger (robot launch) is configured." },
+            "hasIntegration": { "type": "boolean", "description": "True when an integration trigger (API, webhook) is configured." }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+
+    "sourceCode": {
+      "type": ["string", "null"],
+      "description": "Full source code text for coded workflows (ICodeSourceFileModel.SourceCode). Null for XAML workflows. No truncation applied."
+    },
+    "sourceFilePath": {
+      "type": ["string", "null"],
+      "description": "Absolute path of the coded workflow source file (ICodeSourceFileModel.FilePath). Null for XAML workflows."
+    },
+
+    "_errors": {
+      "type": "array",
+      "description": "Structured records of any field-level capture failures during this record's production.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "exceptionType", "message"],
+        "properties": {
+          "field":         { "type": "string", "description": "Name of the field that failed." },
+          "exceptionType": { "type": "string", "description": "CLR exception type name." },
+          "message":       { "type": "string", "description": "Exception message or diagnostic note." }
+        }
+      }
+    }
+  }
+}

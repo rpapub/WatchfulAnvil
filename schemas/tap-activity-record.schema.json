@@ -1,0 +1,338 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/rpapub/WatchfulAnvil/schemas/tap-activity-record.schema.json",
+  "title": "TAP Activity Record",
+  "description": "One JSON Lines record per activity per analysis run, written to activity.jsonl and to by-package/{sourceId}/{sourceVersion}/activity.jsonl. Fields mirror the enriched-catalog.json activity schema plus design-time-only fields not available at package-publication time.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "capturedAt",
+    "threadId",
+    "id",
+    "fullName",
+    "displayName",
+    "description",
+    "category",
+    "visibility",
+    "hasGenericParameters",
+    "genericParameterNames",
+    "isObsolete",
+    "obsoleteMessage",
+    "sourceId",
+    "sourceVersion",
+    "xmlNamespace",
+    "instanceId",
+    "annotationText",
+    "isRootOrActivityContainer",
+    "parentDisplayName",
+    "depthFromRoot",
+    "callChainDepth",
+    "structuralKind",
+    "concreteType",
+    "projectFilePath",
+    "workflowRelativePath",
+    "packageBinding",
+    "scopedVariables",
+    "workflowArguments",
+    "members",
+    "_errors"
+  ],
+  "properties": {
+
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semver version of this schema. Additive changes increment minor. Breaking changes increment major.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "const": "0.1.0"
+    },
+    "runId": {
+      "type": "string",
+      "description": "Unique run identifier shared by all records in the same analysis run. Matches run-meta.json runId."
+    },
+    "capturedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when this record was written."
+    },
+    "threadId": {
+      "type": "integer",
+      "description": "Managed thread ID of the thread that executed this rule invocation."
+    },
+
+    "id": {
+      "type": ["string", "null"],
+      "description": "Catalog-equivalent composite key: {TypeFullName}@{packageId}/{packageVersion}. Sourced from IActivityModel.UiPathActivityTypeId. Null for internal or unregistered activities.",
+      "examples": ["UiPath.Core.Activities.InvokeWorkflowFile@uipath.system.activities/26.2.4"]
+    },
+    "fullName": {
+      "type": ["string", "null"],
+      "description": "CLR full type name of the activity implementation class. Sourced from IActivityModel.Type."
+    },
+    "displayName": {
+      "type": "string",
+      "description": "User-visible label on the Studio canvas. Sourced from IActivityModel.DisplayName. Never null."
+    },
+    "description": {
+      "type": ["string", "null"],
+      "description": "Description from DescriptionAttribute on the activity class. Null when attribute is absent or reflection fails."
+    },
+    "category": {
+      "type": ["string", "null"],
+      "description": "Toolbox panel category. Sourced from IActivityModel.ToolboxName."
+    },
+    "visibility": {
+      "type": ["string", "null"],
+      "description": "Activity panel visibility. Derived from BrowsableAttribute and UiPath visibility attributes on the class.",
+      "enum": ["browsable", "hidden", "legacy", null]
+    },
+    "hasGenericParameters": {
+      "type": ["boolean", "null"],
+      "description": "True when the activity class is a generic type definition. Sourced from activity.GetType().IsGenericTypeDefinition. Null on reflection failure."
+    },
+    "genericParameterNames": {
+      "type": ["array", "null"],
+      "description": "Names of generic type parameters (e.g. [\"T\"] for ForEach<T>). Empty array when hasGenericParameters is false. Null on reflection failure.",
+      "items": { "type": "string" }
+    },
+    "isObsolete": {
+      "type": ["boolean", "null"],
+      "description": "True when ObsoleteAttribute is present on the activity class. Null on reflection failure."
+    },
+    "obsoleteMessage": {
+      "type": ["string", "null"],
+      "description": "ObsoleteAttribute.Message when isObsolete is true. Null otherwise or on reflection failure."
+    },
+    "sourceId": {
+      "type": ["string", "null"],
+      "description": "NuGet package ID of the primary package binding. Sourced from IActivityModel.PackageBinding.Key. Lowercase.",
+      "examples": ["uipath.system.activities"]
+    },
+    "sourceVersion": {
+      "type": ["string", "null"],
+      "description": "NuGet package version resolved from project.json dependencies block by matching sourceId. Null when package is not listed as a direct dependency or when project.json cannot be read."
+    },
+    "xmlNamespace": {
+      "type": ["string", "null"],
+      "description": "XML namespace URI for this activity in XAML. Resolved from XmlnsDefinitionAttribute entries on the activity's assembly, taking the match with the longest ClrNamespace prefix. Null on resolution failure. Required for XAML generation.",
+      "examples": ["http://schemas.uipath.com/workflow/activities"]
+    },
+
+    "instanceId": {
+      "type": ["string", "null"],
+      "description": "Studio-assigned stable identifier for this activity instance within the workflow (e.g. Sequence_1). Sourced from IActivityModel.Id."
+    },
+    "annotationText": {
+      "type": ["string", "null"],
+      "description": "Full annotation text attached to this activity instance by the workflow author. Multi-line; embedded newlines preserved. Null when no annotation exists."
+    },
+    "isRootOrActivityContainer": {
+      "type": "boolean",
+      "description": "True when this activity is the workflow root or a structural container that introduces a new variable scope."
+    },
+    "parentDisplayName": {
+      "type": ["string", "null"],
+      "description": "DisplayName of the immediate parent activity. Null for the workflow root activity."
+    },
+    "depthFromRoot": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of container steps (activities where IsRootOrActivityContainer is true) between this activity and the workflow root, inclusive of root. Root activity = 0."
+    },
+    "callChainDepth": {
+      "type": "null",
+      "description": "Reserved. Cross-workflow InvokeWorkflow depth from the project entry point. Always null in schema v0.1. Requires call-graph analysis not yet in scope."
+    },
+    "structuralKind": {
+      "type": ["string", "null"],
+      "description": "Structural specialisation of this activity. Null for leaf activities (Assign, Log Message, etc.). Determined by SDK cast interface.",
+      "enum": ["sequence", "flowchart", "stateMachine", "tryCatch", "switch", "pick", "ifElse", null]
+    },
+    "concreteType": {
+      "description": "CLR type information of the Studio-internal implementation class backing this activity model. Included for diagnostic and version-correlation purposes.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["fullName", "assemblyName", "assemblyVersion"],
+          "properties": {
+            "fullName":        { "type": "string", "description": "CLR full type name of the concrete implementation." },
+            "assemblyName":    { "type": "string", "description": "Simple name of the containing assembly." },
+            "assemblyVersion": { "type": "string", "description": "Assembly version string (Major.Minor.Build.Revision)." }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+
+    "projectFilePath": {
+      "type": "string",
+      "description": "Absolute path to project.json. Primary reference point for workflowRelativePath. Matches run-meta.json projectFilePath."
+    },
+    "workflowRelativePath": {
+      "type": ["string", "null"],
+      "description": "Path of the containing workflow file relative to the project.json directory, using forward slashes. Null when the workflow cannot be identified via parent-walk."
+    },
+
+    "packageBinding": {
+      "description": "Primary package binding for this activity. Null for activities with no package binding (rare).",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["key", "bindingType"],
+          "properties": {
+            "key":         { "type": "string",         "description": "NuGet package ID (lowercase)." },
+            "bindingType": { "type": "string",         "description": "Binding category.", "enum": ["NuGet", "ObjectRepository", "CodedWorkflow"] },
+            "description": { "type": ["string", "null"], "description": "Human-readable description from the package manifest." }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+
+    "scopedVariables": {
+      "type": "array",
+      "description": "All variables accessible from this activity position (union of all enclosing scopes). Sourced from IActivityContext.Variables.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type", "defaultExpression"],
+        "properties": {
+          "name":              { "type": "string",         "description": "Variable name as declared." },
+          "type":              { "type": ["string", "null"], "description": "CLR type name. Null when type is unresolved." },
+          "defaultExpression": { "type": ["string", "null"], "description": "Default value expression text. Null when no default is set." }
+        }
+      }
+    },
+    "workflowArguments": {
+      "type": "array",
+      "description": "Arguments declared at the parent workflow level. Sourced from IActivityContext.WorkflowArguments.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["direction", "name", "type"],
+        "properties": {
+          "direction": { "type": "string", "enum": ["in", "out", "inout"] },
+          "name":      { "type": "string" },
+          "type":      { "type": ["string", "null"] }
+        }
+      }
+    },
+
+    "members": {
+      "type": "array",
+      "description": "All arguments, properties, and child slots of this activity. Combines catalog-equivalent fields with design-time-only fields.",
+      "items": { "$ref": "#/definitions/member" }
+    },
+
+    "_errors": {
+      "type": "array",
+      "description": "Structured records of any field-level capture failures during this record's production. An empty array indicates a clean capture. A non-empty array identifies which fields degraded and why.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "exceptionType", "message"],
+        "properties": {
+          "field":         { "type": "string", "description": "Name of the top-level or member-level field that failed." },
+          "exceptionType": { "type": "string", "description": "CLR exception type name." },
+          "message":       { "type": "string", "description": "Exception message or diagnostic note." }
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "memberKind", "displayName", "description", "category",
+        "dataType", "argumentDirection", "isRequired", "isBrowsable",
+        "defaultValue", "typeConverter", "isObsolete", "obsoleteMessage",
+        "delegateArgumentName", "enumValues",
+        "definedExpression", "hasLiteralExpression",
+        "childActivityDisplayName"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "CLR property or field name on the activity class. Sourced from PropertyInfo.Name via reflection."
+        },
+        "memberKind": {
+          "type": "string",
+          "description": "Member category.",
+          "enum": ["argument", "property", "child"]
+        },
+        "displayName": {
+          "type": ["string", "null"],
+          "description": "User-facing label. Sourced from DisplayNameAttribute on the member."
+        },
+        "description": {
+          "type": ["string", "null"],
+          "description": "Description from DescriptionAttribute on the member."
+        },
+        "category": {
+          "type": ["string", "null"],
+          "description": "Property panel category from CategoryAttribute on the member."
+        },
+        "dataType": {
+          "type": ["string", "null"],
+          "description": "Full CLR type string including generic parameters (e.g. System.Activities.InArgument`1[System.Int32]). Sourced from PropertyInfo.PropertyType.ToString()."
+        },
+        "argumentDirection": {
+          "type": ["string", "null"],
+          "description": "Argument flow direction. Null for property and child members.",
+          "enum": ["in", "out", "inout", null]
+        },
+        "isRequired": {
+          "type": ["boolean", "null"],
+          "description": "True when RequiredArgumentAttribute is present on the member. Null on reflection failure."
+        },
+        "isBrowsable": {
+          "type": ["boolean", "null"],
+          "description": "True when BrowsableAttribute(true) is present. False when BrowsableAttribute(false). Null when attribute is absent or reflection fails."
+        },
+        "defaultValue": {
+          "type": ["string", "null"],
+          "description": "Schema-declared default value from DefaultValueAttribute on the member. Distinct from definedExpression (which is the instance value). Null when no default is declared."
+        },
+        "typeConverter": {
+          "type": ["string", "null"],
+          "description": "Assembly-qualified type name of the TypeConverterAttribute on the member. Null when absent."
+        },
+        "isObsolete": {
+          "type": ["boolean", "null"],
+          "description": "True when ObsoleteAttribute is present on the member. Null on reflection failure."
+        },
+        "obsoleteMessage": {
+          "type": ["string", "null"],
+          "description": "ObsoleteAttribute.Message when isObsolete is true. Null otherwise."
+        },
+        "delegateArgumentName": {
+          "type": ["string", "null"],
+          "description": "For ActivityDelegate members: the name of the delegate argument (e.g. the ForEach iteration variable name). Null for non-delegate members."
+        },
+        "enumValues": {
+          "type": ["array", "null"],
+          "description": "Valid enum member names when the member type is an enum. [] means the type is known and is not an enum. null means the type could not be resolved (enum membership unknown). Resolved via three-step strategy: (1) arg.Type.IsEnum, (2) Type.GetType from dataType string, (3) null with _errors entry.",
+          "items": { "type": "string" }
+        },
+
+        "definedExpression": {
+          "type": ["string", "null"],
+          "description": "Design-time only. The raw VB/C# expression string entered by the workflow author for this member in the current workflow instance. Null when no expression is set."
+        },
+        "hasLiteralExpression": {
+          "type": ["boolean", "null"],
+          "description": "Design-time only. True when definedExpression is a literal value rather than a variable or compound expression. Sourced from IArgumentModel.HasLiteralExpression."
+        },
+        "childActivityDisplayName": {
+          "type": ["string", "null"],
+          "description": "Design-time only. For memberKind=child: the DisplayName of the child activity placed in this slot. Null when the slot is empty or memberKind is not child."
+        }
+      }
+    }
+  }
+}

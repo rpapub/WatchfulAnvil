@@ -21,9 +21,9 @@ namespace WatchfulAnvil.Sdk.Diagnostics
     public class TapSelectorsRule : ActivityRule
     {
         private const string LogFileKey = "LogFile";
-        private const string DefaultLogFile = @"%TEMP%\wa-tap-selectors.log";
+        private const string DefaultLogFile = @"%TEMP%\cpmf\wa-tap-diagnostics\selectors.log";
 
-        protected override string Id => "WA-TAP-SEL-001";
+        protected override string Id => "CPMF-TAP-SEL-001";
 
         protected override string Name => "Tap Selectors (Diagnostics)";
 

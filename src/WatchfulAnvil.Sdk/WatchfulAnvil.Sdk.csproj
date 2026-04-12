@@ -37,6 +37,12 @@
     <Compile Remove="Diagnostics\TapProjectRule.cs" />
     <Compile Remove="Diagnostics\TapSelectorsRule.cs" />
     <Compile Remove="Diagnostics\TapSdkBypassRule.cs" />
+    <Compile Remove="Diagnostics\RunContext.cs" />
+    <Compile Remove="Diagnostics\JsonlWriter.cs" />
+    <Compile Remove="Diagnostics\ReflectionHelper.cs" />
+    <Compile Remove="Diagnostics\ProjectJsonReader.cs" />
+    <Compile Remove="Diagnostics\ActivityRecordBuilder.cs" />
+    <Compile Remove="Diagnostics\WorkflowRecordBuilder.cs" />
   </ItemGroup>
 
   <!-- net6.0 / net8.0: exclude StubRule and StubRegistration (net461-only) -->

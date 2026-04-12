@@ -1,0 +1,138 @@
+{
+  "product-name": "Development",
+  "policy-name": "CPMF Rules - Development",
+  "data": {
+    "core-allow-edit": true,
+
+    "enforce-analyzer-before-run": false,
+    "enforce-analyzer-before-run-allow-edit": true,
+    "enforce-analyzer-before-publish": false,
+    "enforce-analyzer-before-publish-allow-edit": true,
+    "enforce-analyzer-before-push": false,
+    "enforce-analyzer-before-push-allow-edit": true,
+
+    "analyze-rpa-xamls-only": false,
+    "analyze-rpa-xamls-only-allow-edit": true,
+
+    "additional-analyzer-rule-path": null,
+    "additional-analyzer-rule-path-allow-edit": true,
+
+    "export-analyzer-results": false,
+    "export-analyzer-results-allow-edit": true,
+    "analyzer-allow-edit": true,
+
+    "referenced-rules-config-file": null,
+    "embedded-rules-config-counter": [],
+
+    "embedded-rules-config-rules": [
+      {
+        "code-embedded-rules-config-rules": "CPMF-F001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Error",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-F002",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Error",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-F003",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Error",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-FC001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Error",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-FC002",
+        "is-enabled-embedded-rules-config-rules": false,
+        "default-action": "Warning",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-L001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Warning",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-N001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Warning",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-N002",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Warning",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-N003",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Warning",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-TAP-ACT-001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Info",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-TAP-PRJ-001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Info",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-TAP-SEL-001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Info",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-TAP-WFL-001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Info",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-TAP-XAML-001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Info",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-U001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Error",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-U002",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Error",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-U003",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Error",
+        "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-U004",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Error",
+        "parameters-embedded-rules-config-rules": []
+      }
+    ]
+  }
+}

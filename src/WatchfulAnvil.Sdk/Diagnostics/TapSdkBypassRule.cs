@@ -21,9 +21,9 @@ namespace WatchfulAnvil.Sdk.Diagnostics
     public class TapSdkBypassRule : WorkflowRule
     {
         private const string LogFileKey = "LogFile";
-        private const string DefaultLogFile = @"%TEMP%\wa-tap-xaml.log";
+        private const string DefaultLogFile = @"%TEMP%\cpmf\wa-tap-diagnostics\xaml.log";
 
-        protected override string Id => "WA-TAP-XAML-001";
+        protected override string Id => "CPMF-TAP-XAML-001";
 
         protected override string Name => "Tap XAML SDK Bypass (Diagnostics)";
 
