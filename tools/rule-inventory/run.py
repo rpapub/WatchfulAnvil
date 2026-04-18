@@ -201,6 +201,7 @@ _DEFAULT_TEMPLATE = """\
 {% endfor %}
 {% set rules_with_params = rules | selectattr('parameters') | list -%}
 {% if rules_with_params %}
+
 ### Parameters
 
 | Rule | Key | Display Name | Default |
