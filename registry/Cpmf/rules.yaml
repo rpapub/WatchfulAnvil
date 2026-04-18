@@ -193,3 +193,29 @@ rules:
     requiredFeature: WorkflowAnalyzerV9
     documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-FC001"
     parameters: []
+
+  - id: CPMF-FC002
+    className: WorkflowTypeRatioRule
+    name: Workflow Type Ratio
+    description: "The ratio of module and unit workflows to pipeline workflows must be within configured bounds."
+    recommendation: "Adjust the number of @module or @unit workflows relative to @pipeline workflows to stay within the configured min/max ratios."
+    categoryCode: F
+    scope: IProjectModel
+    type: Rule
+    defaultSeverity: Warning
+    defaultIsEnabled: false
+    requiredFeature: WorkflowAnalyzerV9
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-FC002"
+    parameters:
+      - key: MinModulesPerPipeline
+        displayName: Min modules per pipeline
+        defaultValue: "5"
+      - key: MaxModulesPerPipeline
+        displayName: Max modules per pipeline
+        defaultValue: "10"
+      - key: MinUnitsPerModule
+        displayName: Min units per module
+        defaultValue: "1"
+      - key: MaxUnitsPerModule
+        displayName: Max units per module
+        defaultValue: "5"
