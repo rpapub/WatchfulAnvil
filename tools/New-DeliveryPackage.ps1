@@ -21,16 +21,15 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repoRoot  = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$orgPrefix = $PackageName.Split('.')[0]
+$repoRoot      = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$orgPrefix     = $PackageName.Split('.')[0]
+$rootNamespace = $orgPrefix
 
-$registryPath  = Join-Path $repoRoot "registry\$orgPrefix\rules.yaml"
 $distDir       = Join-Path $repoRoot "dist\$PackageName"
 $manifestPath  = Join-Path $distDir  'manifest.json'
 $csprojPath    = Join-Path $distDir  "$PackageName.csproj"
 $bootstrapPath = Join-Path $distDir  'RegisterAnalyzerConfiguration.g.cs'
 
-if (-not (Test-Path $registryPath))  { Write-Error "Registry not found: $registryPath";  exit 1 }
 if (-not (Test-Path $manifestPath))  { Write-Error "Manifest not found: $manifestPath";   exit 1 }
 
 # ── YAML parser ───────────────────────────────────────────────────────────────
@@ -145,24 +144,57 @@ function ScopeToStubFactory([string] $scope) {
     }
 }
 
-# ── Phase 1: Load registry ────────────────────────────────────────────────────
+# ── Phase 1: Load registries ──────────────────────────────────────────────────
 
-Write-Host "Loading registry: $registryPath"
-$registry = ConvertFrom-RegistryYaml -Path $registryPath
-$regIndex = @{}
-foreach ($r in $registry.rules) { $regIndex[$r.id] = $r }
-Write-Host "  $($registry.rules.Count) rules indexed."
+Write-Host "Loading manifest: $manifestPath"
+$manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+
+# Determine sources: manifest.sources overrides orgPrefix convention
+$sources = if ($manifest.PSObject.Properties['sources']) { $manifest.sources } else { @($orgPrefix) }
+
+$allRegistries = @{}   # srcPrefix -> registry hashtable
+$regIndex      = @{}   # ruleId    -> rule hashtable (with _srcPackage added)
+
+foreach ($src in $sources) {
+    $regPath = Join-Path $repoRoot "registry\$src\rules.yaml"
+    if (-not (Test-Path $regPath)) { Write-Error "Registry not found: $regPath"; exit 1 }
+    Write-Host "Loading registry: $regPath"
+    $reg = ConvertFrom-RegistryYaml -Path $regPath
+    $allRegistries[$src] = $reg
+    foreach ($r in $reg.rules) {
+        $r['_srcPackage'] = $reg.package
+        $regIndex[$r.id]  = $r
+    }
+    Write-Host "  $($reg.rules.Count) rules from '$src' indexed."
+}
 
 # ── Phase 2: Resolve manifest ─────────────────────────────────────────────────
 
-Write-Host "Loading manifest: $manifestPath"
-$manifest     = Get-Content $manifestPath -Raw | ConvertFrom-Json
-$resolvedRules = @()
-
+# Expand wildcard entries ("Cpmf.*" → all rules from that registry)
+$expandedEntries = [System.Collections.Generic.List[object]]::new()
 foreach ($entry in $manifest.rules) {
     $id = $entry.id
+    if ($id -match '^(\w+)\.\*$') {
+        $wldSrc = $Matches[1]
+        if (-not $allRegistries.ContainsKey($wldSrc)) {
+            Write-Error "Wildcard '$id': source '$wldSrc' not in sources list. Add it to manifest.sources."
+            exit 1
+        }
+        foreach ($r in $allRegistries[$wldSrc].rules) {
+            $expandedEntries.Add([PSCustomObject]@{ id = $r.id })
+        }
+        Write-Host "  Wildcard '$id' expanded to $($allRegistries[$wldSrc].rules.Count) rules."
+    } else {
+        $expandedEntries.Add($entry)
+    }
+}
+
+$resolvedRules = @()
+
+foreach ($entry in $expandedEntries) {
+    $id = $entry.id
     if (-not $regIndex.ContainsKey($id)) {
-        Write-Error "Rule '$id' declared in manifest but not found in registry."
+        Write-Error "Rule '$id' declared in manifest but not found in any loaded registry."
         exit 1
     }
     $reg = $regIndex[$id]
@@ -205,9 +237,9 @@ Write-Host "  $($resolvedRules.Count) rules resolved."
 # ── Phase 3: Locate source files + read namespaces ────────────────────────────
 
 Write-Host "Locating source files..."
-$srcRoot = Join-Path $repoRoot "src\$($registry.package)"
 
 foreach ($r in $resolvedRules) {
+    $srcRoot = Join-Path $repoRoot "src\$($r['_srcPackage'])"
     $files = Get-ChildItem -Path $srcRoot -Recurse -Filter "$($r.className).cs" -ErrorAction SilentlyContinue
     if (-not $files) {
         Write-Error "Source file not found for class '$($r.className)' under $srcRoot"
@@ -225,11 +257,16 @@ foreach ($r in $resolvedRules) {
     Write-Host "  $($r.id) -> $relPath  [$($r.namespace)]"
 }
 
-# Always include DotNetIdentifierValidator
-$validatorFiles = Get-ChildItem -Path $srcRoot -Recurse -Filter 'DotNetIdentifierValidator.cs' -ErrorAction SilentlyContinue
-$validatorRelPath = if ($validatorFiles) {
-    $validatorFiles[0].FullName.Substring($repoRoot.Length).TrimStart('\')
-} else { $null }
+# Always include DotNetIdentifierValidator (search across all source packages)
+$validatorRelPath = $null
+foreach ($src in $sources) {
+    $srcRoot = Join-Path $repoRoot "src\$($allRegistries[$src].package)"
+    $validatorFiles = Get-ChildItem -Path $srcRoot -Recurse -Filter 'DotNetIdentifierValidator.cs' -ErrorAction SilentlyContinue
+    if ($validatorFiles) {
+        $validatorRelPath = $validatorFiles[0].FullName.Substring($repoRoot.Length).TrimStart('\')
+        break
+    }
+}
 
 # Collect unique namespaces for using directives
 $uniqueNamespaces = $resolvedRules | ForEach-Object { $_.namespace } | Select-Object -Unique | Sort-Object
@@ -262,7 +299,9 @@ $description = if ($manifest.PSObject.Properties['description']) { $manifest.des
 $authors     = if ($manifest.PSObject.Properties['authors']) { $manifest.authors } else { '' }
 $license     = if ($manifest.PSObject.Properties['license']) { $manifest.license } else { '' }
 
-$registryRelPath = "..\..\registry\$orgPrefix\rules.yaml"
+$registryContentItems = ($sources | ForEach-Object {
+    "    <Content Include=`"..\..\registry\$_\rules.yaml`" Pack=`"true`" PackagePath=`"content\`" />"
+}) -join "`n"
 
 $csprojContent = @"
 <Project Sdk="Microsoft.NET.Sdk">
@@ -270,7 +309,7 @@ $csprojContent = @"
   <PropertyGroup>
     <TargetFrameworks>net461;net6.0;net8.0</TargetFrameworks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <RootNamespace>Cpmf</RootNamespace>
+    <RootNamespace>$rootNamespace</RootNamespace>
     <AssemblyName>$PackageName</AssemblyName>
     <Version>$version</Version>
     <Authors>$authors</Authors>
@@ -321,9 +360,9 @@ $compileItems
     </PackageReference>
   </ItemGroup>
 
-  <!-- R5: registry catalog + manifest embedded in nupkg -->
+  <!-- R5: registry catalog(s) + manifest embedded in nupkg -->
   <ItemGroup>
-    <Content Include="$registryRelPath" Pack="true" PackagePath="content\" />
+$registryContentItems
     <Content Include="manifest.json" Pack="true" PackagePath="content\" />
   </ItemGroup>
 
@@ -393,7 +432,7 @@ foreach ($ns in $uniqueNamespaces) {
 }
 $null = $sb2.AppendLine('#endif')
 $null = $sb2.AppendLine('')
-$null = $sb2.AppendLine('namespace Cpmf')
+$null = $sb2.AppendLine("namespace $rootNamespace")
 $null = $sb2.AppendLine('{')
 $null = $sb2.AppendLine('    public sealed class RegisterAnalyzerConfiguration : IRegisterAnalyzerConfiguration')
 $null = $sb2.AppendLine('    {')

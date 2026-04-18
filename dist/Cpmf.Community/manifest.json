@@ -1,0 +1,21 @@
+{
+  "packageId": "Cpmf.Community",
+  "version": "0.1.0-alpha",
+  "description": "Community — curated stable Cpmf rules.",
+  "authors": "Cpmf",
+  "license": "CC-BY-4.0",
+  "rules": [
+    { "id": "CPMF-U003" },
+    { "id": "CPMF-N001" },
+    { "id": "CPMF-N002" },
+    { "id": "CPMF-N003" },
+    { "id": "CPMF-F001" },
+    { "id": "CPMF-L001" },
+    { "id": "CPMF-U001" },
+    { "id": "CPMF-U002" },
+    { "id": "CPMF-U004" },
+    { "id": "CPMF-F002" },
+    { "id": "CPMF-F003" },
+    { "id": "CPMF-FC001" }
+  ]
+}

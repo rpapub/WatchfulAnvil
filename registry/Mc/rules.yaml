@@ -1,0 +1,13 @@
+# registry/Mc/rules.yaml
+# Rule library catalog for Mc.Rules.
+# V1: no rules yet — library stub for packaging support.
+#
+# Schema: src/WatchfulAnvil.Sdk/schemas/rules.schema.json
+
+package: Mc.Rules
+namespace: Mc.Rules
+version: "0.1.0"
+
+categories: []
+
+rules: []
