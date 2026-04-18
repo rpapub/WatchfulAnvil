@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["pyyaml>=6.0"]
+# dependencies = ["pyyaml>=6.0", "jinja2>=3.0"]
 # ///
 """
 WatchfulAnvil Rule Inventory Tool
@@ -12,13 +12,23 @@ Usage (from WatchfulAnvil repo root):
     uv run tools/rule-inventory/run.py [options]
 
 Options:
-    (no args)            Run --check
-    --check              Validate registry against C# source; exit 1 on drift
-    --format markdown    Print rules as a markdown table to stdout
-    --format json        Print rules as a JSON array to stdout
-    --add <ID> <CLASS>   Append a stub entry to the registry YAML
-    --registry <path>    Override registry file (default: registry/Cpmf/rules.yaml)
-    --src <path>         Override src root (default: src/)
+    (no args)              Run --check
+    --check                Validate registry against C# source; exit 1 on drift
+    --format markdown      Render rules via the built-in Jinja2 template
+    --format json          Print rules as a JSON array to stdout
+    --template <path>      Override the Jinja2 template used by --format markdown
+    --add <ID> <CLASS>     Append a stub entry to the registry YAML
+    --registry <path>      Override registry file (default: registry/Cpmf/rules.yaml)
+    --src <path>           Override src root (default: src/)
+
+Template context variables (available in custom templates):
+    package       str   — registry package name
+    namespace     str   — registry namespace
+    version       str   — registry version string
+    categories    list  — category dicts {code, name, description}
+    rules         list  — rule dicts (all fields from rules.yaml)
+    scope_short   dict  — maps IWorkflowModel etc. to short labels
+    sev_abbrev    dict  — maps Error/Warning/Info/None to short labels
 """
 
 import argparse
@@ -29,6 +39,7 @@ import sys
 from pathlib import Path
 
 import yaml
+from jinja2 import Environment
 
 # ---------------------------------------------------------------------------
 # C# source parsing
@@ -154,7 +165,7 @@ def cmd_check(registry_path: Path, src_root: Path) -> int:
 
 
 # ---------------------------------------------------------------------------
-# Format mode
+# Render mode (Jinja2)
 # ---------------------------------------------------------------------------
 
 SEV_ABBREV = {"Error": "error", "Warning": "warn", "Info": "info", None: "-"}
@@ -165,38 +176,51 @@ SCOPE_SHORT = {
     "IProjectSummary": "Summary",
 }
 
+# Default inline template — override with --template <path>
+_DEFAULT_TEMPLATE = """\
+## {{ package }} - Rule Reference (v{{ version }})
 
-def cmd_format_markdown(registry_path: Path) -> None:
+| ID | Name | Scope | Cat | Sev | On | Params |
+|---|---|---|---|---|---|---|
+{% for r in rules -%}
+| {{ r.id }} | {{ r.name }} | {{ scope_short.get(r.scope, r.scope) }} | {{ r.categoryCode }} | {{ sev_abbrev.get(r.defaultSeverity, r.defaultSeverity or '-') }} | {{ 'yes' if r.get('defaultIsEnabled', True) else 'opt-in' }} | {{ (r.parameters or []) | length or '-' }} |
+{% endfor %}
+{% set rules_with_params = rules | selectattr('parameters') | list -%}
+{% if rules_with_params %}
+### Parameters
+
+| Rule | Key | Display Name | Default |
+|---|---|---|---|
+{% for r in rules_with_params %}{% for p in r.parameters -%}
+| {{ r.id }} | `{{ p.key }}` | {{ p.displayName }} | `{{ p.defaultValue }}` |
+{% endfor %}{% endfor %}{% endif %}
+"""
+
+
+def _build_context(registry: dict) -> dict:
+    return {
+        "package":    registry.get("package", ""),
+        "namespace":  registry.get("namespace", ""),
+        "version":    registry.get("version", ""),
+        "categories": registry.get("categories", []),
+        "rules":      registry.get("rules", []),
+        "scope_short": SCOPE_SHORT,
+        "sev_abbrev":  SEV_ABBREV,
+    }
+
+
+def cmd_render(registry_path: Path, template_path: Path | None) -> None:
     with open(registry_path, encoding="utf-8") as f:
         registry = yaml.safe_load(f)
 
-    rules = registry.get("rules", [])
-    pkg = registry.get("package", "")
-    ver = registry.get("version", "")
+    if template_path is not None:
+        template_src = template_path.read_text(encoding="utf-8")
+    else:
+        template_src = _DEFAULT_TEMPLATE
 
-    print(f"## {pkg} - Rule Reference (v{ver})\n")
-    print("| ID | Name | Scope | Cat | Sev | On | Params |")
-    print("|---|---|---|---|---|---|---|")
-    for r in rules:
-        sev = SEV_ABBREV.get(r.get("defaultSeverity"), r.get("defaultSeverity", "-"))
-        scope = SCOPE_SHORT.get(r.get("scope", ""), r.get("scope", ""))
-        enabled = "yes" if r.get("defaultIsEnabled", True) else "opt-in"
-        params = len(r.get("parameters") or [])
-        params_str = str(params) if params else "-"
-        print(f"| {r['id']} | {r['name']} | {scope} | {r.get('categoryCode','')} | {sev} | {enabled} | {params_str} |")
-
-    params_rows = [
-        (r["id"], p["key"], p.get("displayName", ""), p.get("defaultValue", ""))
-        for r in rules
-        for p in (r.get("parameters") or [])
-    ]
-    if params_rows:
-        print()
-        print("### Parameters\n")
-        print("| Rule | Key | Display Name | Default |")
-        print("|---|---|---|---|")
-        for rule_id, key, display, default in params_rows:
-            print(f"| {rule_id} | `{key}` | {display} | `{default}` |")
+    env = Environment(trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
+    template = env.from_string(template_src)
+    print(template.render(_build_context(registry)), end="")
 
 
 def cmd_format_json(registry_path: Path) -> None:
@@ -249,6 +273,8 @@ def main() -> None:
     )
     parser.add_argument("--check", action="store_true", help="Validate registry vs C# (default)")
     parser.add_argument("--format", choices=["markdown", "json"], help="Emit formatted output")
+    parser.add_argument("--template", type=Path, default=None,
+                        help="Jinja2 template file for --format markdown (default: built-in)")
     parser.add_argument("--add", nargs=2, metavar=("ID", "CLASS"), help="Add a stub registry entry")
     parser.add_argument("--registry", type=Path, default=default_registry, help="Registry YAML path")
     parser.add_argument("--src", type=Path, default=default_src, help="C# src root")
@@ -258,8 +284,16 @@ def main() -> None:
         print(f"ERROR: registry not found: {args.registry}", file=sys.stderr)
         sys.exit(1)
 
+    if args.template and args.format != "markdown":
+        print("ERROR: --template is only valid with --format markdown", file=sys.stderr)
+        sys.exit(1)
+
+    if args.template and not args.template.exists():
+        print(f"ERROR: template not found: {args.template}", file=sys.stderr)
+        sys.exit(1)
+
     if args.format == "markdown":
-        cmd_format_markdown(args.registry)
+        cmd_render(args.registry, args.template)
     elif args.format == "json":
         cmd_format_json(args.registry)
     elif args.add:
