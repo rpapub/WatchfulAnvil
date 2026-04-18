@@ -101,15 +101,22 @@ def extract_is_enabled(cs_path: Path) -> bool | None:
 # Check mode
 # ---------------------------------------------------------------------------
 
-def cmd_check(registry_path: Path, src_root: Path) -> int:
+def cmd_check_one(registry_path: Path, src_root: Path) -> int:
     with open(registry_path, encoding="utf-8") as f:
         registry = yaml.safe_load(f)
 
-    reg_by_class: dict[str, dict] = {
-        r["className"]: r for r in registry.get("rules", [])
-    }
-
     package = registry.get("package", "")
+    rules = registry.get("rules", [])
+
+    # Skip empty libraries that have no RegisterAnalyzerConfiguration yet
+    config_file = src_root / package / "RegisterAnalyzerConfiguration.cs"
+    if not config_file.exists() and not rules:
+        print(f"Registry : {registry_path}")
+        print(f"  SKIP — empty library, no RegisterAnalyzerConfiguration.cs")
+        print()
+        return 0
+
+    reg_by_class: dict[str, dict] = {r["className"]: r for r in rules}
     registered = find_registered_classes(src_root, package)
     issues = 0
 
@@ -164,6 +171,13 @@ def cmd_check(registry_path: Path, src_root: Path) -> int:
     return 0
 
 
+def cmd_check(registry_paths: list[Path], src_root: Path) -> int:
+    total = 0
+    for path in registry_paths:
+        total += cmd_check_one(path, src_root)
+    return min(total, 1)
+
+
 # ---------------------------------------------------------------------------
 # Render mode (Jinja2)
 # ---------------------------------------------------------------------------
@@ -209,24 +223,37 @@ def _build_context(registry: dict) -> dict:
     }
 
 
-def cmd_render(registry_path: Path, template_path: Path | None) -> None:
-    with open(registry_path, encoding="utf-8") as f:
-        registry = yaml.safe_load(f)
+def _load_registry(path: Path) -> dict:
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
-    if template_path is not None:
-        template_src = template_path.read_text(encoding="utf-8")
-    else:
-        template_src = _DEFAULT_TEMPLATE
 
+def _find_all_registries(repo_root: Path) -> list[Path]:
+    return sorted((repo_root / "registry").glob("*/rules.yaml"))
+
+
+def cmd_render(registry_paths: list[Path], template_path: Path | None) -> None:
+    template_src = template_path.read_text(encoding="utf-8") if template_path else _DEFAULT_TEMPLATE
     env = Environment(trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
     template = env.from_string(template_src)
-    print(template.render(_build_context(registry)), end="")
+
+    first = True
+    for path in registry_paths:
+        registry = _load_registry(path)
+        if not registry.get("rules"):
+            continue
+        if not first:
+            print()
+        print(template.render(_build_context(registry)), end="")
+        first = False
 
 
-def cmd_format_json(registry_path: Path) -> None:
-    with open(registry_path, encoding="utf-8") as f:
-        registry = yaml.safe_load(f)
-    print(json.dumps(registry.get("rules", []), indent=2, ensure_ascii=False))
+def cmd_format_json(registry_paths: list[Path]) -> None:
+    all_rules = []
+    for path in registry_paths:
+        registry = _load_registry(path)
+        all_rules.extend(registry.get("rules", []))
+    print(json.dumps(all_rules, indent=2, ensure_ascii=False))
 
 
 # ---------------------------------------------------------------------------
@@ -275,14 +302,12 @@ def main() -> None:
     parser.add_argument("--format", choices=["markdown", "json"], help="Emit formatted output")
     parser.add_argument("--template", type=Path, default=None,
                         help="Jinja2 template file for --format markdown (default: built-in)")
+    parser.add_argument("--all", action="store_true", dest="all_registries",
+                        help="Include all registry/*/rules.yaml files")
     parser.add_argument("--add", nargs=2, metavar=("ID", "CLASS"), help="Add a stub registry entry")
-    parser.add_argument("--registry", type=Path, default=default_registry, help="Registry YAML path")
+    parser.add_argument("--registry", type=Path, default=None, help="Registry YAML path (default: registry/Cpmf/rules.yaml)")
     parser.add_argument("--src", type=Path, default=default_src, help="C# src root")
     args = parser.parse_args()
-
-    if not args.registry.exists():
-        print(f"ERROR: registry not found: {args.registry}", file=sys.stderr)
-        sys.exit(1)
 
     if args.template and args.format != "markdown":
         print("ERROR: --template is only valid with --format markdown", file=sys.stderr)
@@ -292,14 +317,30 @@ def main() -> None:
         print(f"ERROR: template not found: {args.template}", file=sys.stderr)
         sys.exit(1)
 
-    if args.format == "markdown":
-        cmd_render(args.registry, args.template)
-    elif args.format == "json":
-        cmd_format_json(args.registry)
-    elif args.add:
-        cmd_add(args.registry, args.add[0], args.add[1])
+    # Resolve registry list
+    if args.all_registries:
+        registry_paths = _find_all_registries(repo_root)
+        if not registry_paths:
+            print("ERROR: no registry/*/rules.yaml files found", file=sys.stderr)
+            sys.exit(1)
     else:
-        sys.exit(cmd_check(args.registry, args.src))
+        single = args.registry or default_registry
+        if not single.exists():
+            print(f"ERROR: registry not found: {single}", file=sys.stderr)
+            sys.exit(1)
+        registry_paths = [single]
+
+    if args.format == "markdown":
+        cmd_render(registry_paths, args.template)
+    elif args.format == "json":
+        cmd_format_json(registry_paths)
+    elif args.add:
+        if len(registry_paths) > 1:
+            print("ERROR: --add requires --registry (cannot target multiple registries)", file=sys.stderr)
+            sys.exit(1)
+        cmd_add(registry_paths[0], args.add[0], args.add[1])
+    else:
+        sys.exit(cmd_check(registry_paths, args.src))
 
 
 if __name__ == "__main__":
