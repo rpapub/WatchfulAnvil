@@ -1,0 +1,15 @@
+{
+  "packageId": "Cpmf.Tap",
+  "version": "0.1.0-alpha",
+  "description": "Cpmf TAP inspection rules — writes catalog-grade JSONL records to the WatchfulAnvil run directory.",
+  "authors": "Cpmf",
+  "license": "CC-BY-4.0",
+  "sources": ["CpmfTap"],
+  "rules": [
+    { "id": "CPMF-TAP-PRJ-001" },
+    { "id": "CPMF-TAP-WFL-001" },
+    { "id": "CPMF-TAP-ACT-001" },
+    { "id": "CPMF-TAP-SEL-001" },
+    { "id": "CPMF-TAP-XAML-001" }
+  ]
+}

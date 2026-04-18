@@ -3,13 +3,14 @@
 # dependencies = []
 # ///
 """
-WatchfulAnvil Analyze Tool  (issue #50)
+WatchfulAnvil TAP Inspection Tool  (issue #50)
 
-Runs the rule pack against an arbitrary UiPath project.json and surfaces
-both the uipcli violations and the TAP inspection log written by the rules.
+Runs only the TAP inspection rules against an arbitrary UiPath project.json
+and surfaces the inspection log (activity.jsonl, workflow.jsonl) written by
+those rules. Requires uipcli >= 25.
 
 Usage (from WatchfulAnvil repo root):
-    uv run tools/analyze/run.py --project path/to/project.json [options]
+    uv run tools/analyze/tap.py --project path/to/project.json [options]
 
 Options:
     --project <path>        Path to project.json (required)
@@ -17,16 +18,15 @@ Options:
                             (default: <repo-root>/nupkg)
     --version <ver>         Pin a specific rule-pack version
                             (default: latest nupkg by modification time)
-    --uipcli <path>         Path to uipcli.exe
+    --uipcli <path>         Path to uipcli.exe (must be >= 25)
                             (default: newest under ~/AppData/Local/cpmf/tools/)
-    --governance <path>     JSON governance file passed to uipcli
-    --violations-json       Print raw uipcli JSON array to stdout
-    --tap                   Also stream activity.jsonl + workflow.jsonl after violations
-    --tap-dir               Print only the TAP run directory path (no violations output)
+    --governance <path>     Override governance file
+                            (default: tools/governance/tap-only.json)
+    --tap                   Stream activity.jsonl + workflow.jsonl to stdout
+    --tap-dir               Print only the TAP run directory path
 
 Exit codes:
-    0   No violations found
-    1   One or more violations found
+    0   Success
     2   Tool / setup error
 """
 
@@ -34,13 +34,14 @@ import argparse
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-RULE_PACK = "Cpmf.WorkflowAnalyzerRules"
+RULE_PACK = "Cpmf.Tap"
 SEV_MAP = {1: "error", 2: "warning"}
 
 UIPCLI_SEARCH = [
@@ -50,25 +51,40 @@ UIPCLI_SEARCH = [
 
 TAP_RUNS_ROOT = Path(os.environ.get("LOCALAPPDATA", "")) / "WatchfulAnvil" / "runs"
 
+_RE_UIPCLI_VERSION = re.compile(r"uipcli-(\d+)\.")
+
 
 # ---------------------------------------------------------------------------
-# uipcli discovery  (duplicated from tools/corpus-harness/run.py)
+# uipcli discovery + version check
 # ---------------------------------------------------------------------------
 
-def find_uipcli() -> Path:
+def find_uipcli(min_major: int = 25) -> Path:
     for pattern in UIPCLI_SEARCH:
         matches = sorted(glob.glob(pattern), key=os.path.getmtime, reverse=True)
-        if matches:
-            return Path(matches[0])
+        for m in matches:
+            p = Path(m)
+            ver_match = _RE_UIPCLI_VERSION.search(p.parts[-2])
+            major = int(ver_match.group(1)) if ver_match else 0
+            if major >= min_major:
+                return p
     raise RuntimeError(
-        "uipcli.exe not found. Searched:\n"
+        f"uipcli.exe >= {min_major} not found. Searched:\n"
         + "\n".join(f"  {p}" for p in UIPCLI_SEARCH)
-        + "\nInstall UiPath CLI and re-run, or pass --uipcli <path>."
+        + f"\nInstall UiPath CLI >= {min_major} and re-run, or pass --uipcli <path>."
     )
 
 
+def check_uipcli_version(uipcli: Path, min_major: int = 25) -> None:
+    ver_match = _RE_UIPCLI_VERSION.search(str(uipcli))
+    if ver_match:
+        if int(ver_match.group(1)) < min_major:
+            raise RuntimeError(
+                f"uipcli {uipcli} is below the required major version {min_major}."
+            )
+
+
 # ---------------------------------------------------------------------------
-# nupkg discovery  (duplicated from tools/corpus-harness/run.py)
+# nupkg discovery
 # ---------------------------------------------------------------------------
 
 def find_latest_nupkg(nupkg_dir: Path, version_override: str | None) -> tuple[Path, str]:
@@ -95,26 +111,13 @@ def find_latest_nupkg(nupkg_dir: Path, version_override: str | None) -> tuple[Pa
 
 
 # ---------------------------------------------------------------------------
-# NuGet.config generation  (duplicated from tools/corpus-harness/run.py)
+# NuGet.config generation
 # ---------------------------------------------------------------------------
 
-def make_nuget_config(nupkg_dir: Path, output_path: Path) -> None:
-    xml = (
-        '<?xml version="1.0" encoding="utf-8"?>\n'
-        "<configuration>\n"
-        "  <packageSources>\n"
-        f'    <add key="local-nupkg" value="{nupkg_dir}" />\n'
-        '    <add key="UiPath-Official" value="https://uipath.pkgs.visualstudio.com/'
-        'Public.Feeds/_packaging/UiPath-Official/nuget/v3/index.json" />\n'
-        '    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />\n'
-        "  </packageSources>\n"
-        "</configuration>\n"
-    )
-    output_path.write_text(xml, encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
-# project.json patching  (duplicated from tools/corpus-harness/run.py)
+# project.json patching
 # ---------------------------------------------------------------------------
 
 def patch_project_json(src: Path, dest: Path, version: str) -> None:
@@ -129,8 +132,27 @@ def patch_project_json(src: Path, dest: Path, version: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# uipcli analyze  (duplicated from tools/corpus-harness/run.py)
+# uipcli analyze
 # ---------------------------------------------------------------------------
+
+LOCAL_NUGET_SOURCE = r"C:\Users\Public\Documents\myNugetPackages"
+
+
+def make_nuget_config(nupkg_dir: Path, output_path: Path) -> None:
+    xml = (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        "<configuration>\n"
+        "  <packageSources>\n"
+        f'    <add key="local-nupkg" value="{nupkg_dir}" />\n'
+        f'    <add key="myNugetPackages" value="{LOCAL_NUGET_SOURCE}" />\n'
+        '    <add key="UiPath-Official" value="https://uipath.pkgs.visualstudio.com/'
+        'Public.Feeds/_packaging/UiPath-Official/nuget/v3/index.json" />\n'
+        '    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />\n'
+        "  </packageSources>\n"
+        "</configuration>\n"
+    )
+    output_path.write_text(xml, encoding="utf-8")
+
 
 def run_analyze(
     uipcli: Path,
@@ -139,7 +161,7 @@ def run_analyze(
     governance: Path | None,
     result_path: Path,
 ) -> tuple[list, str]:
-    """Launch uipcli package analyze and return (violations, stderr_text)."""
+    """Launch uipcli package analyze and return (raw_results, stderr_text)."""
     cmd = [
         str(uipcli),
         "package",
@@ -174,93 +196,36 @@ def run_analyze(
 
 
 # ---------------------------------------------------------------------------
-# Normalization  (duplicated from tools/corpus-harness/run.py)
-# ---------------------------------------------------------------------------
-
-def normalize(raw: list) -> list:
-    seen: set = set()
-    out = []
-    for r in raw:
-        key = (r.get("ErrorCode"), r.get("FilePath"), r.get("Description"))
-        if key in seen:
-            continue
-        seen.add(key)
-        fp = (r.get("FilePath") or "").replace("\\", "/")
-        basename = fp.split("/")[-1] if fp else None
-        workflow = basename if (basename and basename.lower().endswith(".xaml")) else None
-        out.append(
-            {
-                "ruleId": r.get("ErrorCode", ""),
-                "severity": SEV_MAP.get(r.get("ErrorSeverity"), "unknown"),
-                "filePath": fp,
-                "workflow": workflow,
-                "description": r.get("Description") or "",
-            }
-        )
-    return out
-
-
-# ---------------------------------------------------------------------------
 # TAP run directory discovery
 # ---------------------------------------------------------------------------
 
-def find_tap_run(project_path: Path, after: datetime) -> Path | None:
-    """
-    Scan TAP_RUNS_ROOT for the run whose run-meta.json matches the analyzed
-    project and started at or after `after` (UTC). Returns the newest match,
-    or None if the TAP rules did not fire (e.g. not in this nupkg).
-    """
-    if not TAP_RUNS_ROOT.is_dir():
+def find_tap_run(after: datetime) -> Path | None:
+    """Return the TAP run directory created at or after `after`, via latest.txt."""
+    latest_txt = TAP_RUNS_ROOT / "latest.txt"
+    if not latest_txt.exists():
         return None
-
-    project_dir = str(project_path.parent).replace("\\", "/").lower()
-    best: tuple[datetime, Path] | None = None
-
-    for run_dir in TAP_RUNS_ROOT.iterdir():
-        if not run_dir.is_dir():
-            continue
+    try:
+        run_id = latest_txt.read_text(encoding="utf-8").strip()
+        run_dir = TAP_RUNS_ROOT / run_id
         meta_path = run_dir / "run-meta.json"
         if not meta_path.exists():
-            continue
-        try:
-            with open(meta_path, encoding="utf-8") as f:
-                meta = json.load(f)
-            started_str = meta.get("startedAt", "")
-            started = datetime.fromisoformat(started_str.replace("Z", "+00:00"))
-            if started.tzinfo is None:
-                started = started.replace(tzinfo=timezone.utc)
-            if started < after:
-                continue
-            fp = meta.get("projectFilePath", "").replace("\\", "/").lower()
-            if project_dir not in fp:
-                continue
-            if best is None or started > best[0]:
-                best = (started, run_dir)
-        except Exception:
-            continue
-
-    return best[1] if best else None
+            return None
+        with open(meta_path, encoding="utf-8") as f:
+            meta = json.load(f)
+        started_str = meta.get("startedAt", "")
+        started = datetime.fromisoformat(started_str.replace("Z", "+00:00"))
+        if started.tzinfo is None:
+            started = started.replace(tzinfo=timezone.utc)
+        if started < after:
+            return None
+        return run_dir
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------------------
 # Output helpers
 # ---------------------------------------------------------------------------
-
-def print_violations_table(violations: list) -> None:
-    if not violations:
-        print("No violations found.")
-        return
-    col_id = max(len(v["ruleId"]) for v in violations)
-    col_sev = max(len(v["severity"]) for v in violations)
-    col_wf = max((len(v["workflow"] or "-") for v in violations), default=1)
-    header = f"{'Rule':<{col_id}}  {'Sev':<{col_sev}}  {'Workflow':<{col_wf}}  Description"
-    print(header)
-    print("-" * len(header))
-    for v in violations:
-        wf = v["workflow"] or "-"
-        desc = v["description"][:100]
-        print(f"{v['ruleId']:<{col_id}}  {v['severity']:<{col_sev}}  {wf:<{col_wf}}  {desc}")
-
 
 def stream_tap_file(path: Path, label: str) -> None:
     if not path.exists():
@@ -280,8 +245,11 @@ def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="replace")
 
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    default_governance = repo_root / "tools" / "governance" / "tap-only.json"
+
     parser = argparse.ArgumentParser(
-        description="Run WatchfulAnvil rules against a UiPath project (issue #50)"
+        description="Run TAP inspection rules against a UiPath project (issue #50)"
     )
     parser.add_argument("--project", required=True, type=Path,
                         help="Path to project.json")
@@ -290,13 +258,11 @@ def main() -> None:
     parser.add_argument("--version", default=None,
                         help="Pin rule-pack version")
     parser.add_argument("--uipcli", type=Path, default=None,
-                        help="Path to uipcli.exe")
+                        help="Path to uipcli.exe (must be >= 25)")
     parser.add_argument("--governance", type=Path, default=None,
-                        help="Governance JSON file")
-    parser.add_argument("--violations-json", action="store_true",
-                        help="Print raw uipcli JSON to stdout")
+                        help=f"Override governance file (default: tools/governance/tap-only.json)")
     parser.add_argument("--tap", action="store_true",
-                        help="Stream TAP activity.jsonl + workflow.jsonl after violations")
+                        help="Stream activity.jsonl + workflow.jsonl to stdout")
     parser.add_argument("--tap-dir", action="store_true",
                         help="Print only the TAP run directory path")
     args = parser.parse_args()
@@ -306,29 +272,33 @@ def main() -> None:
         print(f"ERROR: project.json not found: {project_path}", file=sys.stderr)
         sys.exit(2)
 
-    repo_root = Path(__file__).resolve().parent.parent.parent
     nupkg_dir = args.feed.resolve() if args.feed else (repo_root / "nupkg")
+    governance = (args.governance or default_governance).resolve()
+
+    if not governance.exists():
+        print(f"ERROR: governance file not found: {governance}", file=sys.stderr)
+        sys.exit(2)
 
     try:
-        uipcli = args.uipcli.resolve() if args.uipcli else find_uipcli()
+        if args.uipcli:
+            uipcli = args.uipcli.resolve()
+            check_uipcli_version(uipcli)
+        else:
+            uipcli = find_uipcli(min_major=25)
         nupkg_path, version = find_latest_nupkg(nupkg_dir, args.version)
     except RuntimeError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(2)
 
-    governance = args.governance.resolve() if args.governance else None
-
     if not args.tap_dir:
         print(f"Rule pack : {RULE_PACK} {version}")
         print(f"uipcli    : {uipcli}")
         print(f"Project   : {project_path}")
-        if governance:
-            print(f"Governance: {governance}")
+        print(f"Governance: {governance}")
         print()
 
     pre_run_time = datetime.now(tz=timezone.utc)
 
-    # Read original project.json bytes for restore.
     original_project_json = project_path.read_bytes()
 
     def _restore():
@@ -341,7 +311,6 @@ def main() -> None:
         tmpdir = Path(_tmpdir)
         nuget_config = tmpdir / "NuGet.config"
         make_nuget_config(nupkg_dir, nuget_config)
-
         result_file = tmpdir / "result.json"
 
         try:
@@ -355,9 +324,7 @@ def main() -> None:
     if not raw and stderr_text:
         print(f"WARNING: uipcli produced no results. stderr:\n{stderr_text}", file=sys.stderr)
 
-    violations = normalize(raw)
-
-    tap_run = find_tap_run(project_path, pre_run_time)
+    tap_run = find_tap_run(pre_run_time)
 
     if args.tap_dir:
         if tap_run:
@@ -367,21 +334,17 @@ def main() -> None:
             sys.exit(2)
         sys.exit(0)
 
-    if args.violations_json:
-        print(json.dumps(raw, indent=2, ensure_ascii=False))
-    else:
-        print_violations_table(violations)
-
     if tap_run:
-        print(f"\nTAP run   : {tap_run}")
+        print(f"TAP run   : {tap_run}")
+        if args.tap:
+            stream_tap_file(tap_run / "workflow.jsonl", "workflow.jsonl")
+            stream_tap_file(tap_run / "activity.jsonl", "activity.jsonl")
     else:
-        print("\nTAP run   : (none - TAP rules did not fire or run-meta.json not found)")
+        print("TAP run   : (none - TAP rules did not fire)")
+        if stderr_text:
+            print(f"\nuipcli stderr:\n{stderr_text}", file=sys.stderr)
 
-    if args.tap and tap_run:
-        stream_tap_file(tap_run / "workflow.jsonl", "workflow.jsonl")
-        stream_tap_file(tap_run / "activity.jsonl", "activity.jsonl")
-
-    sys.exit(1 if violations else 0)
+    sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,85 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net461;net6.0;net8.0</TargetFrameworks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <RootNamespace>Cpmf</RootNamespace>
+    <AssemblyName>Cpmf.Tap</AssemblyName>
+    <Version>0.1.0-alpha</Version>
+    <Authors>Cpmf</Authors>
+    <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
+    <PackageDescription>Cpmf TAP inspection rules — writes catalog-grade JSONL records to the WatchfulAnvil run directory.</PackageDescription>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <!-- net461: LangVersion 7.3, no nullable, no implicit usings -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+    <LangVersion>7.3</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <!-- net6.0 / net8.0: full SDK features -->
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- TAP rule classes live in WatchfulAnvil.Sdk.dll; ILRepack merges them in. -->
+
+  <!-- Generated bootstrapper: all targets -->
+  <ItemGroup>
+    <Compile Include="RegisterAnalyzerConfiguration.g.cs" />
+  </ItemGroup>
+
+  <!-- WatchfulAnvil.Sdk -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- ILRepack: merge WatchfulAnvil.Sdk.dll into Cpmf.Tap.dll (single self-contained assembly) -->
+  <ItemGroup>
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.34.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <Target Name="ILRepack" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
+    <ItemGroup>
+      <InputAssemblies Include="$(TargetDir)WatchfulAnvil.Sdk.dll" />
+    </ItemGroup>
+    <ILRepack
+      Parallel="true"
+      Internalize="true"
+      InputAssemblies="@(InputAssemblies)"
+      MainAssembly="$(TargetDir)$(AssemblyName).dll"
+      OutputFile="$(TargetDir)$(AssemblyName).dll"
+      TargetKind="Dll"
+      LibraryPath="$(TargetDir)"
+    />
+  </Target>
+
+  <!-- UiPath.Activities.Api -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="UiPath.Activities.Api" Version="23.10.3">
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="UiPath.Activities.Api" Version="24.10.1">
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- R5: registry catalog(s) + manifest embedded in nupkg -->
+  <ItemGroup>
+    <Content Include="..\..\registry\CpmfTap\rules.yaml" Pack="true" PackagePath="content\" />
+    <Content Include="manifest.json" Pack="true" PackagePath="content\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,79 @@
+package: WatchfulAnvil.Sdk
+namespace: WatchfulAnvil.Sdk.Diagnostics
+version: "0.1.0"
+
+categories:
+  - code: TAP
+    name: TAP Inspection
+    description: Rules that write catalog-grade inspection records to the TAP run directory.
+
+rules:
+  - id: CPMF-TAP-PRJ-001
+    className: TapProjectRule
+    name: TAP Project Context
+    description: "Captures project-level metadata (output type, profile, entry point) into the TAP run directory."
+    recommendation: "Include in any TAP inspection run to populate run-meta.json with project context."
+    categoryCode: TAP
+    scope: IProjectModel
+    type: Rule
+    defaultSeverity: Info
+    defaultIsEnabled: false
+    requiredFeature: null
+    documentationLink: null
+    parameters: []
+
+  - id: CPMF-TAP-WFL-001
+    className: TapWorkflowRule
+    name: TAP Workflow Record
+    description: "Writes one JSONL record per workflow to workflow.jsonl in the TAP run directory."
+    recommendation: "Include in any TAP inspection run to capture workflow-level catalog data."
+    categoryCode: TAP
+    scope: IWorkflowModel
+    type: Rule
+    defaultSeverity: Info
+    defaultIsEnabled: false
+    requiredFeature: null
+    documentationLink: null
+    parameters: []
+
+  - id: CPMF-TAP-ACT-001
+    className: TapActivityRule
+    name: TAP Activity Record
+    description: "Writes one JSONL record per activity to activity.jsonl in the TAP run directory."
+    recommendation: "Include in any TAP inspection run to capture activity-level catalog data."
+    categoryCode: TAP
+    scope: IActivityModel
+    type: Rule
+    defaultSeverity: Info
+    defaultIsEnabled: false
+    requiredFeature: null
+    documentationLink: null
+    parameters: []
+
+  - id: CPMF-TAP-SEL-001
+    className: TapSelectorsRule
+    name: TAP Selectors Record
+    description: "Writes selector data for UI automation activities to the TAP activity record."
+    recommendation: "Include when selector inventory is required."
+    categoryCode: TAP
+    scope: IActivityModel
+    type: Rule
+    defaultSeverity: Info
+    defaultIsEnabled: false
+    requiredFeature: null
+    documentationLink: null
+    parameters: []
+
+  - id: CPMF-TAP-XAML-001
+    className: TapSdkBypassRule
+    name: TAP XAML Bypass Record
+    description: "Records activities that bypass the SDK wrapper layer (direct XAML references)."
+    recommendation: "Include when SDK adoption coverage analysis is required."
+    categoryCode: TAP
+    scope: IActivityModel
+    type: Rule
+    defaultSeverity: Info
+    defaultIsEnabled: false
+    requiredFeature: null
+    documentationLink: null
+    parameters: []
