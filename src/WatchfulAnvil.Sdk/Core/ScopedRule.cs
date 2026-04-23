@@ -50,6 +50,13 @@ public abstract class ScopedRule<T> : RuleBase<T>
     /// </summary>
     protected virtual string[]? RequiresAllTags => null;
 
+    /// <summary>
+    /// When non-null, <c>Inspect</c> is only called when the project output type matches one of
+    /// these values (case-insensitive). Applies to <c>ProjectRule</c> / <c>SummaryRule</c> scopes
+    /// only; silently ignored for workflow and activity scopes.
+    /// </summary>
+    protected virtual string[]? TargetOutputTypes => null;
+
     public sealed override Rule<T> Get()
     {
         var rule = new Rule<T>(Name, Id, FilteredInspect);
@@ -106,6 +113,13 @@ public abstract class ScopedRule<T> : RuleBase<T>
             {
                 return Pass();
             }
+        }
+
+        if (TargetOutputTypes != null && model is UiPath.Studio.Analyzer.Models.IProjectSummary projectSummary)
+        {
+            var outputType = projectSummary.ProjectOutputType;
+            if (!TargetOutputTypes.Any(t => t.Equals(outputType, StringComparison.OrdinalIgnoreCase)))
+                return Pass();
         }
 
         return Inspect(model, rule);

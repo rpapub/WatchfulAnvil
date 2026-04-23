@@ -40,7 +40,8 @@
     <Compile Remove="Diagnostics\RunContext.cs" />
     <Compile Remove="Diagnostics\JsonlWriter.cs" />
     <Compile Remove="Diagnostics\ReflectionHelper.cs" />
-    <Compile Remove="Diagnostics\ProjectJsonReader.cs" />
+    <Compile Remove="Common\ProjectJsonReader.cs" />
+    <Compile Remove="Common\ProjectContext.cs" />
     <Compile Remove="Diagnostics\ActivityRecordBuilder.cs" />
     <Compile Remove="Diagnostics\WorkflowRecordBuilder.cs" />
   </ItemGroup>

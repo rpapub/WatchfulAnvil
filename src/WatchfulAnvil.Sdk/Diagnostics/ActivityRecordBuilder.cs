@@ -14,6 +14,8 @@ using System.Text.Json.Serialization;
 using UiPath.Studio.Activities.Api.PackageBindings;
 using UiPath.Studio.Analyzer.Models;
 
+using WatchfulAnvil.Sdk.Common;
+
 namespace WatchfulAnvil.Sdk.Diagnostics;
 
 /// <summary>
