@@ -87,10 +87,20 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Workflow
 </Activity>";
         }
 
+        private static string BuildTargetXaml(int argCount)
+        {
+            var properties = new System.Text.StringBuilder();
+            for (int i = 0; i < argCount; i++)
+                properties.AppendLine(
+                    $"    <x:Property Name=\"arg{i}\" Type=\"InArgument(x:String)\" />");
+
+            return $"<Activity xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\">\r\n  <x:Members>\r\n{properties}  </x:Members>\r\n</Activity>";
+        }
+
         private static Mock<IWorkflowModel> BuildWorkflow(
             string projectDir, string relPath, string invokeId,
             string targetRelPath, bool literalFileName, int targetArgCount, int boundArgCount,
-            bool useEmptyDict = false)
+            bool useEmptyDict = false, bool writeTargetFile = true, bool includeTargetInModel = true)
         {
             var xamlPath = Path.Combine(projectDir, relPath);
             if (useEmptyDict)
@@ -102,6 +112,12 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Workflow
             {
                 var content = BuildBoundArgsXaml(invokeId, boundArgCount, targetRelPath);
                 File.WriteAllText(xamlPath, content);
+            }
+
+            if (writeTargetFile)
+            {
+                var targetPath = Path.Combine(projectDir, targetRelPath);
+                File.WriteAllText(targetPath, BuildTargetXaml(targetArgCount));
             }
 
             // Target workflow
@@ -119,7 +135,10 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Workflow
             // Project
             var project = new Mock<IProjectModel>();
             project.Setup(p => p.Directory).Returns(projectDir);
-            project.Setup(p => p.Workflows).Returns(new List<IWorkflowModel> { target.Object });
+            var workflows = includeTargetInModel
+                ? new List<IWorkflowModel> { target.Object }
+                : new List<IWorkflowModel>();
+            project.Setup(p => p.Workflows).Returns(workflows);
 
             // Invoke activity argument "Workflow file name"
             var fileNameArg = new Mock<IArgumentModel>();
@@ -167,10 +186,12 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Rules.Workflow
         }
 
         [Fact]
-        public void Pass_WhenInvocationIsDynamic()
+        public void Pass_WhenTargetWorkflowCannotBeLocated()
         {
             var dir = Path.GetTempPath();
-            var wf = BuildWorkflow(dir, "Caller_dyn.xaml", "IWF_dyn", "Target.xaml", false, 3, 1);
+            // Target is absent from both the project model and disk — rule skips unresolvable invocations.
+            var wf = BuildWorkflow(dir, "Caller_dyn.xaml", "IWF_dyn", "DynTarget.xaml", false, 3, 1,
+                writeTargetFile: false, includeTargetInModel: false);
             Assert.False(_rule.Get().Inspect(wf.Object, _rule.Get()).HasErrors);
         }
 

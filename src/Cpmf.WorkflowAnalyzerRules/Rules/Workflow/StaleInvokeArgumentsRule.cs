@@ -34,6 +34,9 @@ namespace Cpmf.Rules.Workflow
                 return new InspectionResult { HasErrors = false };
             }
 
+            // Workflows collection is on IProjectModel (subtype of IProjectSummary).
+            var projectModel = workflow.Project as IProjectModel;
+
             var callingPath = Path.Combine(projectDir, workflow.RelativePath);
             if (!File.Exists(callingPath))
             {
@@ -60,25 +63,31 @@ namespace Cpmf.Rules.Workflow
                     continue;
                 }
 
-                // Normalize: "Module.xaml" or "subfolder/Module.xaml" relative to project root.
-                var targetAbsPath = Path.GetFullPath(Path.Combine(projectDir, targetRelPath));
-                if (!File.Exists(targetAbsPath))
-                {
-                    continue;
-                }
+                // Resolve target argument count from the project model when available,
+                // falling back to reading the target XAML from disk.
+                int expectedCount;
+                var targetWorkflow = projectModel?.Workflows != null
+                    ? FindWorkflow(projectModel.Workflows, targetRelPath)
+                    : null;
 
-                XDocument targetDoc;
-                try
+                if (targetWorkflow != null)
                 {
-                    targetDoc = XDocument.Load(targetAbsPath);
+                    expectedCount = targetWorkflow.Arguments?.Count ?? 0;
                 }
-                catch
+                else
                 {
-                    continue;
+                    var targetAbsPath = Path.GetFullPath(Path.Combine(projectDir, targetRelPath));
+                    if (!File.Exists(targetAbsPath))
+                        continue;
+
+                    XDocument targetDoc;
+                    try { targetDoc = XDocument.Load(targetAbsPath); }
+                    catch { continue; }
+
+                    expectedCount = CountDeclaredArgumentsFromXaml(targetDoc);
                 }
 
                 var displayName = invokeEl.Attribute("DisplayName")?.Value ?? "InvokeWorkflowFile";
-                var expectedCount = CountDeclaredArguments(targetDoc);
                 var actualCount = CountBoundArguments(invokeEl);
 
                 if (actualCount != expectedCount)
@@ -103,18 +112,26 @@ namespace Cpmf.Rules.Workflow
             };
         }
 
-        /// <summary>Counts arguments declared in x:Members of the target XAML file.</summary>
-        private static int CountDeclaredArguments(XDocument doc)
+        private static IWorkflowModel FindWorkflow(
+            System.Collections.Generic.IEnumerable<IWorkflowModel> workflows,
+            string relPath)
         {
-            // UiPath workflow arguments are declared as <x:Property> inside <x:Members>.
+            foreach (var wf in workflows)
+            {
+                if (string.Equals(wf.RelativePath, relPath, StringComparison.OrdinalIgnoreCase))
+                    return wf;
+            }
+            return null;
+        }
+
+        /// <summary>Counts arguments declared in x:Members of a target XAML file (disk fallback).</summary>
+        private static int CountDeclaredArgumentsFromXaml(XDocument doc)
+        {
             var members = doc.Root?.Element(XNs + "Members");
             if (members == null)
-            {
                 return 0;
-            }
 
-            return System.Linq.Enumerable.Count(
-                members.Elements(XNs + "Property"));
+            return System.Linq.Enumerable.Count(members.Elements(XNs + "Property"));
         }
 
         private static int CountBoundArguments(XElement invokeEl)

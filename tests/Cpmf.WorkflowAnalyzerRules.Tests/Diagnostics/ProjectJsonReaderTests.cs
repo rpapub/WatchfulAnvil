@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 
-using WatchfulAnvil.Sdk.Diagnostics;
+using WatchfulAnvil.Sdk.Common;
 
 using Xunit;
 
