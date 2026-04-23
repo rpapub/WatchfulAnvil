@@ -1,8 +1,15 @@
-# Registry — How to work with rule metadata
+---
+name: WatchfulAnvil Registry
+description: >-
+  Manage WatchfulAnvil rule registry files (registry/<Package>/rules.yaml) — the
+  source of truth for rule metadata, checked and consumed by tools/rule-inventory/run.py.
+  Use when: verifying registry sync with C# source, adding stub entries for new rules,
+  generating markdown or JSON documentation, or looking up the registry YAML schema
+  (fields, scope values, tag conventions, parameters, and the process/library
+  project-type tagging convention).
+---
 
-This directory contains rule registry files (`registry/<Package>/rules.yaml`) that are the source of truth for rule metadata. The `tools/rule-inventory/run.py` script is the primary interface.
-
-All commands are run from the repository root with `uv run`.
+All commands run from the repository root with `uv run`.
 
 ---
 
@@ -35,16 +42,16 @@ Drift categories reported:
 
 ## Add a stub entry for a new rule
 
-Use this when you have decided on a rule ID and class name, but C# implementation is not yet written.
+Use when a rule ID and class name are decided but C# implementation is not yet written.
 
 ```bash
 uv run tools/rule-inventory/run.py --add CPMF-X001 MyNewRule
 ```
 
-This appends a stub with placeholder fields to `registry/Cpmf/rules.yaml`. After running it:
+Appends a stub with placeholder fields to `registry/Cpmf/rules.yaml`. After running:
 
 1. Open `registry/Cpmf/rules.yaml` and fill in `name`, `description`, `recommendation`, `categoryCode`, `scope`.
-2. Run `--check` — it will report `STALE IN REGISTRY` until the C# implementation and registration land.
+2. Run `--check` — it reports `STALE IN REGISTRY` until the C# implementation and registration land.
 
 To target a different registry:
 
@@ -55,8 +62,6 @@ uv run tools/rule-inventory/run.py --add CPMF-X001 MyNewRule --registry registry
 ---
 
 ## Generate documentation
-
-Render a Markdown table of all rules and their parameters:
 
 ```bash
 # Single registry (default)
@@ -102,7 +107,7 @@ uv run tools/rule-inventory/run.py --src path/to/src
 
 ## Registry YAML schema
 
-Each `rules.yaml` has the following top-level fields:
+Top-level fields:
 
 | Field | Type | Description |
 |---|---|---|
@@ -135,7 +140,7 @@ Each rule entry:
 
 ## Project type applicability
 
-Rules that are only meaningful for specific UiPath project output types should carry one or both of the reserved tags `process` and `library`. Rules without these tags are treated as applicable to all output types.
+Rules meaningful only for specific output types carry the reserved tags `process` or `library`. No tag = applies to all output types.
 
 | Tag value | Meaning |
 |---|---|
@@ -143,19 +148,15 @@ Rules that are only meaningful for specific UiPath project output types should c
 | `library` | Rule targets **Library** output type only |
 | *(none)* | Rule applies to all output types |
 
-Example — marking a rule as process-only in `rules.yaml`:
-
 ```yaml
 - id: CPMF-FC001
   ...
   tags: [process]
 ```
 
-**Runtime enforcement (project-scope rules only)**
-
-For rules with `scope: IProjectModel`, the C# `TargetOutputTypes` property on `ScopedRule<T>` mirrors this tag at runtime — Studio will not call `Inspect` for non-matching projects. For `IWorkflowModel` and `IActivityModel` scopes the tag is informational only; the rule fires on all projects but may produce no violations for non-matching output types.
+**Runtime enforcement (project-scope rules only):** For `scope: IProjectModel` rules, mirror the tag with `TargetOutputTypes` in C# — Studio skips `Inspect` for non-matching projects. For `IWorkflowModel`/`IActivityModel` scopes the tag is informational only.
 
 ```csharp
-// Matches the tags: [process] annotation in rules.yaml
+// Mirrors tags: [process] in rules.yaml
 protected override string[]? TargetOutputTypes => new[] { "Process" };
 ```
