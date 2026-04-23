@@ -1,4 +1,5 @@
 using Cpmf.Rules.Pipeline;
+using Cpmf.Rules.Project;
 using Cpmf.Rules.Workflow;
 using UiPath.Studio.Activities.Api;
 using UiPath.Studio.Activities.Api.Analyzer;
@@ -9,6 +10,7 @@ namespace Cpmf
     {
         public void Initialize(IAnalyzerConfigurationService api)
         {
+            new IsLibraryRule().Initialize(api);
             new NoFlowchartStateMachineRule().Initialize(api);
             new VariableNamingRule().Initialize(api);
             new SpecificContentAssignRule().Initialize(api);

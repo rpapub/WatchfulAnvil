@@ -15,6 +15,9 @@ categories:
   - code: F
     name: Processing Flow
     description: Rules for how logic is sequenced and composed, including pipeline-oriented processing style.
+  - code: G
+    name: Governance
+    description: Rules for enforcing project-level governance constraints such as output type, expression language, and package policy.
 
 rules:
   - id: CPMF-L001
@@ -224,3 +227,18 @@ rules:
       - key: MaxUnitsPerModule
         displayName: Max units per module
         defaultValue: "5"
+
+  - id: CPMF-G001
+    className: IsLibraryRule
+    name: Project Is Library
+    description: "The project output type must be Library."
+    recommendation: "This project is not configured as a Library output type. Update the output type in project settings, or disable this rule."
+    categoryCode: G
+    scope: IProjectModel
+    type: Rule
+    defaultSeverity: Error
+    defaultIsEnabled: false
+    requiredFeature: null
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-G001"
+    tags: [library]
+    parameters: []
