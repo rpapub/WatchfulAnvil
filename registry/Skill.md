@@ -128,4 +128,34 @@ Each rule entry:
 | `defaultIsEnabled` | yes | `true` (on by default) or `false` (opt-in) |
 | `requiredFeature` | no | Feature flag string or `null` |
 | `documentationLink` | no | URL or `null` |
+| `tags` | no | Label strings. Use `process` and/or `library` to declare which project output types the rule is meaningful for. Omit when the rule applies to all types. |
 | `parameters` | no | List of `{key, displayName, defaultValue}` |
+
+---
+
+## Project type applicability
+
+Rules that are only meaningful for specific UiPath project output types should carry one or both of the reserved tags `process` and `library`. Rules without these tags are treated as applicable to all output types.
+
+| Tag value | Meaning |
+|---|---|
+| `process` | Rule targets **Process** output type only |
+| `library` | Rule targets **Library** output type only |
+| *(none)* | Rule applies to all output types |
+
+Example — marking a rule as process-only in `rules.yaml`:
+
+```yaml
+- id: CPMF-FC001
+  ...
+  tags: [process]
+```
+
+**Runtime enforcement (project-scope rules only)**
+
+For rules with `scope: IProjectModel`, the C# `TargetOutputTypes` property on `ScopedRule<T>` mirrors this tag at runtime — Studio will not call `Inspect` for non-matching projects. For `IWorkflowModel` and `IActivityModel` scopes the tag is informational only; the rule fires on all projects but may produce no violations for non-matching output types.
+
+```csharp
+// Matches the tags: [process] annotation in rules.yaml
+protected override string[]? TargetOutputTypes => new[] { "Process" };
+```
