@@ -20,7 +20,7 @@
     },
     "license": {
       "type": "string",
-      "description": "SPDX license expression, e.g. CC-BY-4.0."
+      "description": "SPDX license expression, e.g. Apache-2.0."
     },
     "rules": {
       "type": "array",

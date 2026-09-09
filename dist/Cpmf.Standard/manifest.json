@@ -3,7 +3,7 @@
   "version": "0.1.0-alpha",
   "description": "Standard CPMF workflow analyzer rules.",
   "authors": "Cpmf",
-  "license": "CC-BY-4.0",
+  "license": "Apache-2.0",
   "rules": [
     { "id": "CPMF-WFL-004" },
     { "id": "CPMF-WFL-005" },

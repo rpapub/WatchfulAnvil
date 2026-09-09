@@ -3,7 +3,7 @@
   "version": "0.1.0-alpha",
   "description": "Community — curated stable Cpmf rules.",
   "authors": "Cpmf",
-  "license": "CC-BY-4.0",
+  "license": "Apache-2.0",
   "rules": [
     { "id": "CPMF-U003" },
     { "id": "CPMF-N001" },
