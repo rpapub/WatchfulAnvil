@@ -23,6 +23,10 @@ obj/
 *.dll
 *.nupkg
 *.snupkg
+
+# Extracted package contents produced while inspecting a nupkg. Build output,
+# and the .psmdcp filename is a regenerated GUID that churns on every pack.
+nupkg/unpacked/
 *.deps.json
 *.runtimeconfig.json
 *.csproj.nuget.g.props
