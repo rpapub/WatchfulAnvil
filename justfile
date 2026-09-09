@@ -33,21 +33,30 @@ test-coverage:
 
 # ── Pack ──────────────────────────────────────────────────────────────────────
 
-# Pack Cpmf rules into nupkg/ (uses current csproj version)
+# Pack Cpmf rules AND the SDK they depend on into nupkg/.
+# Both are needed: packs are no longer self-contained, so a feed holding only the
+# rule pack leaves uipcli unable to restore WatchfulAnvil.Sdk. WatchfulAnvilPackDev
+# opts this project into packing; it is deliberately not published by CI.
 pack:
+    dotnet pack src/WatchfulAnvil.Sdk/WatchfulAnvil.Sdk.csproj -c Release -o nupkg/
     dotnet pack src/Cpmf.WorkflowAnalyzerRules/Cpmf.WorkflowAnalyzerRules.csproj \
-        -c Release -o nupkg/
-
-# Pack the TAP rules package
-pack-tap:
-    dotnet pack src/Cpmf.WorkflowAnalyzerRules/Cpmf.WorkflowAnalyzerRules.csproj \
-        -c Release -o nupkg/ -p:PackId=Cpmf.Tap
+        -c Release -o nupkg/ -p:WatchfulAnvilPackDev=true
 
 # Pack the Library rules package and copy to local NuGet feed
 pack-libs:
+    dotnet pack src/WatchfulAnvil.Sdk/WatchfulAnvil.Sdk.csproj -c Release -o nupkg/
     dotnet pack src/Cpmf.Rules.Libs/Cpmf.Rules.Libs.csproj \
         -c Release -o nupkg/
-    cp nupkg/Cpmf.Rules.Libs.*.nupkg "C:/Users/Public/Documents/myNugetPackages/"
+    cp nupkg/Cpmf.Rules.Libs.*.nupkg nupkg/WatchfulAnvil.Sdk.*.nupkg "C:/Users/Public/Documents/myNugetPackages/"
+
+# Pack every release artefact (the curated dist/* packs) plus the SDK
+pack-dist:
+    dotnet pack src/WatchfulAnvil.Sdk/WatchfulAnvil.Sdk.csproj -c Release -o nupkg/
+    dotnet pack dist/Cpmf.Standard/Cpmf.Standard.csproj -c Release -o nupkg/
+    dotnet pack dist/Cpmf.Tap/Cpmf.Tap.csproj -c Release -o nupkg/
+    dotnet pack dist/Cpmf.Community/Cpmf.Community.csproj -c Release -o nupkg/
+    dotnet pack dist/Cpmf.Community.Preview/Cpmf.Community.Preview.csproj -c Release -o nupkg/
+    dotnet pack dist/Mc.2026-04/Mc.2026-04.csproj -c Release -o nupkg/
 
 # Bump patch version, pack, and copy to local NuGet feed
 bump-patch:
@@ -93,6 +102,15 @@ corpus:
 # Run corpus harness with custom corpus path
 corpus-at PATH:
     uv run tools/corpus-harness/run.py --corpus "{{PATH}}"
+
+# Assert every produced package ships the WatchfulAnvil dependencies it declares.
+# Packs are no longer self-contained, so a pack published without its SDK gives
+# consumers an unresolvable dependency - silently, at restore time.
+check-closure:
+    pwsh scripts/Test-PackageClosure.ps1
+
+# Pack the release artefacts and assert closure over them
+pack-check: pack-dist check-closure
 
 # ── CI-equivalent (build + test + check) ─────────────────────────────────────
 

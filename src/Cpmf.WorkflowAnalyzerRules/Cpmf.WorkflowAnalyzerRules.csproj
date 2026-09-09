@@ -13,6 +13,19 @@
 		<Company>cprima.net</Company>
 		<PackageDescription>Custom UiPath Workflow Analyzer rules by Christian Prior-Mamulyan.</PackageDescription>
 
+		<!--
+		  Not published. The curated dist/* packs are the release artefacts; this is the
+		  source library they compile from. CI packs the solution with no project argument
+		  and pushes everything it produces, so shipping this would publish an unintended
+		  second copy of the same rules under a different id.
+
+		  Still packable on demand, because the corpus harness and tools/analyze consume a
+		  Cpmf.WorkflowAnalyzerRules nupkg from nupkg/. `just pack` passes the flag; CI
+		  never sets it.
+		-->
+		<IsPackable Condition="'$(WatchfulAnvilPackDev)' == 'true'">true</IsPackable>
+		<IsPackable Condition="'$(WatchfulAnvilPackDev)' != 'true'">false</IsPackable>
+
 		<!-- Opt in to the shared build logic: per-TFM UiPath.Activities.Api version
 		     and the net461 language block. See build/WatchfulAnvil.Build/. -->
 		<WatchfulAnvilRulePack>true</WatchfulAnvilRulePack>

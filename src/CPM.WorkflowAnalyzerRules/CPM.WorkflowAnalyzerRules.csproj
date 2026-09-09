@@ -13,6 +13,9 @@
 		<Company>cprima.net</Company>
 		<PackageDescription>Custom UiPath Workflow Analyzer rules by Christian Prior-Mamulyan.</PackageDescription>
 
+		<!-- Not a release artefact; the curated dist/* packs are. -->
+		<IsPackable>false</IsPackable>
+
 		<!-- Opt in to the shared build logic: per-TFM UiPath.Activities.Api version
 		     and the net461 language block. See build/WatchfulAnvil.Build/. -->
 		<WatchfulAnvilRulePack>true</WatchfulAnvilRulePack>
