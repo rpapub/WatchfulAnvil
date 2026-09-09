@@ -83,10 +83,31 @@ public abstract class ScopedRule<T> : RuleBase<T>
 
     protected abstract InspectionResult Inspect(T model, Rule rule);
 
+    /// <remarks>
+    /// A project has no annotation of its own, so a project-scoped rule had no way to be
+    /// suppressed at all: <c>@nocheck</c> and <c>@suppress:RULE-ID</c> were silently
+    /// inert on <see cref="IProjectModel"/>. Joining every workflow's root annotation
+    /// gives project rules the same suppression vocabulary as the other scopes.
+    ///
+    /// Note the blast radius this creates, which is deliberate but blunt: because the
+    /// text is a concatenation, ONE <c>@suppress:RULE-ID</c> on ONE workflow suppresses
+    /// that project-scoped rule for the WHOLE project, and one <c>@nocheck</c> anywhere
+    /// silences every project rule. That is the intended escape hatch — a project rule
+    /// reports against the project, so there is no finer granularity to target — but it
+    /// means a stray directive has project-wide reach.
+    /// </remarks>
     private static string? GetAnnotation(T model) => model switch
     {
         IActivityModel a => a.AnnotationText,
         IWorkflowModel w => w.Root?.AnnotationText,
+        // Workflows is null on a project model that has not been populated, so it must be
+        // guarded: dereferencing it here throws before the rule ever runs.
+        IProjectModel p when p.Workflows != null => string.Join(
+            " ",
+            p.Workflows
+                .Where(w => w != null)
+                .Select(w => w.Root?.AnnotationText)
+                .Where(a => !string.IsNullOrWhiteSpace(a))),
         _ => null,
     };
 
