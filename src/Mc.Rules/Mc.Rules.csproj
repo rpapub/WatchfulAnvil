@@ -5,7 +5,8 @@
     <AssemblyName>Mc.Rules</AssemblyName>
     <RootNamespace>Mc.Rules</RootNamespace>
     <Version>0.1.0-alpha</Version>
-    <Authors>Cpmf</Authors>
+    <Authors>Christian Prior-Mamulyan</Authors>
+    <Company>cprima.net</Company>
     <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
     <PackageDescription>Mc workflow analyzer rule library.</PackageDescription>
     <IsPackable>false</IsPackable>

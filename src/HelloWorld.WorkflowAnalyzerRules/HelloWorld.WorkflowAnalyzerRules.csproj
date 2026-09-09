@@ -9,10 +9,10 @@
 		<FileVersion>0.1.0.0</FileVersion>
 		<AssemblyVersion>0.1.0.0</AssemblyVersion>
 		<InformationalVersion>0.1.0-alpha</InformationalVersion>
-		<Authors>ACME</Authors>
-		<Company>ACME</Company>
+		<Authors>Christian Prior-Mamulyan</Authors>
+		<Company>cprima.net</Company>
 		<PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
-		<PackageDescription>Custom UiPath Workflow Analyzer rules by ACME.</PackageDescription>
+		<PackageDescription>Custom UiPath Workflow Analyzer rules by Christian Prior-Mamulyan.</PackageDescription>
 	</PropertyGroup>
 
 	<ItemGroup>
