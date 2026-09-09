@@ -1,0 +1,78 @@
+package: Cpmf.Rules.Libs
+namespace: Cpmf.Rules
+version: "0.1.0"
+
+categories:
+  - code: N
+    name: Naming and Intent
+    description: Rules for naming workflows, arguments, variables, assets, queues, and components consistently.
+  - code: G
+    name: Governance
+    description: Rules for enforcing project-level governance constraints such as output type, expression language, and package policy.
+
+rules:
+  - id: CPMF-G002
+    className: ProjectOutputTypeRule
+    name: Project Output Type
+    description: "The project output type must match the configured expected value (default: Library)."
+    recommendation: "The project output type does not match the expected value. Update the output type in project settings, or change the OutputType parameter on this rule."
+    categoryCode: G
+    scope: IProjectModel
+    type: Rule
+    defaultSeverity: Error
+    defaultIsEnabled: false
+    requiredFeature: null
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-G002"
+    tags: [library]
+    parameters:
+      - key: OutputType
+        displayName: Expected output type
+        defaultValue: "Library"
+
+  - id: CPMF-N004
+    className: LibraryNameLengthRule
+    name: Library Name Length
+    description: "The library project name must not exceed 128 characters."
+    recommendation: "Shorten the project name to 128 characters or fewer. UiPath enforces this limit for library projects."
+    categoryCode: N
+    scope: IProjectModel
+    type: Rule
+    defaultSeverity: Error
+    defaultIsEnabled: true
+    requiredFeature: null
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-N004"
+    tags: [library]
+    parameters: []
+
+  - id: CPMF-N005
+    className: LibraryReservedNameRule
+    name: Library Reserved Name
+    description: "The library project name must not match any configured reserved name (default: 'lib'), as these cause compile errors in consuming projects."
+    recommendation: "Rename the project. The configured reserved names cause compile errors in consuming projects."
+    categoryCode: N
+    scope: IProjectModel
+    type: Rule
+    defaultSeverity: Error
+    defaultIsEnabled: true
+    requiredFeature: null
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-N005"
+    tags: [library]
+    parameters:
+      - key: AdditionalReservedNames
+        displayName: Additional reserved names (comma-separated)
+        defaultValue: ""
+
+  - id: CPMF-N006
+    className: LibraryDescriptionLengthRule
+    name: Library Description Length
+    description: "The library project description must not exceed 500 characters."
+    recommendation: "Shorten the project description to 500 characters or fewer. UiPath enforces this limit for library projects."
+    categoryCode: N
+    scope: IProjectModel
+    type: Rule
+    defaultSeverity: Warning
+    defaultIsEnabled: true
+    requiredFeature: null
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-N006"
+    tags: [library]
+    parameters: []

@@ -43,6 +43,12 @@ pack-tap:
     dotnet pack src/Cpmf.WorkflowAnalyzerRules/Cpmf.WorkflowAnalyzerRules.csproj \
         -c Release -o nupkg/ -p:PackId=Cpmf.Tap
 
+# Pack the Library rules package and copy to local NuGet feed
+pack-libs:
+    dotnet pack src/Cpmf.Rules.Libs/Cpmf.Rules.Libs.csproj \
+        -c Release -o nupkg/
+    cp nupkg/Cpmf.Rules.Libs.*.nupkg "C:/Users/Public/Documents/myNugetPackages/"
+
 # Bump patch version, pack, and copy to local NuGet feed
 bump-patch:
     pwsh scripts/bump-version.ps1 -Part Patch
