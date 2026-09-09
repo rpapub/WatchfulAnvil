@@ -66,6 +66,18 @@ check-rules:
 rules-md:
     uv run tools/rule-inventory/run.py --format markdown
 
+# Report available versions from the remote feeds (what we pin vs what exists)
+feed-versions:
+    uv run tools/feed-versions/run.py
+
+# List every published version of one package
+feed-versions-all PACKAGE:
+    uv run tools/feed-versions/run.py --package "{{PACKAGE}}" --all
+
+# Fail if any pinned dependency has a newer release
+feed-versions-check:
+    uv run tools/feed-versions/run.py --check
+
 # Run rules against a project (set PROJECT=path/to/project.json)
 analyze PROJECT="":
     uv run tools/analyze/run.py --project "{{PROJECT}}"
