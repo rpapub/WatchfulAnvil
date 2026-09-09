@@ -4,19 +4,17 @@
     <TargetFrameworks>net461;net6.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 
-  <!-- net461: stub target for Studio Windows-Legacy. LangVersion 7.3, no modern features. -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
-    <LangVersion>7.3</LangVersion>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
-  </PropertyGroup>
-
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <Version>0.1.2-alpha</Version>
     <Authors>Christian Prior-Mamulyan</Authors>
     <Company>cprima.net</Company>
     <PackageDescription>Base classes and utilities for building UiPath Workflow Analyzer rules.</PackageDescription>
+
+    <!-- Opt in to the shared build logic. Supplies the net461 stub target's
+         LangVersion 7.3 / no-nullable / no-implicit-usings block and the per-TFM
+         UiPath.Activities.Api version. See build/WatchfulAnvil.Build/. -->
+    <WatchfulAnvilRulePack>true</WatchfulAnvilRulePack>
   </PropertyGroup>
 
   <!-- net461: only StubRule; exclude all modern Core and Diagnostics files -->
@@ -51,25 +49,9 @@
     <Compile Remove="Core\StubRegistration.cs" />
   </ItemGroup>
 
-  <!-- Package references per target -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="UiPath.Activities.Api" Version="23.10.3">
-      <ExcludeAssets>runtime</ExcludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <!-- net6.0: targets Studio Windows < 2024.10 -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="UiPath.Activities.Api" Version="23.10.3">
-      <ExcludeAssets>runtime</ExcludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <!-- net8.0: targets Studio Windows 2024.10+ -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <PackageReference Include="UiPath.Activities.Api" Version="24.10.1">
+  <!-- Version resolved per TFM by WatchfulAnvil.Build.props -->
+  <ItemGroup>
+    <PackageReference Include="UiPath.Activities.Api" Version="$(WatchfulAnvilApiVersion)">
       <ExcludeAssets>runtime</ExcludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
