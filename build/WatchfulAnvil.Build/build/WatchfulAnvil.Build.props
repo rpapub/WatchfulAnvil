@@ -1,0 +1,51 @@
+<Project>
+
+  <!--
+    WatchfulAnvil.Build — properties.
+
+    Deliberately minimal. A .props is imported BEFORE the consuming project body,
+    so anything here must not depend on properties the project sets. Conversely,
+    anything the project body *references* must be defined here rather than in the
+    .targets: a csproj that writes
+
+        <PackageReference Include="UiPath.Activities.Api"
+                          Version="$(WatchfulAnvilApiVersion)" ... />
+
+    is evaluated after this file and before the .targets, so the version has to
+    already exist at this point.
+
+    Everything gated on a project opt-in flag lives in WatchfulAnvil.Build.targets.
+  -->
+
+  <PropertyGroup>
+    <WatchfulAnvilBuildImported>true</WatchfulAnvilBuildImported>
+  </PropertyGroup>
+
+  <!--
+    UiPath.Activities.Api version matrix — the single source of truth.
+
+    net461  Studio Windows-Legacy
+    net6.0  Studio Windows < 2024.10
+    net8.0  Studio Windows 2024.10+
+
+    Override any single TFM from a consuming project without forking this file,
+    e.g. <WatchfulAnvilApiVersionNet8>25.4.1</WatchfulAnvilApiVersionNet8>.
+  -->
+  <PropertyGroup>
+    <WatchfulAnvilApiVersionNet461 Condition="'$(WatchfulAnvilApiVersionNet461)' == ''">23.10.3</WatchfulAnvilApiVersionNet461>
+    <WatchfulAnvilApiVersionNet6   Condition="'$(WatchfulAnvilApiVersionNet6)'   == ''">23.10.3</WatchfulAnvilApiVersionNet6>
+    <WatchfulAnvilApiVersionNet8   Condition="'$(WatchfulAnvilApiVersionNet8)'   == ''">24.10.1</WatchfulAnvilApiVersionNet8>
+  </PropertyGroup>
+
+  <!--
+    Resolve the matrix down to one value for the current inner build.
+    $(TargetFramework) is empty during the outer multi-targeting pass and set for
+    each inner build, which is where PackageReference actually matters.
+  -->
+  <PropertyGroup Condition="'$(WatchfulAnvilApiVersion)' == ''">
+    <WatchfulAnvilApiVersion Condition="'$(TargetFramework)' == 'net461'">$(WatchfulAnvilApiVersionNet461)</WatchfulAnvilApiVersion>
+    <WatchfulAnvilApiVersion Condition="'$(TargetFramework)' == 'net6.0'">$(WatchfulAnvilApiVersionNet6)</WatchfulAnvilApiVersion>
+    <WatchfulAnvilApiVersion Condition="'$(TargetFramework)' == 'net8.0'">$(WatchfulAnvilApiVersionNet8)</WatchfulAnvilApiVersion>
+  </PropertyGroup>
+
+</Project>

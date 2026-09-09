@@ -1,0 +1,23 @@
+<Project>
+
+  <!--
+    Repo-wide import of the shared build LOGIC, straight from disk.
+    The matching properties are imported from Directory.Build.props — see there
+    for why the split matters.
+
+    In-repo projects must NOT PackageReference WatchfulAnvil.Build; it is built
+    from this same repo, which would be circular. Both paths consume the identical
+    files: in-repo via these imports, external consumers via the nupkg that
+    packages them. The repo therefore dogfoods the exact bytes that ship.
+
+    Everything inside is gated on WatchfulAnvilRulePack, so tests/ and the
+    packaging projects are unaffected by this being repo-wide.
+
+    Deliberately no src/Directory.Build.targets: MSBuild takes the NEAREST
+    Directory.Build.targets and stops, so one under src/ would shadow this file
+    rather than chain to it.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)build\WatchfulAnvil.Build\build\WatchfulAnvil.Build.targets"
+          Condition="Exists('$(MSBuildThisFileDirectory)build\WatchfulAnvil.Build\build\WatchfulAnvil.Build.targets')" />
+
+</Project>

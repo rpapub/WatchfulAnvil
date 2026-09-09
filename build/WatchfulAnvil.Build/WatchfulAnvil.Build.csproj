@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Packages build/WatchfulAnvil.Build.props and .targets for EXTERNAL consumers.
+    In-repo projects never reference this package; they import the same two files
+    from disk via the root Directory.Build.props / .targets, so there is exactly
+    one copy and the repo dogfoods what ships.
+
+    Deliberately NOT in WatchfulAnvil.WorkflowAnalyzerRules.sln: CI runs
+    `dotnet pack` with no project argument, which packs every packable project
+    listed in the solution. Keeping this out, plus the IsPackable gate below,
+    means it cannot be published by accident while it is local-feed-only.
+    Pack it explicitly with -p:WatchfulAnvilPackBuild=true.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>WatchfulAnvil.Build</PackageId>
+
+    <IsPackable Condition="'$(WatchfulAnvilPackBuild)' == 'true'">true</IsPackable>
+    <IsPackable Condition="'$(WatchfulAnvilPackBuild)' != 'true'">false</IsPackable>
+
+    <!-- No assemblies: the payload is MSBuild files only. NU5128 is the
+         "no lib/ref assemblies for the declared TFM" warning, expected here. -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+
+    <Description>Shared MSBuild props and targets for UiPath Workflow Analyzer rule packs: the UiPath.Activities.Api version matrix, the net461 language block, and assembly-version pinning.</Description>
+    <PackageTags>UiPath;WorkflowAnalyzer;MSBuild;build</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- NuGet auto-imports build/<PackageId>.props|.targets into consuming projects. -->
+    <None Include="build\WatchfulAnvil.Build.props" Pack="true" PackagePath="build\" />
+    <None Include="build\WatchfulAnvil.Build.targets" Pack="true" PackagePath="build\" />
+  </ItemGroup>
+
+</Project>

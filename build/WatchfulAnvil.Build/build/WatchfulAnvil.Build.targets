@@ -1,0 +1,63 @@
+<Project>
+
+  <!--
+    WatchfulAnvil.Build — targets.
+
+    Imported AFTER the consuming project body, so opt-in flags set in the csproj
+    (e.g. <WatchfulAnvilRulePack>true</WatchfulAnvilRulePack>) are defined by the
+    time these conditions are evaluated. Nothing here may be moved to the .props.
+
+    Opt-in flags:
+      WatchfulAnvilRulePack           this project is a Workflow Analyzer rule pack
+      WatchfulAnvilPinAssemblyVersion pin AssemblyVersion (see PinAssemblyVersion below)
+  -->
+
+  <!--
+    net461 targets Studio Windows-Legacy, which predates modern C#. The SDK
+    compiles only a stub for this TFM; rule sources are excluded.
+  -->
+  <PropertyGroup Condition="'$(WatchfulAnvilRulePack)' == 'true' And '$(TargetFramework)' == 'net461'">
+    <LangVersion>7.3</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(WatchfulAnvilRulePack)' == 'true' And '$(TargetFramework)' != 'net461' And '$(TargetFramework)' != ''">
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!--
+    Fail loudly on a TFM with no API version mapping, rather than silently
+    resolving UiPath.Activities.Api to an empty version string.
+  -->
+  <Target Name="_WatchfulAnvilValidateTfm"
+          BeforeTargets="CollectPackageReferences"
+          Condition="'$(WatchfulAnvilRulePack)' == 'true' And '$(TargetFramework)' != ''">
+    <Error Condition="'$(WatchfulAnvilApiVersion)' == ''"
+           Text="WatchfulAnvil.Build: no UiPath.Activities.Api version is mapped for TargetFramework '$(TargetFramework)'. Add a WatchfulAnvilApiVersion&lt;Tfm&gt; property in WatchfulAnvil.Build.props, or set WatchfulAnvilApiVersion explicitly in this project." />
+  </Target>
+
+  <!--
+    Pin AssemblyVersion while letting FileVersion / PackageVersion float.
+
+    Why a Target and not a PropertyGroup: CI passes /p:AssemblyVersion=... as a
+    GLOBAL property (build-and-version.yml), and global properties override every
+    PropertyGroup in every imported file. A target can still reassign it, and this
+    one runs before the version is baked into the assembly and the nuspec.
+
+    Needed because WatchfulAnvil.Sdk is not strong-named. On net6.0/net8.0 simple
+    -name probing ignores the version, but on net461 the CLR compares the version
+    recorded in the reference — so a pack built against SDK 0.2.0.0 sitting beside
+    a restored 0.3.0.0 fails to bind. Pinning keeps that reference stable across
+    compatible SDK releases.
+  -->
+  <Target Name="WatchfulAnvilPinAssemblyVersion"
+          BeforeTargets="GetAssemblyVersion;GenerateNuspec"
+          Condition="'$(WatchfulAnvilPinAssemblyVersion)' == 'true' And '$(WatchfulAnvilPinnedAssemblyVersion)' != ''">
+    <PropertyGroup>
+      <AssemblyVersion>$(WatchfulAnvilPinnedAssemblyVersion)</AssemblyVersion>
+    </PropertyGroup>
+  </Target>
+
+</Project>
