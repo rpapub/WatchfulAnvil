@@ -64,6 +64,32 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Common
             Assert.Equal("RULE-A", AnnotationReader.GetTagValue("@suppress:RULE-A @suppress:RULE-B", "@suppress"));
         }
 
+        [Theory]
+        [InlineData("@unit", "@unit", true)]                      // bare form
+        [InlineData("@unit:Login", "@unit", true)]                // valued form still IS the tag
+        [InlineData("@UNIT:Login", "@unit", true)]                // case-insensitive
+        [InlineData("@pipeline\n@unit:Login", "@unit", true)]     // newline-separated
+        [InlineData("@units", "@unit", false)]                    // must not match a longer tag
+        [InlineData("@domain-model:X", "@domain", false)]         // prefix tested is "@domain:"
+        [InlineData("@module", "@unit", false)]
+        [InlineData("", "@unit", false)]
+        [InlineData(null, "@unit", false)]
+        public void HasTag_AcceptsBareAndValuedForms(string? annotation, string tag, bool expected)
+        {
+            Assert.Equal(expected, AnnotationReader.HasTag(annotation, tag));
+        }
+
+        [Fact]
+        public void HasTag_AndGetTagValue_AgreeOnTheValuedForm()
+        {
+            // These two used to disagree: GetTagValue understood @unit:Login while HasTag
+            // reported the same annotation as untagged.
+            const string annotation = "@unit:Login";
+
+            Assert.True(AnnotationReader.HasTag(annotation, "@unit"));
+            Assert.Equal("Login", AnnotationReader.GetTagValue(annotation, "@unit"));
+        }
+
         [Fact]
         public void NoCheck_IsIndependentOfSuppress()
         {

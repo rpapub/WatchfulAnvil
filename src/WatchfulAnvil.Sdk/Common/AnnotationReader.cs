@@ -39,9 +39,29 @@ namespace WatchfulAnvil.Sdk.Common
         public static bool IsViolates(string? annotation, string ruleId)
             => HasTagValue(annotation, "@violates", ruleId);
 
-        /// <summary>True if the annotation contains the given tag (e.g. <c>@unit</c>, <c>@nocheck</c>).</summary>
+        /// <summary>
+        /// True if the annotation carries the given tag (e.g. <c>@unit</c>, <c>@nocheck</c>),
+        /// in either the bare <c>@tag</c> form or the valued <c>@tag:VALUE</c> form.
+        /// </summary>
+        /// <remarks>
+        /// The valued form counts. <c>@unit:Login</c> is a unit — the value narrows the tag,
+        /// it does not replace it — but the bare-token comparison used to report it as
+        /// untagged, so a rule gated on <c>@unit</c> silently skipped every annotated
+        /// workflow that also named its unit. This aligns <c>HasTag</c> with
+        /// <see cref="GetTagValue"/> and <see cref="HasTagValue"/>, which have always
+        /// understood the valued form.
+        ///
+        /// Matching is on the whole tag token: <c>@domain-model:X</c> does not satisfy
+        /// <c>@domain</c>, because the prefix tested is <c>@domain:</c>.
+        /// </remarks>
         public static bool HasTag(string? annotation, string tag)
-            => Tokenize(annotation).Any(t => t.Equals(tag, StringComparison.OrdinalIgnoreCase));
+        {
+            var bare = tag.TrimEnd(':');
+            var prefix = bare + ":";
+            return Tokenize(annotation).Any(t =>
+                t.Equals(bare, StringComparison.OrdinalIgnoreCase) ||
+                t.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+        }
 
         /// <summary>
         /// True if the annotation carries <c>@tag:VALUE</c> for the given value, checking
