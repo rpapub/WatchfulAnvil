@@ -15,42 +15,21 @@
     <WatchfulAnvilRulePack>true</WatchfulAnvilRulePack>
   </PropertyGroup>
 
-  <!-- TAP rule classes live in WatchfulAnvil.Sdk.dll; ILRepack merges them in. -->
+  <!-- This pack contains only the generated bootstrapper: the TAP rule classes live in
+       WatchfulAnvil.Sdk.dll and now resolve from it at runtime rather than being merged
+       in. Verified in the Phase 0 probe: an unmerged pack loads and its rules execute,
+       and the SDK's own TAP rules do NOT auto-register in unrelated consumers. -->
 
   <!-- Generated bootstrapper: all targets -->
   <ItemGroup>
     <Compile Include="RegisterAnalyzerConfiguration.g.cs" />
   </ItemGroup>
 
-  <!-- WatchfulAnvil.Sdk -->
+  <!-- Plain reference, no PrivateAssets: the SDK must flow into the nuspec as a
+       dependency so the analyzer can resolve it. -->
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj">
-      <PrivateAssets>all</PrivateAssets>
-    </ProjectReference>
+    <ProjectReference Include="..\..\src\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj" />
   </ItemGroup>
-
-  <!-- ILRepack: merge WatchfulAnvil.Sdk.dll into Cpmf.Tap.dll (single self-contained assembly) -->
-  <ItemGroup>
-    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.34.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <Target Name="ILRepack" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
-    <ItemGroup>
-      <InputAssemblies Include="$(TargetDir)WatchfulAnvil.Sdk.dll" />
-    </ItemGroup>
-    <ILRepack
-      Parallel="true"
-      Internalize="true"
-      InputAssemblies="@(InputAssemblies)"
-      MainAssembly="$(TargetDir)$(AssemblyName).dll"
-      OutputFile="$(TargetDir)$(AssemblyName).dll"
-      TargetKind="Dll"
-      LibraryPath="$(TargetDir)"
-    />
-  </Target>
 
   <!-- UiPath.Activities.Api -->
   <ItemGroup>

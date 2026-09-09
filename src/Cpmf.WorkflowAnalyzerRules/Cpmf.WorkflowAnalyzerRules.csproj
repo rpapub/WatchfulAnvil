@@ -18,34 +18,12 @@
 		<WatchfulAnvilRulePack>true</WatchfulAnvilRulePack>
 	</PropertyGroup>
 
+	<!-- Plain reference, no PrivateAssets: the SDK must flow into the nuspec as a
+	     dependency so the analyzer can resolve it. Measured to work in both uipcli
+	     and Studio, which load it as a separate assembly. -->
 	<ItemGroup>
-		<ProjectReference Include="..\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj">
-			<PrivateAssets>all</PrivateAssets>
-		</ProjectReference>
+		<ProjectReference Include="..\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj" />
 	</ItemGroup>
-
-	<!-- ILRepack: merge WatchfulAnvil.Sdk.dll into Cpmf.WorkflowAnalyzerRules.dll (single self-contained assembly) -->
-	<ItemGroup>
-		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.34.2">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
-
-	<Target Name="ILRepack" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
-		<ItemGroup>
-			<InputAssemblies Include="$(TargetDir)WatchfulAnvil.Sdk.dll" />
-		</ItemGroup>
-		<ILRepack
-			Parallel="true"
-			Internalize="true"
-			InputAssemblies="@(InputAssemblies)"
-			MainAssembly="$(TargetDir)$(AssemblyName).dll"
-			OutputFile="$(TargetDir)$(AssemblyName).dll"
-			TargetKind="Dll"
-			LibraryPath="$(TargetDir)"
-		/>
-	</Target>
 
 	<ItemGroup>
 		<PackageReference Include="UiPath.Activities.Api" Version="$(WatchfulAnvilApiVersion)">
