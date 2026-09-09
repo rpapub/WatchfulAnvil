@@ -5,19 +5,46 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <IsPackable>false</IsPackable>
+    <!--
+      Packable and published. Rule packs reference the SDK rather than merging it, so
+      every pack that ships declares a dependency on this package: it must reach every
+      feed its dependants reach, or consumers get an unresolvable dependency. That is
+      already the situation for the packs that never ILRepacked - they shipped declaring
+      a WatchfulAnvil.Sdk dependency that existed on no feed.
+    -->
+    <IsPackable>true</IsPackable>
+    <PackageId>WatchfulAnvil.Sdk</PackageId>
+
     <!-- Minor bump: Info() and the IRegisterAnalyzerConfiguration placement are
          source-breaking, and annotation handling changed which violations are
          reported. See CHANGELOG.md. -->
     <Version>0.2.0-alpha</Version>
     <Authors>Christian Prior-Mamulyan</Authors>
     <Company>cprima.net</Company>
-    <PackageDescription>Base classes and utilities for building UiPath Workflow Analyzer rules.</PackageDescription>
+    <PackageDescription>Base classes and utilities for building UiPath Workflow Analyzer rules: annotation parsing, XAML x:Members access, project.json metadata, and diagnostic tapping - the surface UiPath.Activities.Api does not expose.</PackageDescription>
+    <PackageTags>UiPath;WorkflowAnalyzer;StaticAnalysis;RPA</PackageTags>
+    <RepositoryUrl>https://github.com/rpapub/WatchfulAnvil</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
 
     <!-- Opt in to the shared build logic. Supplies the net461 stub target's
          LangVersion 7.3 / no-nullable / no-implicit-usings block and the per-TFM
          UiPath.Activities.Api version. See build/WatchfulAnvil.Build/. -->
     <WatchfulAnvilRulePack>true</WatchfulAnvilRulePack>
+
+    <!--
+      Pin AssemblyVersion while FileVersion and PackageVersion float.
+
+      The SDK is not strong-named. On net6.0/net8.0 simple-name probing ignores the
+      version, but net461 - which dist/Cpmf.Standard, Cpmf.Community,
+      Cpmf.Community.Preview and Mc.2026-04 all target - compares the version recorded
+      in the reference. Unpinned, a pack built against 0.2.0.0 fails to bind beside a
+      restored 0.3.0.0. Keep this value fixed across compatible releases.
+
+      Applied by a target, not a PropertyGroup: CI passes /p:AssemblyVersion as a global
+      property, which outranks every PropertyGroup. See build/WatchfulAnvil.Build/.
+    -->
+    <WatchfulAnvilPinAssemblyVersion>true</WatchfulAnvilPinAssemblyVersion>
+    <WatchfulAnvilPinnedAssemblyVersion>0.2.0.0</WatchfulAnvilPinnedAssemblyVersion>
   </PropertyGroup>
 
   <!-- net461: only StubRule; exclude all modern Core and Diagnostics files -->
