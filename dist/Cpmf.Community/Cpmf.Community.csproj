@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net461;net6.0;net8.0</TargetFrameworks>
@@ -7,21 +7,12 @@
     <AssemblyName>Cpmf.Community</AssemblyName>
     <Version>0.1.0-alpha</Version>
     <Authors>Cpmf</Authors>
-    <PackageDescription>Community â€” curated stable Cpmf rules.</PackageDescription>
+    <PackageDescription>Community — curated stable Cpmf rules.</PackageDescription>
     <IsPackable>true</IsPackable>
-  </PropertyGroup>
 
-  <!-- net461: LangVersion 7.3, no nullable, no implicit usings -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
-    <LangVersion>7.3</LangVersion>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
-  </PropertyGroup>
-
-  <!-- net6.0 / net8.0: full SDK features -->
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <!-- Opt in to the shared build logic: per-TFM UiPath.Activities.Api version
+         and the net461 language block. See build/WatchfulAnvil.Build/. -->
+    <WatchfulAnvilRulePack>true</WatchfulAnvilRulePack>
   </PropertyGroup>
 
   <!-- Rule source files: net6.0 and net8.0 only -->
@@ -52,14 +43,8 @@
   </ItemGroup>
 
   <!-- UiPath.Activities.Api -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="UiPath.Activities.Api" Version="23.10.3">
-      <ExcludeAssets>runtime</ExcludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <PackageReference Include="UiPath.Activities.Api" Version="24.10.1">
+  <ItemGroup>
+    <PackageReference Include="UiPath.Activities.Api" Version="$(WatchfulAnvilApiVersion)">
       <ExcludeAssets>runtime</ExcludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
