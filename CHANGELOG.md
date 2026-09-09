@@ -6,8 +6,55 @@ All notable user-facing changes are documented here.
 
 ## [Unreleased]
 
+### ⚠️ Breaking — `WatchfulAnvil.Sdk` 0.1.2-alpha → 0.2.0-alpha
+
+Source-breaking for anyone deriving from the SDK base classes directly. No rule class
+that derives through `ScopedRule` / `ActivityRule` / `WorkflowRule` / `ProjectRule` is
+affected, and no in-repo caller had to change.
+
+- `AnalyzerBase.Info(string)` → `Info(Rule, string)`. It now sets `RecommendationMessage`,
+  as `Fail` already did; an Info result previously reached Studio with an empty
+  recommendation column.
+- `IRegisterAnalyzerConfiguration` and `Initialize` moved off `AnalyzerBase` down to
+  `RuleBase<T>` and `CounterBase<T>`. `AnalyzerBase` is now shared helpers only — the
+  `InspectionResult` factories and the feature gate — not a registration contract.
+
+### 🐛 Behaviour changes in annotation handling
+
+These change which violations are reported. They are fixes, but they are not silent.
+
+- **`@suppress` and `@violates` now honour every directive, not just the first.** Both
+  resolved through `GetTagValue`, which returns the first match and stops, so given
+  `@suppress:RULE-A @suppress:RULE-B` only `RULE-A` was ever detected — `RULE-B` was
+  unreachable and the suppression was silently ignored.
+- **`@tag:VALUE` now counts as `@tag`.** `HasTag` compared whole tokens, so `@unit:Login`
+  was reported as untagged. Every rule gated via `RequiresAnyTag` / `RequiresAllTags`
+  (`LogMessageBookendsRule`, `ModuleCodedConfigRule`, `UnitOutStatusRule`,
+  `PipelineDomainModelRule`, `PipelineSequenceOrderRule`) previously skipped such
+  workflows entirely, and `PipelinePresenceCounter` / `WorkflowTypeRatioRule` were
+  undercounting them.
+- **Project-scoped rules can now be suppressed.** A project carries no annotation, so
+  `@nocheck` and `@suppress:RULE-ID` were inert on `IProjectModel`. `ScopedRule` now joins
+  every workflow's root annotation. Note the reach: one `@suppress:RULE-ID` on one
+  workflow suppresses that rule for the *whole* project, and one `@nocheck` anywhere
+  silences every project rule.
+
+Verified against the corpus harness: identical results before and after
+(19 passed / 6 failed / 3 skipped, per-test identical). The corpus uses bare tags
+throughout, so it confirms no regression rather than exercising the fixes; unit tests
+cover those.
+
 ### 🚀 Features
-- Placeholder for enhancements beyond v0.9.0
+- `tools/feed-versions/` reports what the repo pins against what the remote feeds offer
+- `WatchfulAnvil.Build` shares the `UiPath.Activities.Api` version matrix and the net461
+  language block across all 12 rule pack projects
+
+### 🧹 Housekeeping
+- Licensing corrected: Apache-2.0 for code, CC-BY-4.0 for documentation. Source headers
+  claimed Apache-2.0 and pointed at a `LICENSE` file that did not exist, while every
+  package shipped declaring CC-BY-4.0.
+- Repaired the `CPRIMA` test project, which had not compiled since suppression moved into
+  the SDK
 
 ---
 

@@ -6,7 +6,10 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <Version>0.1.2-alpha</Version>
+    <!-- Minor bump: Info() and the IRegisterAnalyzerConfiguration placement are
+         source-breaking, and annotation handling changed which violations are
+         reported. See CHANGELOG.md. -->
+    <Version>0.2.0-alpha</Version>
     <Authors>Christian Prior-Mamulyan</Authors>
     <Company>cprima.net</Company>
     <PackageDescription>Base classes and utilities for building UiPath Workflow Analyzer rules.</PackageDescription>
