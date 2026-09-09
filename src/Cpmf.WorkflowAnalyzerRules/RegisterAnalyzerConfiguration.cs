@@ -11,6 +11,7 @@ namespace Cpmf
         public void Initialize(IAnalyzerConfigurationService api)
         {
             new IsLibraryRule().Initialize(api);
+            new ProjectOutputTypeRule().Initialize(api);
             new NoFlowchartStateMachineRule().Initialize(api);
             new VariableNamingRule().Initialize(api);
             new SpecificContentAssignRule().Initialize(api);

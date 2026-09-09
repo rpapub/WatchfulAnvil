@@ -242,3 +242,20 @@ rules:
     documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-G001"
     tags: [library]
     parameters: []
+
+  - id: CPMF-G002
+    className: ProjectOutputTypeRule
+    name: Project Output Type
+    description: "The project output type must match the configured expected value (default: Process)."
+    recommendation: "The project output type does not match the expected value. Update the output type in project settings, or change the OutputType parameter on this rule."
+    categoryCode: G
+    scope: IProjectModel
+    type: Rule
+    defaultSeverity: Error
+    defaultIsEnabled: false
+    requiredFeature: null
+    documentationLink: "https://github.com/rpapub/WatchfulAnvil/wiki/Rule-Documentation-CPMF-G002"
+    parameters:
+      - key: OutputType
+        displayName: Expected output type
+        defaultValue: "Process"
