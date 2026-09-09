@@ -1,0 +1,37 @@
+# Probe: can the rule packs build and pack on a Linux runner?
+#
+# The repo is mounted READ-ONLY and copied inside the container before building,
+# so a Linux build never writes bin/obj into the Windows working tree.
+# Produced nupkgs and the log land in ./out.
+#
+# Pre-pull first, so a failed pull cannot wedge compose:
+#   docker pull mcr.microsoft.com/dotnet/sdk:9.0-alpine
+#   docker compose -f infra/linux-build/compose.yaml run --rm build
+#
+# Alpine is used because it is ~250 MB rather than ~1 GB. Caveat: it is musl,
+# not glibc, so it is not identical to a typical `ubuntu-latest` runner. If a
+# target FAILS here, re-test on mcr.microsoft.com/dotnet/sdk:9.0 (Debian)
+# before concluding anything. A PASS on musl is a reliable PASS on glibc.
+services:
+  build:
+    image: mcr.microsoft.com/dotnet/sdk:9.0-alpine
+    working_dir: /work
+    volumes:
+      - ../..:/repo:ro
+      - ./out:/out
+      - ./NuGet.config:/nuget/NuGet.config:ro
+      - ./build.sh:/build.sh:ro
+      - nuget-cache:/root/.nuget/packages
+    environment:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
+    # Alpine ships busybox ash, not bash, and has no unzip. build.sh needs both
+    # (arrays, shopt, herestrings; unzip for the merge check).
+    entrypoint:
+      - /bin/sh
+      - -c
+      - apk add --no-cache bash unzip >/dev/null && exec bash /build.sh
+
+volumes:
+  nuget-cache:
