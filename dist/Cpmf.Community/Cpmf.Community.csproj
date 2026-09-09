@@ -7,7 +7,6 @@
     <AssemblyName>Cpmf.Community</AssemblyName>
     <Version>0.1.0-alpha</Version>
     <Authors>Cpmf</Authors>
-    <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
     <PackageDescription>Community â€” curated stable Cpmf rules.</PackageDescription>
     <IsPackable>true</IsPackable>
   </PropertyGroup>

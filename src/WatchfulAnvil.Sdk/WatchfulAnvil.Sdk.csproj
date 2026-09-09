@@ -16,7 +16,6 @@
     <Version>0.1.2-alpha</Version>
     <Authors>Christian Prior-Mamulyan</Authors>
     <Company>cprima.net</Company>
-    <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
     <PackageDescription>Base classes and utilities for building UiPath Workflow Analyzer rules.</PackageDescription>
   </PropertyGroup>
 

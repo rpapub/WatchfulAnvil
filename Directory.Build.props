@@ -5,8 +5,17 @@
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 
+  <!--
+    Shared build PROPERTIES (the UiPath.Activities.Api version matrix).
+    Imported here, not from Directory.Build.targets, because a project body that
+    writes Version="$(WatchfulAnvilApiVersion)" on a PackageReference is evaluated
+    after this file and before any .targets — so the value must already exist.
+    The matching logic and targets are imported from Directory.Build.targets.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)build\WatchfulAnvil.Build\build\WatchfulAnvil.Build.props"
+          Condition="Exists('$(MSBuildThisFileDirectory)build\WatchfulAnvil.Build\build\WatchfulAnvil.Build.props')" />
 
 </Project>

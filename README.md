@@ -113,7 +113,8 @@ This project consists of two key components:
 WatchfulAnvil
 │── AUTHORS.md
 │── CHANGELOG.md
-│── LICENCE.md
+│── LICENSE
+│── LICENSE-DOCS.md
 │── README.md
 │── ROADMAP.md
 │── WatchfulAnvil.WorkflowAnalyzerRules.sln
@@ -219,5 +220,7 @@ This is a personal project. Contributions are welcome, but coordinated participa
 
 ## 📄 License
 
-Licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENCE.md)
+- **Code** — Apache License 2.0 ([LICENSE](LICENSE))
+- **Documentation** — Creative Commons Attribution 4.0 International ([LICENSE-DOCS.md](LICENSE-DOCS.md))
+
 See [AUTHORS.md](AUTHORS.md) for contributors.
