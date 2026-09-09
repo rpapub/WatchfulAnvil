@@ -64,6 +64,34 @@ namespace WatchfulAnvil.Sdk.Common
         }
 
         /// <summary>
+        /// Reads the <c>description</c> field from the root of <c>project.json</c>.
+        /// Returns <c>null</c> on any failure or when the field is absent.
+        /// </summary>
+        public static string? ReadDescription(string? projectFilePath)
+        {
+            if (string.IsNullOrEmpty(projectFilePath))
+                return null;
+
+            try
+            {
+                if (!File.Exists(projectFilePath))
+                    return null;
+
+                var json = File.ReadAllText(projectFilePath);
+                using var doc = JsonDocument.Parse(json);
+
+                if (doc.RootElement.TryGetProperty("description", out var desc))
+                    return desc.GetString();
+
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Reads the <c>projectVersion</c> field from the root of <c>project.json</c>.
         /// Returns <c>null</c> on any failure.
         /// </summary>

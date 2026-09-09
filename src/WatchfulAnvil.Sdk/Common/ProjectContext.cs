@@ -25,6 +25,7 @@ namespace WatchfulAnvil.Sdk.Common
 
         private ProjectContext(
             string name,
+            string? description,
             string? outputType,
             string? profileType,
             string? version,
@@ -33,6 +34,7 @@ namespace WatchfulAnvil.Sdk.Common
             IReadOnlyDictionary<string, string> dependencies)
         {
             Name = name;
+            Description = description;
             OutputType = outputType;
             ProfileType = profileType;
             Version = version;
@@ -45,6 +47,9 @@ namespace WatchfulAnvil.Sdk.Common
 
         /// <summary>Project display name (<c>IInspectionObject.DisplayName</c>).</summary>
         public string Name { get; }
+
+        /// <summary>Project description from <c>project.json</c>. <c>null</c> if absent or unreadable.</summary>
+        public string? Description { get; }
 
         /// <summary>
         /// Project output type: <c>"Process"</c>, <c>"Library"</c>, <c>"Tests"</c>, or <c>"Framework"</c>.
@@ -99,6 +104,7 @@ namespace WatchfulAnvil.Sdk.Common
             var filePath = summary.ProjectFilePath ?? string.Empty;
             return new ProjectContext(
                 name: summary.DisplayName ?? string.Empty,
+                description: ProjectJsonReader.ReadDescription(filePath),
                 outputType: summary.ProjectOutputType,
                 profileType: summary.ProjectProfileType,
                 version: ProjectJsonReader.ReadProjectVersion(filePath),
