@@ -28,8 +28,7 @@ namespace WatchfulAnvil.Sdk.Common
 
         /// <summary>True if the annotation contains <c>@suppress:RULE-ID</c> for the given rule ID.</summary>
         public static bool IsSuppressed(string? annotation, string ruleId)
-            => GetTagValue(annotation, "@suppress")
-                   ?.Equals(ruleId, StringComparison.OrdinalIgnoreCase) == true;
+            => HasTagValue(annotation, "@suppress", ruleId);
 
         /// <summary>True if the annotation contains <c>@nocheck</c> (suppresses all rules).</summary>
         public static bool IsNoCheck(string? annotation)
@@ -38,15 +37,54 @@ namespace WatchfulAnvil.Sdk.Common
         /// <summary>True if the annotation contains <c>@violates:RULE-ID</c> for the given rule ID.
         /// Used to mark intentional violations in a rule-development test corpus.</summary>
         public static bool IsViolates(string? annotation, string ruleId)
-            => GetTagValue(annotation, "@violates")
-                   ?.Equals(ruleId, StringComparison.OrdinalIgnoreCase) == true;
+            => HasTagValue(annotation, "@violates", ruleId);
 
         /// <summary>True if the annotation contains the given tag (e.g. <c>@unit</c>, <c>@nocheck</c>).</summary>
         public static bool HasTag(string? annotation, string tag)
             => Tokenize(annotation).Any(t => t.Equals(tag, StringComparison.OrdinalIgnoreCase));
 
         /// <summary>
+        /// True if the annotation carries <c>@tag:VALUE</c> for the given value, checking
+        /// <b>every</b> occurrence of the tag rather than only the first.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="GetTagValue"/> returns the first match and stops, so testing a value
+        /// through it silently ignores every later occurrence: given
+        /// <c>@suppress:RULE-A @suppress:RULE-B</c>, only RULE-A was ever detected and
+        /// RULE-B was unreachable. Annotations carrying more than one directive of the same
+        /// kind are the normal case, so the value test scans all of them.
+        /// Accepts both <c>@tag:VALUE</c> and the space-separated <c>@tag: VALUE</c> form,
+        /// matching <see cref="GetTagValue"/>.
+        /// </remarks>
+        public static bool HasTagValue(string? annotation, string tag, string value)
+        {
+            var prefix = tag.TrimEnd(':') + ":";
+            var tokens = Tokenize(annotation).ToList();
+            for (var i = 0; i < tokens.Count; i++)
+            {
+                if (!tokens[i].StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var candidate = tokens[i].Substring(prefix.Length);
+                if (candidate.Length == 0 && i + 1 < tokens.Count)
+                {
+                    candidate = tokens[i + 1];
+                }
+
+                if (candidate.Equals(value, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Returns the value after the colon for <c>@tag:VALUE</c>, or <c>null</c> if the tag is absent or has no value.
+        /// Returns the <b>first</b> occurrence only; use <see cref="HasTagValue"/> to test a specific value.
         /// </summary>
         public static string? GetTagValue(string? annotation, string tag)
         {
