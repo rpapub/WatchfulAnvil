@@ -7,7 +7,6 @@ using UiPath.Studio.Analyzer.Models;
 using Moq;
 using Xunit;
 using CPRIMA.WorkflowAnalyzerRules.Rules.Naming;
-using CPRIMA.WorkflowAnalyzerRules.Common;
 
 
 namespace CPRIMA.WorkflowAnalyzerRules.Tests.Rules.Naming.Unit
