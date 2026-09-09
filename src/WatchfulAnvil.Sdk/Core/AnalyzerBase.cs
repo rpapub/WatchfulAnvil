@@ -17,7 +17,7 @@ namespace WatchfulAnvil.Sdk.Core;
 /// Does not prescribe implementation pattern — use tree-walking, accumulation,
 /// predicates, extractors, or any combination as the rule requires.
 /// </summary>
-public abstract class AnalyzerBase : IRegisterAnalyzerConfiguration
+public abstract class AnalyzerBase
 {
     /// <summary>
     /// Override to require a minimum Studio SDK feature level.
@@ -26,8 +26,6 @@ public abstract class AnalyzerBase : IRegisterAnalyzerConfiguration
     /// When set, Initialize() silently skips registration if the feature is absent.
     /// </summary>
     protected virtual string? RequiredFeature => null;
-
-    public abstract void Initialize(IAnalyzerConfigurationService api);
 
     // ── InspectionResult factories ────────────────────────────────────────────
     protected static InspectionResult Pass()
@@ -45,10 +43,20 @@ public abstract class AnalyzerBase : IRegisterAnalyzerConfiguration
     protected static InspectionResult Fail(Rule rule, string message)
         => Fail(rule, new List<string> { message });
 
-    protected static InspectionResult Info(string message)
+    /// <summary>
+    /// An informational, non-failing result carrying the rule's recommendation.
+    /// </summary>
+    /// <remarks>
+    /// Takes the rule so it can set <c>RecommendationMessage</c>, which <see cref="Fail(Rule, string)"/>
+    /// already does. Without it an Info result reached Studio with an empty recommendation
+    /// column while every other result had one — the reader has no way to tell what the
+    /// rule wanted, which for a purely informational result is the entire payload.
+    /// </remarks>
+    protected static InspectionResult Info(Rule rule, string message)
         => new()
         {
             HasErrors = false,
+            RecommendationMessage = rule.RecommendationMessage,
             ErrorLevel = TraceLevel.Info,
             Messages = new List<string> { message },
         };

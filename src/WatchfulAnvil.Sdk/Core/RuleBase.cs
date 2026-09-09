@@ -13,12 +13,12 @@ namespace WatchfulAnvil.Sdk.Core;
 /// Base class for Rule&lt;T&gt; implementations.
 /// Handles registration via api.AddRule&lt;T&gt;() with optional feature gating.
 /// </summary>
-public abstract class RuleBase<T> : AnalyzerBase
+public abstract class RuleBase<T> : AnalyzerBase, IRegisterAnalyzerConfiguration
     where T : IInspectionObject
 {
     public abstract Rule<T> Get();
 
-    public override void Initialize(IAnalyzerConfigurationService api)
+    public void Initialize(IAnalyzerConfigurationService api)
     {
         if (!IsFeatureAvailable(api))
         {
