@@ -287,7 +287,8 @@ def main() -> None:
     parser.add_argument("--uipcli", help="Path to uipcli.exe")
     parser.add_argument(
         "--governance",
-        help="JSON governance file passed to uipcli (default: none)",
+        help="JSON governance file passed to uipcli "
+             "(default: tools/governance/cpmf.policy.Corpus.json; pass 'none' to omit)",
     )
     parser.add_argument("--tags", help="Comma-separated tag filter")
     parser.add_argument("--id", dest="ids", help="Comma-separated test set ID filter")
@@ -370,7 +371,25 @@ def main() -> None:
     nupkg_path, version = find_latest_nupkg(nupkg_dir, args.version)
 
     # Resolve optional governance file
-    governance: Path | None = Path(args.governance).resolve() if args.governance else None
+    # Default to an explicit policy rather than none.
+    #
+    # With no governance file uipcli runs --policy-file-type "Default", and that built-in
+    # policy - not the rule's own IsEnabledByDefault - decides what runs. It suppressed
+    # CPMF-U001/U002/U003 while enabling CPMF-FC002, which is declared disabled. Six
+    # corpus tests failed for months against rules that were working correctly.
+    #
+    # So the harness must state what it wants enabled instead of inheriting whatever
+    # uipcli happens to default to. Pass --governance none to reproduce the old behaviour.
+    if args.governance == "none":
+        governance: Path | None = None
+    elif args.governance:
+        governance = Path(args.governance).resolve()
+    else:
+        governance = repo_root / "tools" / "governance" / "cpmf.policy.Corpus.json"
+        if not governance.exists():
+            print(f"ERROR: default corpus policy not found: {governance}\n"
+                  f"Regenerate it with: just governance", file=sys.stderr)
+            sys.exit(1)
 
     print(f"Rule pack : {RULE_PACK} {version}")
     print(f"nupkg     : {nupkg_path}")
