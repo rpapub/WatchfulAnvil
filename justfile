@@ -67,9 +67,11 @@ bump-minor:
 
 # ── Tools ─────────────────────────────────────────────────────────────────────
 
-# Check rule registry against C# source (drift detection)
+# Check EVERY rule registry against C# source (drift detection).
+# Without --all only registry/Cpmf was validated, leaving Cpmf.Rules.Libs, CpmfTap and
+# Mc unchecked - and `ci` inherited that gap.
 check-rules:
-    uv run tools/rule-inventory/run.py --check
+    uv run tools/rule-inventory/run.py --check --all
 
 # Print rule inventory as markdown
 rules-md:

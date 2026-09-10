@@ -1,4 +1,9 @@
-package: WatchfulAnvil.Sdk
+# package names the directory holding RegisterAnalyzerConfiguration[.g].cs, which for
+# the TAP rules is the dist pack - the rule classes themselves live in the SDK under
+# WatchfulAnvil.Sdk/Diagnostics/ and are resolved separately by class name.
+# This said WatchfulAnvil.Sdk, which has no registration file at all; the checker then
+# silently fell back to an unrelated package and reported six bogus issues.
+package: Cpmf.Tap
 namespace: WatchfulAnvil.Sdk.Diagnostics
 version: "0.1.0"
 

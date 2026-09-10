@@ -34,6 +34,7 @@ Template context variables (available in custom templates):
 import argparse
 import glob
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -51,24 +52,48 @@ _RE_SEVERITY = re.compile(r"protected override TraceLevel DefaultSeverity\s*=>\s
 _RE_ENABLED = re.compile(r"protected override bool IsEnabledByDefault\s*=>\s*(true|false)")
 
 
-def find_registered_classes(src_root: Path, package: str) -> list[tuple[str, Path]]:
-    """Return [(className, cs_file)] from <package>/RegisterAnalyzerConfiguration.cs."""
-    config_file = src_root / package / "RegisterAnalyzerConfiguration.cs"
-    if not config_file.exists():
-        # Fall back to glob if the direct path doesn't exist
-        pattern = str(src_root / "**" / "RegisterAnalyzerConfiguration.cs")
-        matches = glob.glob(pattern, recursive=True)
-        if not matches:
-            raise RuntimeError(f"RegisterAnalyzerConfiguration.cs not found under {src_root}")
-        config_file = Path(matches[0])
+def find_registration_file(src_roots: list[Path], package: str) -> Path:
+    """Locate <root>/<package>/RegisterAnalyzerConfiguration[.g].cs across the roots.
+
+    Deliberately no glob fallback. The previous version, when the direct path was
+    missing, globbed for any RegisterAnalyzerConfiguration.cs and took matches[0] -- an
+    arbitrary file. registry/CpmfTap declared package: WatchfulAnvil.Sdk, which has no
+    registration file, so the check silently validated the TAP registry against
+    CPM.WorkflowAnalyzerRules and reported six bogus issues. A wrong answer that looks
+    like a real result is worse than no answer.
+    """
+    tried = []
+    for root in src_roots:
+        for name in ("RegisterAnalyzerConfiguration.cs", "RegisterAnalyzerConfiguration.g.cs"):
+            candidate = root / package / name
+            tried.append(candidate)
+            if candidate.exists():
+                return candidate
+
+    raise RuntimeError(
+        f"No registration file for package '{package}'. Looked for:\n"
+        + "\n".join(f"  {p}" for p in tried)
+        + "\nCheck the 'package:' field in the registry - it must name the directory "
+          "holding RegisterAnalyzerConfiguration[.g].cs."
+    )
+
+
+def find_registered_classes(src_roots: list[Path], package: str) -> list[tuple[str, Path]]:
+    """Return [(className, cs_file)] from the package's registration file."""
+    config_file = find_registration_file(src_roots, package)
     text = config_file.read_text(encoding="utf-8")
     class_names = _RE_REGISTERED.findall(text)
 
     results = []
     for cls in class_names:
-        cs_pattern = str(src_root / "**" / f"{cls}.cs")
-        cs_matches = glob.glob(cs_pattern, recursive=True)
-        cs_path = Path(cs_matches[0]) if cs_matches else None
+        cs_path = None
+        for root in src_roots:
+            cs_matches = glob.glob(str(root / "**" / f"{cls}.cs"), recursive=True)
+            cs_matches = [m for m in cs_matches if f"{os.sep}bin{os.sep}" not in m
+                          and f"{os.sep}obj{os.sep}" not in m]
+            if cs_matches:
+                cs_path = Path(cs_matches[0])
+                break
         results.append((cls, cs_path))
     return results
 
@@ -101,27 +126,41 @@ def extract_is_enabled(cs_path: Path) -> bool | None:
 # Check mode
 # ---------------------------------------------------------------------------
 
-def cmd_check_one(registry_path: Path, src_root: Path) -> int:
+def cmd_check_one(registry_path: Path, src_roots: list[Path]) -> int:
     with open(registry_path, encoding="utf-8") as f:
         registry = yaml.safe_load(f)
 
     package = registry.get("package", "")
     rules = registry.get("rules", [])
 
-    # Skip empty libraries that have no RegisterAnalyzerConfiguration yet
-    config_file = src_root / package / "RegisterAnalyzerConfiguration.cs"
-    if not config_file.exists() and not rules:
+    # Skip empty libraries that have no registration file yet
+    try:
+        find_registration_file(src_roots, package)
+        has_registration = True
+    except RuntimeError:
+        has_registration = False
+
+    if not has_registration and not rules:
         print(f"Registry : {registry_path}")
-        print(f"  SKIP — empty library, no RegisterAnalyzerConfiguration.cs")
+        print("  SKIP — empty library, no RegisterAnalyzerConfiguration.cs")
         print()
         return 0
 
     reg_by_class: dict[str, dict] = {r["className"]: r for r in rules}
-    registered = find_registered_classes(src_root, package)
+    try:
+        registered = find_registered_classes(src_roots, package)
+    except RuntimeError as e:
+        # A registry naming a package with no registration file is a registry error,
+        # not a reason to fall back to some other package's file.
+        print(f"Registry : {registry_path}")
+        print(f"  ERROR — {e}")
+        print()
+        return 1
+
     issues = 0
 
     print(f"Registry : {registry_path}")
-    print(f"Src root : {src_root}")
+    print(f"Src roots: {', '.join(str(r) for r in src_roots)}")
     print(f"Registered classes: {len(registered)}")
     print()
 
@@ -171,10 +210,10 @@ def cmd_check_one(registry_path: Path, src_root: Path) -> int:
     return 0
 
 
-def cmd_check(registry_paths: list[Path], src_root: Path) -> int:
+def cmd_check(registry_paths: list[Path], src_roots: list[Path]) -> int:
     total = 0
     for path in registry_paths:
-        total += cmd_check_one(path, src_root)
+        total += cmd_check_one(path, src_roots)
     return min(total, 1)
 
 
@@ -294,7 +333,10 @@ def cmd_add(registry_path: Path, rule_id: str, class_name: str) -> None:
 def main() -> None:
     repo_root = Path(__file__).resolve().parent.parent.parent
     default_registry = repo_root / "registry" / "Cpmf" / "rules.yaml"
-    default_src = repo_root / "src"
+    # Both roots by default: rule classes live under src/, but the generated
+    # registration for the curated dist packs lives under dist/, so a src-only search
+    # cannot resolve them.
+    default_srcs = [repo_root / "src", repo_root / "dist"]
 
     parser = argparse.ArgumentParser(
         description="WatchfulAnvil rule inventory tool"
@@ -307,7 +349,8 @@ def main() -> None:
                         help="Include all registry/*/rules.yaml files")
     parser.add_argument("--add", nargs=2, metavar=("ID", "CLASS"), help="Add a stub registry entry")
     parser.add_argument("--registry", type=Path, default=None, help="Registry YAML path (default: registry/Cpmf/rules.yaml)")
-    parser.add_argument("--src", type=Path, default=default_src, help="C# src root")
+    parser.add_argument("--src", type=Path, action="append", dest="srcs", default=None,
+                        help="C# source root; repeatable (default: src/ and dist/)")
     args = parser.parse_args()
 
     if args.template and args.format != "markdown":
@@ -341,7 +384,7 @@ def main() -> None:
             sys.exit(1)
         cmd_add(registry_paths[0], args.add[0], args.add[1])
     else:
-        sys.exit(cmd_check(registry_paths, args.src))
+        sys.exit(cmd_check(registry_paths, args.srcs or default_srcs))
 
 
 if __name__ == "__main__":
