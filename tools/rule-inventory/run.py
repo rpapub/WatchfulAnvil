@@ -297,6 +297,98 @@ def cmd_format_json(registry_paths: list[Path]) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Governance mode
+# ---------------------------------------------------------------------------
+
+# Defaults for the full policy form, matching tools/governance/cpmf.policy.Development.json.
+# Every setting is paired with <setting>-allow-edit, which decides whether a developer may
+# override it locally in Studio: that pairing IS the governance model - a policy either
+# suggests (allow-edit true) or enforces (false).
+_GOVERNANCE_SCAFFOLD = {
+    "core-allow-edit": True,
+    "enforce-analyzer-before-run": False,
+    "enforce-analyzer-before-run-allow-edit": True,
+    "enforce-analyzer-before-publish": False,
+    "enforce-analyzer-before-publish-allow-edit": True,
+    "enforce-analyzer-before-push": False,
+    "enforce-analyzer-before-push-allow-edit": True,
+    "analyze-rpa-xamls-only": False,
+    "analyze-rpa-xamls-only-allow-edit": True,
+    "additional-analyzer-rule-path": None,
+    "additional-analyzer-rule-path-allow-edit": True,
+    "export-analyzer-results": False,
+    "export-analyzer-results-allow-edit": True,
+    "analyzer-allow-edit": True,
+    "referenced-rules-config-file": None,
+}
+
+
+def _governance_entry(rule: dict, collection: str) -> dict:
+    """One embedded-rules-config entry. Key names repeat the collection name, as UiPath writes them."""
+    return {
+        f"code-{collection}": rule.get("id"),
+        f"is-enabled-{collection}": bool(rule.get("defaultIsEnabled", True)),
+        "default-action": rule.get("defaultSeverity", "Error"),
+        # Left empty deliberately. Every entry in every policy file in this repo has an
+        # empty parameter array -- including rules that demonstrably declare parameters --
+        # so the populated shape is unknown. A wrong guess yields a policy that loads and
+        # silently fails to apply overrides, which is worse than an obvious gap.
+        # TODO: configure a parameterised rule in Studio, export, and read back the shape.
+        f"parameters-{collection}": [],
+    }
+
+
+def cmd_format_governance(
+    registry_paths: list[Path],
+    form: str,
+    product_name: str,
+    policy_name: str | None,
+) -> int:
+    # A policy targets the rules actually installed in one project. Merging registries
+    # would emit entries for rules that will never load, and the duplicate CPMF-G002
+    # across registry/Cpmf and registry/Cpmf.Rules.Libs makes the result ambiguous.
+    seen: dict[str, Path] = {}
+    rules: list[dict] = []
+    for path in registry_paths:
+        for rule in _load_registry(path).get("rules", []):
+            rule_id = rule.get("id")
+            if rule_id in seen:
+                print(
+                    f"ERROR: duplicate rule id {rule_id!r} in {seen[rule_id]} and {path}.\n"
+                    f"A governance policy targets one installed pack; generate per registry "
+                    f"with --registry instead of --all.",
+                    file=sys.stderr,
+                )
+                return 1
+            seen[rule_id] = path
+            rules.append(rule)
+
+    # Counters are a distinct analyzer concept and belong in their own collection.
+    counters = [r for r in rules if r.get("type") == "Counter"]
+    plain = [r for r in rules if r.get("type") != "Counter"]
+
+    data: dict = {}
+    if form == "full":
+        data.update(_GOVERNANCE_SCAFFOLD)
+
+    data["embedded-rules-config-counter"] = [
+        _governance_entry(r, "embedded-rules-config-counter") for r in counters
+    ]
+    data["embedded-rules-config-rules"] = [
+        _governance_entry(r, "embedded-rules-config-rules") for r in plain
+    ]
+
+    policy: dict = {}
+    if form == "full":
+        policy["product-name"] = product_name
+        policy["policy-name"] = policy_name or f"WatchfulAnvil Rules - {product_name}"
+    policy["data"] = data
+
+    print(json.dumps(policy, indent=2, ensure_ascii=False))
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # Add stub mode
 # ---------------------------------------------------------------------------
 
@@ -342,7 +434,16 @@ def main() -> None:
         description="WatchfulAnvil rule inventory tool"
     )
     parser.add_argument("--check", action="store_true", help="Validate registry vs C# (default)")
-    parser.add_argument("--format", choices=["markdown", "json"], help="Emit formatted output")
+    parser.add_argument("--format", choices=["markdown", "json", "governance"],
+                        help="Emit formatted output")
+    parser.add_argument("--governance-form", choices=["full", "minimal"], default="full",
+                        help="Policy shape for --format governance: full includes the "
+                             "product/policy names and the *-allow-edit scaffolding; "
+                             "minimal emits only data.embedded-rules-config-* (default: full)")
+    parser.add_argument("--product-name", default="Development",
+                        help="product-name for --format governance --governance-form full")
+    parser.add_argument("--policy-name", default=None,
+                        help="policy-name for --format governance --governance-form full")
     parser.add_argument("--template", type=Path, default=None,
                         help="Jinja2 template file for --format markdown (default: built-in)")
     parser.add_argument("--all", action="store_true", dest="all_registries",
@@ -378,6 +479,9 @@ def main() -> None:
         cmd_render(registry_paths, args.template)
     elif args.format == "json":
         cmd_format_json(registry_paths)
+    elif args.format == "governance":
+        sys.exit(cmd_format_governance(
+            registry_paths, args.governance_form, args.product_name, args.policy_name))
     elif args.add:
         if len(registry_paths) > 1:
             print("ERROR: --add requires --registry (cannot target multiple registries)", file=sys.stderr)

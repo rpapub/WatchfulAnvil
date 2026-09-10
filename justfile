@@ -80,6 +80,12 @@ check-rules:
 rules-md:
     uv run tools/rule-inventory/run.py --format markdown
 
+# Generate a governance policy from a registry's declared defaults.
+# One registry at a time: a policy targets the rules installed in one project, and
+# CPMF-G002 is declared in two registries with different defaults.
+governance REGISTRY="registry/Cpmf/rules.yaml":
+    uv run tools/rule-inventory/run.py --format governance --registry "{{REGISTRY}}"
+
 # Report available versions from the remote feeds (what we pin vs what exists)
 feed-versions:
     uv run tools/feed-versions/run.py
