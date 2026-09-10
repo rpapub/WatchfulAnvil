@@ -348,6 +348,25 @@ def main() -> None:
 
     # Resolve nupkg
     nupkg_dir = Path(args.feed).resolve() if args.feed else (repo_root / "nupkg")
+
+    # Rule packs declare a dependency on the SDK rather than merging it, so the flat feed
+    # must carry it too. Without this the restore fails, no result file is written, and
+    # every corpus project reports zero violations -- which reads as a clean run rather
+    # than a broken feed.
+    sdk_in_feed = [
+        p for p in glob.glob(str(nupkg_dir / "WatchfulAnvil.Sdk.*.nupkg"))
+        if "unpacked" not in p
+    ]
+    if not sdk_in_feed:
+        print(
+            f"ERROR: No WatchfulAnvil.Sdk nupkg in {nupkg_dir}\n"
+            f"Rule packs depend on it rather than merging it, so restore would fail and "
+            f"every test set would report zero violations.\n"
+            f"Run: just pack",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     nupkg_path, version = find_latest_nupkg(nupkg_dir, args.version)
 
     # Resolve optional governance file

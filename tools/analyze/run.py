@@ -15,7 +15,11 @@ Options:
     --project <path>        Path to project.json (required)
     --feed <path>           Directory containing the rule-pack nupkg
                             (default: <repo-root>/nupkg)
-    --version <ver>         Pin a specific rule-pack version
+    --pack <id>             Rule pack package id; repeatable. Supplying any --pack
+                            replaces the default rather than adding to it, e.g.
+                            --pack Cpmf.Standard --pack Cpmf.Tap
+                            (default: Cpmf.WorkflowAnalyzerRules)
+    --version <ver>         Pin a specific rule-pack version. Single pack only.
                             (default: latest nupkg by modification time)
     --uipcli <path>         Path to uipcli.exe
                             (default: newest under ~/AppData/Local/cpmf/tools/)
@@ -40,7 +44,12 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-RULE_PACK = "Cpmf.WorkflowAnalyzerRules"
+DEFAULT_RULE_PACK = "Cpmf.WorkflowAnalyzerRules"
+
+# Rule packs no longer merge the SDK in; they declare a dependency on it. So the flat
+# feed handed to uipcli must carry WatchfulAnvil.Sdk as well, or restore fails and the
+# run reports "no violations" rather than "could not resolve".
+SDK_PACKAGE = "WatchfulAnvil.Sdk"
 SEV_MAP = {1: "error", 2: "warning"}
 
 UIPCLI_SEARCH = [
@@ -71,27 +80,49 @@ def find_uipcli() -> Path:
 # nupkg discovery  (duplicated from tools/corpus-harness/run.py)
 # ---------------------------------------------------------------------------
 
-def find_latest_nupkg(nupkg_dir: Path, version_override: str | None) -> tuple[Path, str]:
+def find_latest_nupkg(
+    nupkg_dir: Path, version_override: str | None, pack: str
+) -> tuple[Path, str]:
     if version_override:
-        p = nupkg_dir / f"{RULE_PACK}.{version_override}.nupkg"
+        p = nupkg_dir / f"{pack}.{version_override}.nupkg"
         if not p.exists():
             raise RuntimeError(f"nupkg not found: {p}")
         return p, version_override
 
     candidates = [
         Path(p)
-        for p in glob.glob(str(nupkg_dir / f"{RULE_PACK}.*.nupkg"))
+        for p in glob.glob(str(nupkg_dir / f"{pack}.*.nupkg"))
         if "unpacked" not in p
     ]
     if not candidates:
         raise RuntimeError(
-            f"No {RULE_PACK} nupkg found in {nupkg_dir}\n"
-            f"Run: dotnet pack src/Cpmf.WorkflowAnalyzerRules/"
-            f"Cpmf.WorkflowAnalyzerRules.csproj -c Release -o nupkg/"
+            f"No {pack} nupkg found in {nupkg_dir}\n"
+            f"Run: just pack   (or: dotnet pack <project for {pack}> -c Release -o nupkg/)"
         )
     path = max(candidates, key=os.path.getmtime)
-    version = path.stem.replace(f"{RULE_PACK}.", "")
+    version = path.stem.replace(f"{pack}.", "")
     return path, version
+
+
+def assert_sdk_in_feed(nupkg_dir: Path) -> None:
+    """Fail early when the feed lacks WatchfulAnvil.Sdk.
+
+    Packs declare a dependency on the SDK rather than merging it. If it is absent from
+    the flat feed, uipcli's restore fails and run_analyze returns no result file -- which
+    surfaces as an empty violation list, i.e. a clean run. Better to say what is actually
+    wrong than to report success.
+    """
+    found = [
+        p for p in glob.glob(str(nupkg_dir / f"{SDK_PACKAGE}.*.nupkg"))
+        if "unpacked" not in p
+    ]
+    if not found:
+        raise RuntimeError(
+            f"No {SDK_PACKAGE} nupkg in {nupkg_dir}\n"
+            f"Rule packs depend on it rather than merging it, so restore will fail and "
+            f"the run would report no violations instead of an error.\n"
+            f"Run: just pack"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -117,11 +148,16 @@ def make_nuget_config(nupkg_dir: Path, output_path: Path) -> None:
 # project.json patching  (duplicated from tools/corpus-harness/run.py)
 # ---------------------------------------------------------------------------
 
-def patch_project_json(src: Path, dest: Path, version: str) -> None:
+def patch_project_json(src: Path, dest: Path, versions: dict[str, str]) -> None:
+    """Inject one or more rule packs as project dependencies.
+
+    Takes a {pack: version} map so several packs can be analysed in one run -- the
+    dist/ shape, where Cpmf.Standard and Cpmf.Tap are meant to be exercised together.
+    """
     with open(src, encoding="utf-8") as f:
         data = json.load(f)
     deps = data.get("dependencies", {})
-    deps[RULE_PACK] = version
+    deps.update(versions)
     data["dependencies"] = deps
     with open(dest, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
@@ -289,6 +325,10 @@ def main() -> None:
                         help="Directory containing the rule-pack nupkg (default: <repo>/nupkg)")
     parser.add_argument("--version", default=None,
                         help="Pin rule-pack version")
+    parser.add_argument("--pack", action="append", dest="packs", default=None,
+                        help=f"Rule pack package id; repeatable "
+                             f"(default: {DEFAULT_RULE_PACK}). Supplying any --pack "
+                             f"replaces the default rather than adding to it.")
     parser.add_argument("--uipcli", type=Path, default=None,
                         help="Path to uipcli.exe")
     parser.add_argument("--governance", type=Path, default=None,
@@ -309,9 +349,18 @@ def main() -> None:
     repo_root = Path(__file__).resolve().parent.parent.parent
     nupkg_dir = args.feed.resolve() if args.feed else (repo_root / "nupkg")
 
+    packs = args.packs or [DEFAULT_RULE_PACK]
+    if args.version and len(packs) > 1:
+        print("ERROR: --version pins a single pack; drop it when passing several --pack.",
+              file=sys.stderr)
+        sys.exit(2)
+
     try:
         uipcli = args.uipcli.resolve() if args.uipcli else find_uipcli()
-        nupkg_path, version = find_latest_nupkg(nupkg_dir, args.version)
+        assert_sdk_in_feed(nupkg_dir)
+        pack_versions = {
+            pack: find_latest_nupkg(nupkg_dir, args.version, pack)[1] for pack in packs
+        }
     except RuntimeError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(2)
@@ -319,7 +368,8 @@ def main() -> None:
     governance = args.governance.resolve() if args.governance else None
 
     if not args.tap_dir:
-        print(f"Rule pack : {RULE_PACK} {version}")
+        for pack, version in pack_versions.items():
+            print(f"Rule pack : {pack} {version}")
         print(f"uipcli    : {uipcli}")
         print(f"Project   : {project_path}")
         if governance:
@@ -344,8 +394,14 @@ def main() -> None:
 
         result_file = tmpdir / "result.json"
 
+        # Bound before the try: the only handler here is `finally`, so an exception
+        # propagates past the reads below. Harmless today, a NameError the moment
+        # anyone adds an `except`.
+        raw: list = []
+        stderr_text = ""
+
         try:
-            patch_project_json(project_path, project_path, version)
+            patch_project_json(project_path, project_path, pack_versions)
             raw, stderr_text = run_analyze(
                 uipcli, project_path.parent, nuget_config, governance, result_file,
             )
