@@ -13,15 +13,18 @@ build:
     dotnet build src/WatchfulAnvil.Sdk/WatchfulAnvil.Sdk.csproj
     dotnet build src/Cpmf.WorkflowAnalyzerRules/Cpmf.WorkflowAnalyzerRules.csproj
 
-# Build every project under src/
+# Build everything, via the solution.
+# `dotnet build src/` fails outright - MSBuild wants a project or solution file, and a
+# directory holding several projects is neither. This recipe never worked.
 build-all:
-    dotnet build src/
+    dotnet build WatchfulAnvil.WorkflowAnalyzerRules.sln
 
 # ── Test ──────────────────────────────────────────────────────────────────────
 
-# Run all unit tests
+# Run all unit tests (via the solution; `dotnet test tests/` has the same directory
+# problem as `dotnet build src/`)
 test:
-    dotnet test tests/
+    dotnet test WatchfulAnvil.WorkflowAnalyzerRules.sln
 
 # Run only the Cpmf rules tests (faster)
 test-cpmf:
@@ -114,6 +117,20 @@ check-closure:
 # Pack the release artefacts and assert closure over them
 pack-check: pack-dist check-closure
 
+# Fail if an SDK type is declared outside WatchfulAnvil.Sdk.
+# The SDK was forked once already and the copy drifted both ways; this is the check
+# that would have caught it on day one.
+check-no-fork:
+    pwsh scripts/Test-NoVendoredSdk.ps1
+
+# Fail if a project pins UiPath.Activities.Api to a literal version instead of
+# $(WatchfulAnvilApiVersion). Catches the drift class directly.
+check-api-version:
+    pwsh scripts/Test-NoLiteralApiVersion.ps1
+
+# All drift guards
+check: check-rules check-no-fork check-api-version
+
 # ── CI-equivalent (build + test + check) ─────────────────────────────────────
 
-ci: build-all test check-rules
+ci: build-all test check
