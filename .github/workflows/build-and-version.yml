@@ -35,6 +35,10 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      # The registry drift check is a PEP-723 script run through uv.
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Install GitVersion
         run: dotnet tool install --global GitVersion.Tool
 
@@ -82,6 +86,25 @@ jobs:
             /p:FileVersion=${{ env.FILE_VERSION }} \
             /p:AssemblyVersion=${{ env.ASSEMBLY_VERSION }}
 
+      # There was no test step at all, which is why a test project that had not compiled
+      # for months went unnoticed: the solution build was red and CI never said so.
+      - name: Run Tests
+        run: dotnet test --configuration Release --no-build
+
+      # Drift guards. These exist as scripts but could not protect anything until CI ran
+      # them. Each one catches a class of failure that has already happened in this repo.
+      - name: Check rule registries
+        # Every registry, not just the default one - three of four were unvalidated.
+        run: uv run tools/rule-inventory/run.py --check --all
+
+      - name: Check for vendored SDK types
+        # The SDK was forked wholesale once and the copy drifted both ways.
+        run: pwsh scripts/Test-NoVendoredSdk.ps1
+
+      - name: Check for literal UiPath.Activities.Api versions
+        # The version matrix drifted between the template and the real packs.
+        run: pwsh scripts/Test-NoLiteralApiVersion.ps1
+
       - name: Pack NuGet Package
         run: |
           dotnet pack --configuration Release --no-build --output ./nupkg \
@@ -89,6 +112,13 @@ jobs:
             /p:Version=${{ env.FULL_VERSION }} \
             /p:FileVersion=${{ env.FILE_VERSION }} \
             /p:AssemblyVersion=${{ env.ASSEMBLY_VERSION }}
+
+      # Rule packs declare a dependency on WatchfulAnvil.Sdk rather than merging it, so a
+      # pack published without the SDK beside it gives consumers a dependency that
+      # resolves nowhere - silently, at their restore time. Seven of nine published
+      # packages were in exactly that state before the SDK became packable.
+      - name: Verify package dependency closure
+        run: pwsh scripts/Test-PackageClosure.ps1 -Path ./nupkg
 
       - name: Debug Build Output
         run: ls -R src/**/bin/Release/
