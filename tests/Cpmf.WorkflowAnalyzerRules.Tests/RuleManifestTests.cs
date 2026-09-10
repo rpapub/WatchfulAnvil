@@ -1,75 +1,49 @@
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using Cpmf.WorkflowAnalyzerRules.Tests.Fakes;
-using UiPath.Studio.Activities.Api;
-using UiPath.Studio.Activities.Api.Analyzer.Rules;
+using WatchfulAnvil.Sdk.Testing;
 using Xunit;
 
 namespace Cpmf.WorkflowAnalyzerRules.Tests
 {
     /// <summary>
-    /// Manifest test: verifies that RegisterAnalyzerConfiguration registers exactly
-    /// the rules declared by the individual rule classes in the assembly.
+    /// Manifest test: RegisterAnalyzerConfiguration must register exactly the rules the
+    /// rule classes in this assembly declare.
     ///
-    /// No hardcoded ID list — expected set is discovered via reflection:
-    /// every non-abstract IRegisterAnalyzerConfiguration in the rules assembly
-    /// (except RegisterAnalyzerConfiguration itself) is initialized through the
-    /// fake and contributes its rule(s) to the expected set.
+    /// The expected set is discovered by reflection rather than hardcoded, so adding a
+    /// rule updates both sides at once and only forgetting to wire it up fails.
     ///
-    /// Adding a new rule class automatically updates both sides. Forgetting to
-    /// wire it up in RegisterAnalyzerConfiguration breaks this test.
+    /// The reflection and capture machinery now lives in WatchfulAnvil.Sdk.Testing so
+    /// downstream packs get the same check; what stays here is the namespace this pack
+    /// owns plus its own metadata expectations.
     /// </summary>
     public class RuleManifestTests
     {
-        /// <summary>Rules registered by the central RegisterAnalyzerConfiguration.</summary>
-        private static List<Rule> CaptureActual()
-        {
-            var rules = new List<Rule>();
-            new RegisterAnalyzerConfiguration().Initialize(new FakeAnalyzerConfigurationService(rules));
-            return rules;
-        }
+        /// <summary>Rule classes live under this namespace; scoping the scan keeps referenced assemblies out.</summary>
+        private const string RuleNamespace = "Cpmf.Rules";
 
-        /// <summary>
-        /// Rules discovered by scanning the rules assembly for every individual
-        /// IRegisterAnalyzerConfiguration implementor and initializing each one.
-        /// </summary>
-        private static List<Rule> CaptureExpected()
-        {
-            var rules = new List<Rule>();
-            var fake = new FakeAnalyzerConfigurationService(rules);
-
-            var rulesAssembly = typeof(RegisterAnalyzerConfiguration).Assembly;
-            var individualTypes = rulesAssembly.GetTypes()
-                .Where(t =>
-                    !t.IsAbstract &&
-                    typeof(IRegisterAnalyzerConfiguration).IsAssignableFrom(t) &&
-                    t != typeof(RegisterAnalyzerConfiguration) &&
-                    t.Namespace != null && t.Namespace.StartsWith("Cpmf.Rules"));
-
-            foreach (var type in individualTypes)
-            {
-                var instance = (IRegisterAnalyzerConfiguration)System.Activator.CreateInstance(type);
-                instance.Initialize(fake);
-            }
-
-            return rules;
-        }
+        private static RegisterAnalyzerConfiguration Registration() => new RegisterAnalyzerConfiguration();
 
         [Fact]
         public void RegisteredRules_MatchesAllDeclaredRuleClasses()
         {
-            var actual = CaptureActual().Select(r => r.Id).OrderBy(x => x).ToList();
-            var expected = CaptureExpected().Select(r => r.Id).OrderBy(x => x).ToList();
+            var actual = RuleManifest.RegisteredIds(Registration());
+            var expected = RuleManifest.DeclaredIds(Registration(), RuleNamespace);
 
             Assert.Equal(expected, actual);
         }
 
         [Fact]
+        public void NoRuleClassIsLeftUnregistered()
+        {
+            // Same invariant stated as the failure it catches, so a break names the
+            // offending rule instead of printing two long sorted lists.
+            Assert.Empty(RuleManifest.Unregistered(Registration(), RuleNamespace));
+        }
+
+        [Fact]
         public void PipelineStructureRule_HasCorrectMetadata()
         {
-            var rule = CaptureActual().Single(r => r.Id == "CPMF-F002");
+            var rule = RuleManifest.Registered(Registration()).Single(r => r.Id == "CPMF-F002");
             Assert.Equal(TraceLevel.Error, rule.DefaultErrorLevel);
             Assert.Equal("Pipeline Structure", rule.Name);
         }
@@ -77,7 +51,7 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests
         [Fact]
         public void PipelinePresenceCounter_HasCorrectMetadata()
         {
-            var rule = CaptureActual().Single(r => r.Id == "CPMF-FC001");
+            var rule = RuleManifest.Registered(Registration()).Single(r => r.Id == "CPMF-FC001");
             Assert.Equal(TraceLevel.Error, rule.DefaultErrorLevel);
             Assert.Equal("Pipeline Presence", rule.Name);
         }

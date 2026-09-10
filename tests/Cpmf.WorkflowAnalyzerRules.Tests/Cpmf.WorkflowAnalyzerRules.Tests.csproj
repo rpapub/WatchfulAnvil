@@ -26,6 +26,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Cpmf.WorkflowAnalyzerRules\Cpmf.WorkflowAnalyzerRules.csproj" />
     <ProjectReference Include="..\..\src\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj" />
+    <!-- First consumer of the testing package: this repo dogfoods what it ships. -->
+    <ProjectReference Include="..\..\src\WatchfulAnvil.Sdk.Testing\WatchfulAnvil.Sdk.Testing.csproj" />
   </ItemGroup>
 
 </Project>

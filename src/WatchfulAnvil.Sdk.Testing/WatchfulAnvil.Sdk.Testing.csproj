@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Test helpers for authoring Workflow Analyzer rules.
+
+    Deliberately NOT in WatchfulAnvil.WorkflowAnalyzerRules.sln and IsPackable is gated:
+    CI packs the solution with no project argument and pushes what it produces, and this
+    is local-feed-only for now. Pack it with -p:WatchfulAnvilPackTesting=true.
+    In-repo consumers reference it by path, which builds it transitively regardless.
+  -->
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <PackageId>WatchfulAnvil.Sdk.Testing</PackageId>
+
+    <IsPackable Condition="'$(WatchfulAnvilPackTesting)' == 'true'">true</IsPackable>
+    <IsPackable Condition="'$(WatchfulAnvilPackTesting)' != 'true'">false</IsPackable>
+
+    <Version>0.2.0-alpha</Version>
+    <Authors>Christian Prior-Mamulyan</Authors>
+    <Company>cprima.net</Company>
+    <PackageDescription>Test helpers for UiPath Workflow Analyzer rules: a recording IAnalyzerConfigurationService, model builders for annotation-bearing workflows and activities, and on-disk fixtures for XAML x:Members and project.json.</PackageDescription>
+    <PackageTags>UiPath;WorkflowAnalyzer;Testing;RPA</PackageTags>
+    <RepositoryUrl>https://github.com/rpapub/WatchfulAnvil</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- Shared build logic: the per-TFM UiPath.Activities.Api version. -->
+    <WatchfulAnvilRulePack>true</WatchfulAnvilRulePack>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Plain reference so the SDK flows into the nuspec as a dependency. -->
+    <ProjectReference Include="..\WatchfulAnvil.Sdk\WatchfulAnvil.Sdk.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UiPath.Activities.Api" Version="$(WatchfulAnvilApiVersion)">
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+
+    <!--
+      Moq is a real dependency, not an implementation detail: the analyzer model
+      interfaces total roughly fifty members across their inheritance chains, so
+      hand-written stubs would be brittle against SDK revisions. Consumers do not need
+      to know Moq to use the builders here - the surface returns plain model interfaces.
+      Deliberately no xunit reference: assertions are the consumer's choice.
+    -->
+    <PackageReference Include="Moq" Version="4.20.72" />
+  </ItemGroup>
+
+</Project>
