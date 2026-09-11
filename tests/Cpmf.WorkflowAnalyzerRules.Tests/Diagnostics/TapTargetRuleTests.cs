@@ -25,6 +25,12 @@ namespace Cpmf.WorkflowAnalyzerRules.Tests.Diagnostics
     /// cannot distinguish a rule that never registered from one that registered and passed;
     /// this can.
     /// </remarks>
+    /// <remarks>
+    /// In the RunContext collection because the @tap:dump case writes a real record to the
+    /// process-lifetime run directory that JsonlWriterTests counts lines in. Run in
+    /// parallel, that test sees two appended lines where it made one call.
+    /// </remarks>
+    [Collection("RunContext")]
     public sealed class TapTargetRuleTests
     {
         private static Rule<IActivityModel> Registered()
