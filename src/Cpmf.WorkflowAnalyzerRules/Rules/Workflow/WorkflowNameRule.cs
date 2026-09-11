@@ -26,7 +26,13 @@ namespace Cpmf.Rules.Workflow
                 return new InspectionResult { HasErrors = false };
             }
 
-            var stem = Path.GetFileNameWithoutExtension(relativePath);
+            // RelativePath carries the separator the PROJECT uses, which for a UiPath
+            // project is always '\'. Path.GetFileNameWithoutExtension honours the separator
+            // the HOST uses, so on Linux -- where uipcli also runs -- 'Process\Crm\Foo.xaml'
+            // is one long filename and every nested workflow reads as an invalid identifier.
+            // Split on both and take the last segment.
+            var lastSegment = relativePath.Split('/', '\\')[^1];
+            var stem = Path.GetFileNameWithoutExtension(lastSegment);
             var error = DotNetIdentifierValidator.Validate(stem);
 
             if (error == null)
