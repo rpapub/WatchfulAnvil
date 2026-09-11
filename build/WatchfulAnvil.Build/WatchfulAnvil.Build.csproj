@@ -16,6 +16,17 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>WatchfulAnvil.Build</PackageId>
+    <Version>0.2.0-alpha</Version>
+    <Authors>Christian Prior-Mamulyan</Authors>
+    <Company>cprima.net</Company>
+
+    <!-- This project contains no code; the payload is the MSBuild files. netstandard2.0
+         defaults to C# 7.3, which rejects both Nullable=enable and the global usings
+         that ImplicitUsings=enable generates - and the root Directory.Build.props sets
+         both repo-wide. Opt out rather than raise LangVersion for a project with no
+         source files. -->
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
 
     <IsPackable Condition="'$(WatchfulAnvilPackBuild)' == 'true'">true</IsPackable>
     <IsPackable Condition="'$(WatchfulAnvilPackBuild)' != 'true'">false</IsPackable>
