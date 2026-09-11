@@ -16,7 +16,8 @@
     <IsPackable Condition="'$(WatchfulAnvilPackTesting)' == 'true'">true</IsPackable>
     <IsPackable Condition="'$(WatchfulAnvilPackTesting)' != 'true'">false</IsPackable>
 
-    <Version>0.2.0-alpha</Version>
+    <!-- New package, so versioning starts at 0.1.0; it does not track the SDK's version. -->
+    <Version>0.1.0</Version>
     <Authors>Christian Prior-Mamulyan</Authors>
     <Company>cprima.net</Company>
     <PackageDescription>Test helpers for UiPath Workflow Analyzer rules: a recording IAnalyzerConfigurationService, model builders for annotation-bearing workflows and activities, and on-disk fixtures for XAML x:Members and project.json.</PackageDescription>

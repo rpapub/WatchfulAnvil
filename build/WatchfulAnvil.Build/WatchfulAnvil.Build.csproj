@@ -16,7 +16,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>WatchfulAnvil.Build</PackageId>
-    <Version>0.2.0-alpha</Version>
+    <!-- New package, so versioning starts at 0.1.0; it does not track the SDK's version.
+         No prerelease suffix: 0.x already signals pre-production, and a -alpha tag only
+         makes NuGet refuse to resolve it without an explicit prerelease opt-in. -->
+    <Version>0.1.0</Version>
     <Authors>Christian Prior-Mamulyan</Authors>
     <Company>cprima.net</Company>
 
