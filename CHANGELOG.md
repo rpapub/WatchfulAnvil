@@ -6,7 +6,11 @@ All notable user-facing changes are documented here.
 
 ## [Unreleased]
 
-### ⚠️ Breaking — `WatchfulAnvil.Sdk` 0.1.2-alpha → 0.2.0-alpha
+### ⚠️ Breaking — `WatchfulAnvil.Sdk`
+
+Nothing in this repo has been published, so every package is reset to a common `0.1.0`
+baseline rather than carrying accumulated pre-release numbers. These changes are
+therefore breaking against the *previous source*, not against any released package.
 
 Source-breaking for anyone deriving from the SDK base classes directly. No rule class
 that derives through `ScopedRule` / `ActivityRule` / `WorkflowRule` / `ProjectRule` is

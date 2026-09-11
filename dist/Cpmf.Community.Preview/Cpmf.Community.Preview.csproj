@@ -5,7 +5,7 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <RootNamespace>Cpmf</RootNamespace>
     <AssemblyName>Cpmf.Community.Preview</AssemblyName>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.1.0</Version>
     <Authors>Cpmf</Authors>
     <PackageDescription>Community Preview — all available Cpmf rules. Updated with every library release.</PackageDescription>
     <IsPackable>true</IsPackable>

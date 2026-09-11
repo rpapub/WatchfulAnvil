@@ -4,7 +4,7 @@
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <AssemblyName>Mc.Rules</AssemblyName>
     <RootNamespace>Mc.Rules</RootNamespace>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.1.0</Version>
     <Authors>Christian Prior-Mamulyan</Authors>
     <Company>cprima.net</Company>
     <PackageDescription>Mc workflow analyzer rule library.</PackageDescription>

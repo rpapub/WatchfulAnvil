@@ -5,10 +5,10 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Version>0.1.0-alpha</Version>
+		<Version>0.1.0</Version>
 		<FileVersion>0.1.0.0</FileVersion>
 		<AssemblyVersion>0.1.0.0</AssemblyVersion>
-		<InformationalVersion>0.1.0-alpha</InformationalVersion>
+		<InformationalVersion>0.1.0</InformationalVersion>
 		<Authors>Christian Prior-Mamulyan</Authors>
 		<Company>cprima.net</Company>
 		<PackageDescription>Custom UiPath Workflow Analyzer rules by Christian Prior-Mamulyan.</PackageDescription>

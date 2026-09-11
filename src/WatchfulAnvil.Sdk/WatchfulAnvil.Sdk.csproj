@@ -15,10 +15,10 @@
     <IsPackable>true</IsPackable>
     <PackageId>WatchfulAnvil.Sdk</PackageId>
 
-    <!-- Minor bump: Info() and the IRegisterAnalyzerConfiguration placement are
-         source-breaking, and annotation handling changed which violations are
-         reported. See CHANGELOG.md. -->
-    <Version>0.2.0-alpha</Version>
+    <!-- Nothing here has been published, so the whole set is reset to a common 0.1.0
+         baseline rather than carrying accumulated pre-release numbers. The breaking
+         changes recorded in CHANGELOG.md still apply; they simply predate any release. -->
+    <Version>0.1.0</Version>
     <Authors>Christian Prior-Mamulyan</Authors>
     <Company>cprima.net</Company>
     <PackageDescription>Base classes and utilities for building UiPath Workflow Analyzer rules: annotation parsing, XAML x:Members access, project.json metadata, and diagnostic tapping - the surface UiPath.Activities.Api does not expose.</PackageDescription>
@@ -44,7 +44,7 @@
       property, which outranks every PropertyGroup. See build/WatchfulAnvil.Build/.
     -->
     <WatchfulAnvilPinAssemblyVersion>true</WatchfulAnvilPinAssemblyVersion>
-    <WatchfulAnvilPinnedAssemblyVersion>0.2.0.0</WatchfulAnvilPinnedAssemblyVersion>
+    <WatchfulAnvilPinnedAssemblyVersion>0.1.0.0</WatchfulAnvilPinnedAssemblyVersion>
   </PropertyGroup>
 
   <!-- net461: only StubRule; exclude all modern Core and Diagnostics files -->

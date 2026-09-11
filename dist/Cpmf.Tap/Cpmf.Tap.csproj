@@ -5,7 +5,7 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <RootNamespace>Cpmf</RootNamespace>
     <AssemblyName>Cpmf.Tap</AssemblyName>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.1.0</Version>
     <Authors>Cpmf</Authors>
     <PackageDescription>Cpmf TAP inspection rules — writes catalog-grade JSONL records to the WatchfulAnvil run directory.</PackageDescription>
     <IsPackable>true</IsPackable>
