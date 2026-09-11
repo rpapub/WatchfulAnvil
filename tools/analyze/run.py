@@ -38,6 +38,7 @@ import argparse
 import glob
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -50,7 +51,10 @@ DEFAULT_RULE_PACK = "Cpmf.WorkflowAnalyzerRules"
 # feed handed to uipcli must carry WatchfulAnvil.Sdk as well, or restore fails and the
 # run reports "no violations" rather than "could not resolve".
 SDK_PACKAGE = "WatchfulAnvil.Sdk"
-SEV_MAP = {1: "error", 2: "warning"}
+# System.Diagnostics.TraceLevel as uipcli reports it: Off=0, Error=1, Warning=2,
+# Info=3, Verbose=4. Info was missing, so every diagnostics rule -- which report at
+# Info by design -- printed as "unknown".
+SEV_MAP = {1: "error", 2: "warning", 3: "info", 4: "verbose"}
 
 UIPCLI_SEARCH = [
     str(Path.home() / "AppData/Local/cpmf/tools/uipcli-*/uipcli.exe"),
@@ -125,6 +129,37 @@ def assert_sdk_in_feed(nupkg_dir: Path) -> None:
         )
 
 
+def global_packages_folder() -> Path:
+    """The folder NuGet extracts packages into.
+
+    Honours NUGET_PACKAGES, which is how this is commonly redirected off the system
+    drive. Reading it rather than assuming ~/.nuget/packages matters: clearing the
+    wrong folder looks like clearing the cache and changes nothing.
+    """
+    env = os.environ.get("NUGET_PACKAGES")
+    return Path(env) if env else Path.home() / ".nuget" / "packages"
+
+
+def purge_extracted(packages: dict[str, str]) -> list[Path]:
+    """Delete the extracted copy of each {package: version} before analysing.
+
+    Rule-pack versions are stable across rebuilds during development -- 0.1.0 is repacked
+    many times a day. NuGet keys its extracted cache on id+version alone and never
+    compares content, so the second and every later run silently loads whichever build
+    happened to be extracted first. A rule added after that point does not exist as far
+    as the analyzer is concerned, and the run reports no violations rather than an error,
+    which reads as "my rule does not work" instead of "you tested yesterday's DLL".
+    """
+    root = global_packages_folder()
+    removed = []
+    for pack, version in packages.items():
+        target = root / pack.lower() / version.lower()
+        if target.is_dir():
+            shutil.rmtree(target, ignore_errors=True)
+            removed.append(target)
+    return removed
+
+
 # ---------------------------------------------------------------------------
 # NuGet.config generation  (duplicated from tools/corpus-harness/run.py)
 # ---------------------------------------------------------------------------
@@ -134,6 +169,12 @@ def make_nuget_config(nupkg_dir: Path, output_path: Path) -> None:
         '<?xml version="1.0" encoding="utf-8"?>\n'
         "<configuration>\n"
         "  <packageSources>\n"
+        # Without <clear /> the machine- and user-level NuGet.Config sources are merged in,
+        # and any of them holding the same id+version wins on resolve order rather than on
+        # being newer. A stale WatchfulAnvil.Sdk.0.1.0 sitting in a local flat feed is then
+        # what actually gets analysed, no matter what was just packed here -- silently, and
+        # reported as "no violations".
+        "    <clear />\n"
         f'    <add key="local-nupkg" value="{nupkg_dir}" />\n'
         '    <add key="UiPath-Official" value="https://uipath.pkgs.visualstudio.com/'
         'Public.Feeds/_packaging/UiPath-Official/nuget/v3/index.json" />\n'
@@ -361,6 +402,10 @@ def main() -> None:
         pack_versions = {
             pack: find_latest_nupkg(nupkg_dir, args.version, pack)[1] for pack in packs
         }
+        # The SDK carries the rule classes themselves, so a stale extract of it hides
+        # new rules just as effectively as a stale extract of the pack.
+        sdk_version = find_latest_nupkg(nupkg_dir, None, SDK_PACKAGE)[1]
+        purged = purge_extracted({**pack_versions, SDK_PACKAGE: sdk_version})
     except RuntimeError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(2)
@@ -370,10 +415,14 @@ def main() -> None:
     if not args.tap_dir:
         for pack, version in pack_versions.items():
             print(f"Rule pack : {pack} {version}")
+        print(f"SDK       : {SDK_PACKAGE} {sdk_version}")
         print(f"uipcli    : {uipcli}")
         print(f"Project   : {project_path}")
         if governance:
             print(f"Governance: {governance}")
+        if purged:
+            print(f"Purged    : {len(purged)} extracted package(s) from "
+                  f"{global_packages_folder()}")
         print()
 
     pre_run_time = datetime.now(tz=timezone.utc)

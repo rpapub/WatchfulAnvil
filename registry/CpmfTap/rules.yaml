@@ -82,3 +82,20 @@ rules:
     requiredFeature: null
     documentationLink: null
     parameters: []
+
+  # Unlike the other TAP rules this is enabled by default. The @tap annotation is the
+  # opt-in, so it stays silent until a developer asks a question; requiring a governance
+  # policy would mean configuring the tool before it could tell you anything.
+  - id: CPMF-TAP-TGT-001
+    className: TapTargetRule
+    name: Tap Target (Diagnostics)
+    description: "Reports how to target an activity in a rule: what the model exposes for it, plus paste-ready match predicates. Fires only on activities annotated @tap."
+    recommendation: "Diagnostic aid for rule authors. Annotate an activity with @tap to see how to target it, or @tap:dump to also write the full record to the run directory. Remove the annotation when done."
+    categoryCode: TAP
+    scope: IActivityModel
+    type: Rule
+    defaultSeverity: Info
+    defaultIsEnabled: true
+    requiredFeature: null
+    documentationLink: null
+    parameters: []

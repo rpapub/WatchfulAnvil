@@ -108,6 +108,12 @@
         "is-enabled-embedded-rules-config-rules": false,
         "default-action": "Error",
         "parameters-embedded-rules-config-rules": []
+      },
+      {
+        "code-embedded-rules-config-rules": "CPMF-TAP-TGT-001",
+        "is-enabled-embedded-rules-config-rules": true,
+        "default-action": "Info",
+        "parameters-embedded-rules-config-rules": []
       }
     ]
   }

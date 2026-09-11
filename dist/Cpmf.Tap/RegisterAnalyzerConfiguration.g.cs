@@ -19,6 +19,7 @@ namespace Cpmf
             StubRule.ActivityRule("CPMF-TAP-ACT-001", "TAP Activity Record", "Include in any TAP inspection run to capture activity-level catalog data.").Initialize(api);
             StubRule.ActivityRule("CPMF-TAP-SEL-001", "TAP Selectors Record", "Include when selector inventory is required.").Initialize(api);
             StubRule.ActivityRule("CPMF-TAP-XAML-001", "TAP XAML Bypass Record", "Include when SDK adoption coverage analysis is required.").Initialize(api);
+            StubRule.ActivityRule("CPMF-TAP-TGT-001", "Tap Target (Diagnostics)", "Annotate an activity with @tap to see how to target it in a rule.").Initialize(api);
 #else
             // No overrides -- delegate to rule own Initialize()
             new TapProjectRule().Initialize(api);
@@ -26,6 +27,7 @@ namespace Cpmf
             new TapActivityRule().Initialize(api);
             new TapSelectorsRule().Initialize(api);
             new TapSdkBypassRule().Initialize(api);
+            new TapTargetRule().Initialize(api);
 #endif
         }
     }

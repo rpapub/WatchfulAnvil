@@ -42,7 +42,10 @@ from pathlib import Path
 import yaml
 
 RULE_PACK = "Cpmf.WorkflowAnalyzerRules"
-SEV_MAP = {1: "error", 2: "warning"}
+# System.Diagnostics.TraceLevel as uipcli reports it: Off=0, Error=1, Warning=2,
+# Info=3, Verbose=4. Info was missing, so every diagnostics rule -- which report at
+# Info by design -- printed as "unknown".
+SEV_MAP = {1: "error", 2: "warning", 3: "info", 4: "verbose"}
 
 # Candidate patterns for uipcli.exe, tried in order (newest match wins).
 UIPCLI_SEARCH = [
@@ -73,28 +76,59 @@ def find_uipcli() -> Path:
 # nupkg discovery
 # ---------------------------------------------------------------------------
 
-def find_latest_nupkg(nupkg_dir: Path, version_override: str | None) -> tuple[Path, str]:
-    """Return (path, version_string) for the rule-pack nupkg to test."""
+def find_latest_nupkg(
+    nupkg_dir: Path, version_override: str | None, pack: str = RULE_PACK
+) -> tuple[Path, str]:
+    """Return (path, version_string) for the nupkg of `pack` to test."""
     if version_override:
-        p = nupkg_dir / f"{RULE_PACK}.{version_override}.nupkg"
+        p = nupkg_dir / f"{pack}.{version_override}.nupkg"
         if not p.exists():
             raise RuntimeError(f"nupkg not found: {p}")
         return p, version_override
 
     candidates = [
         Path(p)
-        for p in glob.glob(str(nupkg_dir / f"{RULE_PACK}.*.nupkg"))
+        for p in glob.glob(str(nupkg_dir / f"{pack}.*.nupkg"))
         if "unpacked" not in p
     ]
     if not candidates:
         raise RuntimeError(
-            f"No {RULE_PACK} nupkg found in {nupkg_dir}\n"
-            f"Run: dotnet pack src/Cpmf.WorkflowAnalyzerRules/"
-            f"Cpmf.WorkflowAnalyzerRules.csproj -c Release -o nupkg/"
+            f"No {pack} nupkg found in {nupkg_dir}\n"
+            f"Run: just pack   (or: dotnet pack <project for {pack}> -c Release -o nupkg/)"
         )
     path = max(candidates, key=os.path.getmtime)
-    version = path.stem.replace(f"{RULE_PACK}.", "")
+    version = path.stem.replace(f"{pack}.", "")
     return path, version
+
+
+def global_packages_folder() -> Path:
+    """The folder NuGet extracts packages into.
+
+    Honours NUGET_PACKAGES, which is how this is commonly redirected off the system
+    drive. Reading it rather than assuming ~/.nuget/packages matters: clearing the
+    wrong folder looks like clearing the cache and changes nothing.
+    """
+    env = os.environ.get("NUGET_PACKAGES")
+    return Path(env) if env else Path.home() / ".nuget" / "packages"
+
+
+def purge_extracted(packages: dict[str, str]) -> list[Path]:
+    """Delete the extracted copy of each {package: version} before analysing.
+
+    Rule-pack versions are stable across rebuilds during development -- 0.1.0 is repacked
+    many times a day. NuGet keys its extracted cache on id+version alone and never
+    compares content, so the second and every later run silently loads whichever build
+    happened to be extracted first. For the corpus that means a green run proves nothing:
+    it may be re-asserting yesterday's DLL against today's expectations.
+    """
+    root = global_packages_folder()
+    removed = []
+    for pack, version in packages.items():
+        target = root / pack.lower() / version.lower()
+        if target.is_dir():
+            shutil.rmtree(target, ignore_errors=True)
+            removed.append(target)
+    return removed
 
 
 # ---------------------------------------------------------------------------
@@ -107,6 +141,11 @@ def make_nuget_config(nupkg_dir: Path, output_path: Path) -> None:
         '<?xml version="1.0" encoding="utf-8"?>\n'
         "<configuration>\n"
         "  <packageSources>\n"
+        # Without <clear /> the machine- and user-level NuGet.Config sources are merged in,
+        # and any of them holding the same id+version wins on resolve order rather than on
+        # being newer. A stale WatchfulAnvil.Sdk.0.1.0 sitting in a local flat feed is then
+        # what the corpus actually asserts against, no matter what was just packed here.
+        "    <clear />\n"
         f'    <add key="local-nupkg" value="{nupkg_dir}" />\n'
         '    <add key="UiPath-Official" value="https://uipath.pkgs.visualstudio.com/'
         'Public.Feeds/_packaging/UiPath-Official/nuget/v3/index.json" />\n'
@@ -121,13 +160,15 @@ def make_nuget_config(nupkg_dir: Path, output_path: Path) -> None:
 # project.json patching
 # ---------------------------------------------------------------------------
 
-def patch_project_json(src: Path, dest: Path, version: str) -> None:
+def patch_project_json(
+    src: Path, dest: Path, version: str, pack: str = RULE_PACK
+) -> None:
     """Copy project.json to dest, replacing the rule-pack version."""
     with open(src, encoding="utf-8") as f:
         data = json.load(f)
     deps = data.get("dependencies", {})
     # Accept both bare version strings and bracket-pinned "[x.y.z]" forms.
-    deps[RULE_PACK] = version
+    deps[pack] = version
     data["dependencies"] = deps
     with open(dest, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
@@ -368,7 +409,28 @@ def main() -> None:
         )
         sys.exit(1)
 
+    # Every test set names its own rulePack in the catalog; the field was being ignored
+    # and Cpmf.WorkflowAnalyzerRules substituted for all of them, so a test set for any
+    # other pack could not be expressed. Resolve one version per distinct pack in play.
+    try:
+        pack_versions = {
+            pack: find_latest_nupkg(nupkg_dir, args.version, pack)[1]
+            for pack in sorted({ts.get("rulePack") or RULE_PACK for ts in active})
+        }
+    except RuntimeError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
+
     nupkg_path, version = find_latest_nupkg(nupkg_dir, args.version)
+
+    # Drop the extracted copies so this run analyses the nupkgs that were just packed.
+    # The SDK matters as much as the pack: it carries the rule classes themselves.
+    sdk_version = Path(max(sdk_in_feed, key=os.path.getmtime)).stem.replace(
+        "WatchfulAnvil.Sdk.", "")
+    purged = purge_extracted({**pack_versions, "WatchfulAnvil.Sdk": sdk_version})
+    if purged:
+        print(f"Purged {len(purged)} extracted package(s) from "
+              f"{global_packages_folder()}")
 
     # Resolve optional governance file
     # Default to an explicit policy rather than none.
@@ -391,7 +453,9 @@ def main() -> None:
                   f"Regenerate it with: just governance", file=sys.stderr)
             sys.exit(1)
 
-    print(f"Rule pack : {RULE_PACK} {version}")
+    for pack, pack_version in pack_versions.items():
+        print(f"Rule pack : {pack} {pack_version}")
+    print(f"SDK       : WatchfulAnvil.Sdk {sdk_version}")
     print(f"nupkg     : {nupkg_path}")
     print(f"uipcli    : {uipcli}")
     print(f"Corpus    : {corpus_root}")
@@ -439,12 +503,26 @@ def main() -> None:
                 shutil.rmtree(workspace)
             shutil.copytree(corpus_dir, workspace)
 
-            patch_project_json(project_json, workspace / "project.json", version)
+            ts_pack = ts.get("rulePack") or RULE_PACK
+            patch_project_json(
+                project_json, workspace / "project.json", pack_versions[ts_pack], ts_pack
+            )
+
+            # A test set may name its own policy. Diagnostics rules are not in the corpus
+            # policy and must not be -- it governs what the production rules assert -- so
+            # without this a TAP test set could only be expressed by polluting that file.
+            ts_governance = governance
+            if ts.get("governance"):
+                ts_governance = (repo_root / ts["governance"]).resolve()
+                if not ts_governance.exists():
+                    print(f"  SKIP  {ts_id}  (governance not found: {ts_governance})")
+                    skipped += 1
+                    continue
 
             if result_file.exists():
                 result_file.unlink()
 
-            raw = run_analyze(uipcli, workspace, nuget_config, governance, result_file)
+            raw = run_analyze(uipcli, workspace, nuget_config, ts_governance, result_file)
             actual = normalize(raw)
 
             failures = compare(actual, expected_violations)
